@@ -1,30 +1,327 @@
 <template>
-    <div class="min-h-screen flex justify-center items-center py-20">
-    <div class="container mx-auto p-12 rounded-xl">
-    <h1 class="text-4xl font-bold text-center mb-4">About Us</h1>
-    <!-- Box-1 -->
-    <div class=" px-2 py-8">
-        <div class="max-w-[45rem] flex flex-col justify-center m-auto">
-        <p class="pb-4">Welcome to Imperium, a platform for in-depth analysis and discussion of politics, power struggles, and international relations. Our blog is dedicated to exploring the complex issues that shape our world, providing insights and perspectives that are often overlooked by mainstream media.</p>
-        <p class="pb-4">At Imperium, we believe that understanding the root causes of conflicts and power struggles is essential to creating a better future for all. Our team of writers and researchers is passionate about delving deep into the history, culture, and politics of different nations to uncover the truth behind the headlines.</p>
-        <p class="pb-4">Our articles cover a wide range of topics, from current events and global affairs to the impact of political decisions on people's lives. We are committed to providing well-researched and thought-provoking content that challenges conventional wisdom and inspires critical thinking.</p>
-        <p class="pb-4">As our name suggests, we are interested in exploring the concept of an imperium or powerful and traditionalist state. However, we also seek to examine the challenges and complexities that arise in the pursuit of such a state and the impact it has on individuals and societies.</p>
-        <p class="pb-4">Whether you're a student of international relations, a political enthusiast, or simply someone who wants to stay informed about the world around you, Imperium has something for you. Our platform offers a space for open dialogue and constructive debate, where readers can share their opinions and engage in meaningful discussions.</p>
-        <p class="pb-4">Join us on this journey of discovery and exploration, as we seek to make sense of the complex and ever-changing landscape of global politics. Together, we can build a more informed and engaged global community.</p>
+  <div class="w-2/3 mx-auto my-[1rem]">
+    <form
+      v-if="currentDivIndex === 0"
+      class="relative mb-32"
+      style="height: 406px"
+    >
+      <div
+        active=""
+        form="user"
+        class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+      >
+        <h5 class="mb-0 font-bold dark:text-white">Timeline</h5>
+        <div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Date</label
+              >
+              <input
+                type="text"
+                name="First Name"
+                placeholder="eg. Michael"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="Last Name"
+                >Distance</label
+              >
+              <input
+                type="text"
+                name="Last Name"
+                placeholder="eg. Prior"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="Company"
+                >Heure debut</label
+              >
+              <input
+                type="text"
+                name="Company"
+                placeholder="eg. Creative Tim"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="Email Address"
+                >Heure fin</label
+              >
+              <input
+                type="email"
+                name="Email Address"
+                placeholder="eg. soft@dashboard.com"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex mt-6">
+            <button
+              @click="currentDivIndex = (currentDivIndex + 1) % 3"
+              type="button"
+              aria-controls="address"
+              next-form-btn=""
+              href="javascript:;"
+              class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
+            >
+              Next
+            </button>
+          </div>
         </div>
-    </div>
-    
-    </div>
+      </div>
+    </form>
+
+    <form
+      v-if="currentDivIndex === 1"
+      class="relative mb-32"
+      style="height: 406px"
+    >
+      <div
+        active=""
+        form="user"
+        class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+      >
+        <h5 class="mb-0 font-bold dark:text-white">Client</h5>
+        <div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Nom</label
+              >
+              <input
+                type="text"
+                name="First Name"
+                placeholder="eg. Michael"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="Last Name"
+                >Num Tel</label
+              >
+              <input
+                type="text"
+                name="Last Name"
+                placeholder="eg. Prior"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex mt-6">
+            <button
+              @click="currentDivIndex = (currentDivIndex + 1) % 3"
+              type="button"
+              aria-controls="address"
+              next-form-btn=""
+              href="javascript:;"
+              class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <form
+      v-if="currentDivIndex === 2"
+      class="relative mb-32"
+      style="height: 406px"
+    >
+      <div
+        active=""
+        form="user"
+        class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+      >
+        <h5 class="mb-0 font-bold dark:text-white">Task</h5>
+        <div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Type de maintenance</label
+              >
+              <input
+                type="text"
+                name="First Name"
+                placeholder="eg. Michael"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Fourniture</label
+              >
+              <input
+                type="text"
+                name="First Name"
+                placeholder="eg. Michael"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+              <!-- File uplaod -->
+              <div class="bg-white p7 rounded mx-auto">
+                <div
+                  x-data="dataFileDnD()"
+                  class="relative flex flex-col p-4 text-gray-400"
+                >
+                  <div
+                    x-ref="dnd"
+                    class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
+                  >
+                    <input
+                      accept="*"
+                      type="file"
+                      multiple
+                      class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
+                    />
+
+                    <div
+                      class="flex flex-col items-center justify-center py-10 text-center"
+                    >
+                      <svg
+                        class="w-6 h-6 mr-1 text-current-50"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <p class="m-0">
+                        Drag your files here or click in this area.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- end file opload -->
+            </div>
+          </div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Demande de devis</label
+              >
+              <input
+                type="text"
+                name="First Name"
+                placeholder="eg. Michael"
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Fin de maintenance</label
+              >
+              <div class="flex justify-around">
+                <div
+                  class="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700"
+                >
+                  <input
+                    id="bordered-checkbox-1"
+                    type="checkbox"
+                    value=""
+                    name="bordered-checkbox"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label
+                    for="bordered-checkbox-1"
+                    class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >Favourable</label
+                  >
+                </div>
+                <div
+                  class="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700"
+                >
+                  <input
+                    checked
+                    id="bordered-checkbox-2"
+                    type="checkbox"
+                    value=""
+                    name="bordered-checkbox"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label
+                    for="bordered-checkbox-2"
+                    class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >Defavourable</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="w-full max-w-full px-3 flex-0">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Resultat</label
+              >
+              <textarea
+                name="Bio"
+                rows="5"
+                placeholder="Say a few words about who you are or what you're working on."
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              ></textarea>
+            </div>
+          </div>
+          <div class="flex mt-6">
+            <button
+              @click="currentDivIndex = (currentDivIndex + 1) % 3"
+              type="button"
+              aria-controls="address"
+              next-form-btn=""
+              href="javascript:;"
+              class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
-    
-
-
-    
 </template>
 <script>
-
 export default {
-    name:'About',
-
-}
+  name: "About",
+  data() {
+    return {
+      currentDivIndex: 0, // Start with the first div
+    };
+  },
+};
 </script>
