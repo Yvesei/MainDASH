@@ -1,26 +1,16 @@
 <script setup>
-import About from '../components/About.vue'
-import Navbar from '../components/Navbar.vue'
-import Footer from '../components/Footer.vue'
-
+import About from "../components/About.vue";
 </script>
 
 <template>
-    <Navbar />
-    <About />
-    <Footer />
+  <About />
 </template>
 
 <script>
-
-
 export default {
-  name:'app',
-  components:{
-    Navbar,
-    Footer,
+  name: "app",
+  components: {
     About,
-  }
-}
+  },
+};
 </script>
-
