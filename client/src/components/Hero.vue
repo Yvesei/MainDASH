@@ -1,47 +1,108 @@
 <template>
-       <div class="flex items-center justify-center flex-col mt-8">
-        <!-- main card -->
-        <div class=" p-10 rounded-xl">
-            <!-- headers content-->
-            <div class="flex flex-col justify-center items-center text-center mt-[6rem]">
-                <h1>
-                    Imper<span>ui</span>m
-                </h1>
-                <div class="max-w-sm font-bold font-sans">
-                    The Power of Opinion, The Impact of Knowledge
-                </div>
-                <div class="font-light max-w-lg mt-5 text-sm">
-                    Get inspired, get involved, and make your voice heard on the issues that matter most to you.
-                </div>
- 
-            <div class="h-full w-60 mt-5 flex flex-col"> 
-                <button class="rounded-full bg-blue-500 px-5 py-3 text-base mb-3 font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
-                    <router-link to="/signup">Get Started</router-link>
-                </button> 
-            </div>
-            </div>
+  <!-- component -->
+  <div class="sm:px-6 w-full">
+    <!--- more free and premium Tailwind CSS components at https://tailwinduikit.com/ --->
+    <div class="px-4 md:px-10 py-4 md:py-7">
+      <div class="flex items-center justify-between">
+        <p
+          tabindex="0"
+          class="focus:outline-none text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-normal text-gray-800"
+        >
+          Tasks
+        </p>
+        <div
+          class="py-3 px-4 flex items-center text-sm font-medium leading-none text-gray-600 bg-gray-200 hover:bg-gray-300 cursor-pointer rounded"
+        >
+          <p>Sort By:</p>
+          <select
+            aria-label="select"
+            class="focus:text-indigo-600 focus:outline-none bg-transparent ml-1"
+          >
+            <option class="text-sm text-indigo-800">Latest</option>
+            <option class="text-sm text-indigo-800">Oldest</option>
+            <option class="text-sm text-indigo-800">Latest</option>
+          </select>
         </div>
+      </div>
     </div>
+    <div class="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
+      <div class="sm:flex items-center justify-between">
+        <div class="flex items-center">
+          <a
+            class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
+            href=" javascript:void(0)"
+          >
+            <div class="py-2 px-8 bg-indigo-100 text-indigo-700 rounded-full">
+              <p>All</p>
+            </div>
+          </a>
+          <a
+            class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            href="javascript:void(0)"
+          >
+            <div
+              class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+            >
+              <p>Done</p>
+            </div>
+          </a>
+          <a
+            class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            href="javascript:void(0)"
+          >
+            <div
+              class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+            >
+              <p>Pending</p>
+            </div>
+          </a>
+        </div>
+        <button
+          onclick="popuphandler(true)"
+          class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+        >
+          <p class="text-sm font-medium leading-none text-white">Add Task</p>
+        </button>
+      </div>
+      <!-- component -->
+      <div class="overflow-x-auto">
+        <div>
+          <div class="w-full">
+            <div class="bg-white shadow-md rounded my-6">
+              <table class="min-w-max w-full table-auto">
+                <thead>
+                  <tr class="uppercase text-sm leading-normal">
+                    <th class="py-3 px-6 text-left"></th>
+                    <th class="py-3 px-6 text-left">Client</th>
+                    <th class="py-3 px-6 text-center">Date</th>
+                    <th class="py-3 px-6 text-center">Heure</th>
+                    <th class="py-3 px-6 text-center">Status</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                  <TableTr />
+                  <TableTr />
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
+import TableTr from "./TableTr.vue";
+
 export default {
-    setup() {
-        name:'hero'
-    },
-}
+  setup() {
+    name: "hero";
+  },
+  components: {
+    TableTr,
+  },
+};
 </script>
-<style>
-    h1{
-        font-size: 16vw;
-    color: #313b44;
-    line-height: 1.2;
-    font-weight: 900;
-    }
-    h1>span{
-            color: transparent;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: #313b44;
-    }
-</style>
+<style></style>
