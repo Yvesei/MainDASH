@@ -1,8 +1,11 @@
 <template>
-  <div class="w-2/3 mx-auto my-[1rem]">
+  <div
+    v-if="showPopup"
+    class="h-full overflow-auto w-full fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+  >
     <form
       v-if="currentDivIndex === 0"
-      class="relative mb-32"
+      class="relative w-2/3"
       style="height: 406px"
     >
       <div
@@ -10,7 +13,11 @@
         form="user"
         class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
-        <h5 class="mb-0 font-bold dark:text-white">Timeline</h5>
+        <div class="flex justify-between">
+          <h5 class="mb-0 font-bold dark:text-white">Timeline</h5>
+          <h5 @click="closePopup">X</h5>
+        </div>
+
         <div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
@@ -86,7 +93,7 @@
 
     <form
       v-if="currentDivIndex === 1"
-      class="relative mb-32"
+      class="relative w-2/3"
       style="height: 406px"
     >
       <div
@@ -94,7 +101,10 @@
         form="user"
         class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
-        <h5 class="mb-0 font-bold dark:text-white">Client</h5>
+        <div class="flex justify-between">
+          <h5 class="mb-0 font-bold dark:text-white">Client</h5>
+          <h5 @click="closePopup">X</h5>
+        </div>
         <div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
@@ -126,6 +136,16 @@
           </div>
           <div class="flex mt-6">
             <button
+              @click="currentDivIndex = (currentDivIndex - 1) % 3"
+              type="button"
+              aria-controls="user"
+              prev-form-btn=""
+              href="javascript:;"
+              class="inline-block px-6 py-3 mb-0 text-xs font-bold text-right uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs bg-gradient-to-tl from-gray-400 to-gray-100 leading-pro tracking-tight-rem bg-150 bg-x-25 text-slate-800"
+            >
+              Prev
+            </button>
+            <button
               @click="currentDivIndex = (currentDivIndex + 1) % 3"
               type="button"
               aria-controls="address"
@@ -140,17 +160,16 @@
       </div>
     </form>
 
-    <form
-      v-if="currentDivIndex === 2"
-      class="relative mb-32"
-      style="height: 406px"
-    >
+    <form v-if="currentDivIndex === 2" class="absolute w-2/3 h-[160%]">
       <div
         active=""
         form="user"
-        class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+        class="absolute mt-[20rem] mb-4 flex flex-col visible w-full min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
-        <h5 class="mb-0 font-bold dark:text-white">Task</h5>
+        <div class="flex justify-between">
+          <h5 class="mb-0 font-bold dark:text-white">Task</h5>
+          <h5 @click="closePopup">X</h5>
+        </div>
         <div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
@@ -300,7 +319,17 @@
           </div>
           <div class="flex mt-6">
             <button
-              @click="currentDivIndex = (currentDivIndex + 1) % 3"
+              @click="currentDivIndex = (currentDivIndex - 1) % 3"
+              type="button"
+              aria-controls="user"
+              prev-form-btn=""
+              href="javascript:;"
+              class="inline-block px-6 py-3 mb-0 text-xs font-bold text-right uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs bg-gradient-to-tl from-gray-400 to-gray-100 leading-pro tracking-tight-rem bg-150 bg-x-25 text-slate-800"
+            >
+              Prev
+            </button>
+            <button
+              @click="SubmitTask()"
               type="button"
               aria-controls="address"
               next-form-btn=""
@@ -315,9 +344,24 @@
     </form>
   </div>
 </template>
+
 <script>
 export default {
-  name: "About",
+  props: {
+    showPopup: Boolean,
+  },
+  methods: {
+    closePopup() {
+      this.$emit("close");
+    },
+    addTask() {
+      // Add your logic to add a new task
+      // You can emit an event here to notify the parent component
+      // and pass the task data if needed
+      // Then close the popup
+      this.closePopup();
+    },
+  },
   data() {
     return {
       currentDivIndex: 0, // Start with the first div

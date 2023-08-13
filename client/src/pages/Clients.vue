@@ -1,16 +1,16 @@
 <script setup>
-import About from "../components/About.vue";
+import Clients from "../components/Clients.vue";
 </script>
 
 <template>
-  <About />
+  <Clients />
 </template>
 
 <script>
 export default {
   name: "app",
   components: {
-    About,
+    Clients,
   },
 };
 </script>

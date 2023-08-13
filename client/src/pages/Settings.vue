@@ -1,11 +1,7 @@
 <script setup>
-import SignUp from "../components/SignUp.vue";
-import Login from "../components/Login.vue";
-import Canva from "../components/Canva.vue";
+import Settings from "../components/Settings.vue";
 import Hero from "../components/Hero.vue";
 import Navbar from "../components/Navbar.vue";
-import Footer from "../components/Footer.vue";
-import Settings from "../components/Settings.vue";
 </script>
 
 <template>
@@ -20,13 +16,9 @@ import Settings from "../components/Settings.vue";
 export default {
   name: "app",
   components: {
-    SignUp,
-    Login,
     Navbar,
-    Canva,
     Hero,
-    Footer,
-    Settings
+    Settings,
   },
 };
 </script>
