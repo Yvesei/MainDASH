@@ -1,6 +1,9 @@
 <template>
   <!-- component -->
-  <div>
+
+  <div class="flex">
+    <navbar />
+
     <div class="sm:px-6 w-full">
       <div class="px-4 md:px-10 py-4 md:py-7">
         <div class="flex items-center justify-between">
@@ -97,6 +100,7 @@
 
 <script>
 import AddTaskPopup from "./AddTaskPopup.vue";
+import navbar from "./Navbar.vue";
 import TableTr from "./TableTr.vue";
 
 export default {
@@ -106,6 +110,7 @@ export default {
   components: {
     TableTr,
     AddTaskPopup,
+    navbar,
   },
   data() {
     return {
