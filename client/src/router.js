@@ -9,8 +9,8 @@ import Clients from "./pages/Clients.vue";
 const routes = [
   { path: "/", component: Home },
   { path: "/Clients", component: Clients },
-  { path: "/login", component: Login, meta: { requiresGuest: true } },
-  { path: "/signup", component: SignUp, meta: { requiresGuest: true } },
+  { path: "/login", component: Login },
+  { path: "/signup", component: SignUp },
   { path: "/settings", component: Settings, meta: { requiresAuth: true } },
 ];
 

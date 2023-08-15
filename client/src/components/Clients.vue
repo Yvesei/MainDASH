@@ -8,21 +8,8 @@
             tabindex="0"
             class="focus:outline-none text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-normal text-gray-800"
           >
-            Tasks
+            Clients
           </p>
-          <div
-            class="py-3 px-4 flex items-center text-sm font-medium leading-none text-gray-600 bg-gray-200 hover:bg-gray-300 cursor-pointer rounded"
-          >
-            <p>Sort By:</p>
-            <select
-              aria-label="select"
-              class="focus:text-indigo-600 focus:outline-none bg-transparent ml-1"
-            >
-              <option class="text-sm text-indigo-800">Latest</option>
-              <option class="text-sm text-indigo-800">Oldest</option>
-              <option class="text-sm text-indigo-800">Latest</option>
-            </select>
-          </div>
         </div>
       </div>
       <div class="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
@@ -61,7 +48,9 @@
             @click="popup = true"
             class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
           >
-            <p class="text-sm font-medium leading-none text-white">Add Task</p>
+            <p class="text-sm font-medium leading-none text-white">
+              Add Client
+            </p>
           </button>
         </div>
         <!-- component -->
@@ -72,17 +61,16 @@
                 <table class="min-w-max w-full table-auto">
                   <thead>
                     <tr class="uppercase text-sm leading-normal">
-                      <th class="py-3 px-6 text-left"></th>
                       <th class="py-3 px-6 text-left">Client</th>
-                      <th class="py-3 px-6 text-center">Date</th>
-                      <th class="py-3 px-6 text-center">Heure</th>
+                      <th class="py-3 px-6 text-center">Number</th>
+                      <th class="py-3 px-6 text-center">Distance</th>
                       <th class="py-3 px-6 text-center">Status</th>
                       <th class="py-3 px-6 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="text-gray-600 text-sm font-light">
-                    <TableTr />
-                    <TableTr />
+                    <ClientRow />
+                    <ClientRow />
                   </tbody>
                 </table>
               </div>
@@ -91,21 +79,21 @@
         </div>
       </div>
     </div>
-    <add-task-popup :show-popup="popup" @close="popup = false" />
+    <add-client-popup :show-popup="popup" @close="popup = false" />
   </div>
 </template>
 
 <script>
-import AddTaskPopup from "./AddTaskPopup.vue";
-import TableTr from "./TableTr.vue";
+import AddClientPopup from "./AddClientPopup.vue";
+import ClientRow from "./ClientRow.vue";
 
 export default {
   setup() {
     name: "hero";
   },
   components: {
-    TableTr,
-    AddTaskPopup,
+    ClientRow,
+    AddClientPopup,
   },
   data() {
     return {
