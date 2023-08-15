@@ -1,22 +1,16 @@
 <script setup>
-import Login from "../components/Login.vue";
-import Navbar from "../components/Navbar.vue";
+import SignUp from "../components/SignUp.vue";
 </script>
 
 <template>
-  <header>
-    <Navbar />
-    <SignUp />
-    <Footer />
-  </header>
+  <SignUp />
 </template>
 
 <script>
 export default {
   name: "app",
   components: {
-    Login,
-    Navbar,
+    SignUp,
   },
 };
 </script>
