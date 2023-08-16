@@ -56,6 +56,18 @@
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
+            <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
+              <label
+                class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
+                for="First Name"
+                >Image</label
+              >
+              <input
+                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                id="file_input"
+                type="file"
+              />
+            </div>
           </div>
           <div class="flex mt-6">
             <button
@@ -85,10 +97,6 @@ export default {
       this.$emit("close");
     },
     addTask() {
-      // Add your logic to add a new task
-      // You can emit an event here to notify the parent component
-      // and pass the task data if needed
-      // Then close the popup
       this.closePopup();
     },
   },
