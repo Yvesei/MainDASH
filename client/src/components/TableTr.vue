@@ -80,7 +80,13 @@
             />
           </svg>
         </div>
-        <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
+        <div
+          @click="
+            popup = true;
+            create = false;
+          "
+          class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -112,13 +118,29 @@
         </div>
       </div>
     </td>
+    <add-task-popup
+      :show-popup="popup"
+      :create="create"
+      @close="popup = false"
+    />
   </tr>
 </template>
 
 <script>
+import AddTaskPopup from "./AddTaskPopup.vue";
+
 export default {
   setup() {
     name: "TableTr";
+  },
+  components: {
+    AddTaskPopup,
+  },
+  data() {
+    return {
+      popup: false,
+      create: false,
+    };
   },
 };
 </script>
