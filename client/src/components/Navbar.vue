@@ -11,7 +11,8 @@
         />
       </a>
 
-      <a
+      <router-link
+        to="/"
         href="#"
         class="p-1.5 text-gray-500 focus:outline-nones transition-colors duration-200 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800 hover:bg-gray-100"
       >
@@ -29,9 +30,10 @@
             d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
           />
         </svg>
-      </a>
+      </router-link>
 
       <a
+        @click="users = !users"
         href="#"
         class="p-1.5 text-blue-500 transition-colors duration-200 bg-blue-100 rounded-lg dark:text-blue-400 dark:bg-gray-800"
       >
@@ -51,7 +53,8 @@
         </svg>
       </a>
 
-      <a
+      <router-link
+        to="/clients"
         href="#"
         class="p-1.5 text-gray-500 focus:outline-nones transition-colors duration-200 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800 hover:bg-gray-100"
       >
@@ -74,7 +77,7 @@
             d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
           />
         </svg>
-      </a>
+      </router-link>
 
       <a
         href="#"
@@ -123,14 +126,15 @@
     </div>
     <!-- accounts -->
 
-    <!-- <div
+    <div
+      v-if="users"
       class="h-screen py-8 overflow-y-auto bg-white border-l border-r sm:w-64 w-60 dark:bg-gray-900 dark:border-gray-700"
     >
       <h2 class="px-5 text-lg font-medium text-gray-800 dark:text-white">
         Accounts
       </h2>
 
-      <div class="mt-8 space-y-4">
+      <div class="mt-8 space-y-4 flex" style="flex-direction: column">
         <button
           class="flex items-center w-full px-5 py-2 transition-colors duration-200 dark:hover:bg-gray-800 gap-x-2 hover:bg-gray-100 focus:outline-none"
         >
@@ -299,69 +303,31 @@
             </p>
           </div>
         </button>
+        <button
+          @click="Userpopup = true"
+          class="mx-4 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 items-start justify-center px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+        >
+          <p class="text-sm font-medium leading-none text-white">Add User</p>
+        </button>
       </div>
-    </div> -->
+    </div>
+    <create-user :show-user-popup="Userpopup" @close="Userpopup = false" />
   </aside>
 </template>
 
 <script>
-import Profile from "./Profile.vue";
+import CreateUser from "./CreateUser.vue";
+
 export default {
   name: "Navbar",
   components: {
-    Profile,
+    CreateUser,
   },
   data() {
     return {
-      name: "", // Initialize the userName data property
-      id: "",
-      showDropdownNav: false,
-      responsive: "",
+      users: false,
+      Userpopup: false,
     };
-  },
-  mounted() {
-    this.updateResponsive();
-    // Retrieve the user's name from localStorage
-    const storedName = localStorage.getItem("name");
-    this.id = localStorage.getItem("id");
-
-    // Update the userName data property with the retrieved value
-    this.name = storedName;
-    window.addEventListener("resize", this.updateResponsive);
-  },
-  beforeUnmount() {
-    // Remove event listener before component is unmounted
-    window.removeEventListener("resize", this.updateResponsive);
-  },
-
-  methods: {
-    toggleDropdownNav() {
-      this.showDropdownNav = !this.showDropdownNav;
-    },
-    updateResponsive() {
-      // Get the current screen width
-      const screenWidth = window.innerWidth;
-
-      // Update the responsive property based on screen width
-      if (screenWidth < 768) {
-        this.responsive = "small";
-      } else if (screenWidth >= 768 && screenWidth < 1024) {
-        this.responsive = "medium";
-      } else {
-        this.responsive = "large";
-      }
-
-      // Update the visibility of the dropdown menu on screen size change
-      if (this.responsive !== "small") {
-        this.showDropdownNav = false;
-      }
-    },
-    signOut() {
-      // Clear the token from localStorage or sessionStorage
-      localStorage.clear();
-      // Redirect the user to the login page or perform any other sign-out actions
-      this.$router.push("/login");
-    },
   },
 };
 </script>
