@@ -94,7 +94,7 @@
         </div>
       </div>
     </div>
-    <add-task-popup :show-popup="popup" @close="popup = false" />
+    <CreateUser />
   </div>
 </template>
 
@@ -102,6 +102,7 @@
 import AddTaskPopup from "./AddTaskPopup.vue";
 import navbar from "./Navbar.vue";
 import TableTr from "./TableTr.vue";
+import CreateUser from "./CreateUser.vue";
 
 export default {
   setup() {
@@ -111,6 +112,7 @@ export default {
     TableTr,
     AddTaskPopup,
     navbar,
+    CreateUser,
   },
   data() {
     return {
