@@ -355,10 +355,6 @@ export default {
       this.$emit("close");
     },
     addTask() {
-      // Add your logic to add a new task
-      // You can emit an event here to notify the parent component
-      // and pass the task data if needed
-      // Then close the popup
       this.closePopup();
     },
   },

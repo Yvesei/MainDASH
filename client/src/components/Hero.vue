@@ -1,9 +1,6 @@
 <template>
-  <!-- component -->
-
   <div class="flex">
     <navbar />
-
     <div class="sm:px-6 w-full">
       <div class="px-4 md:px-10 py-4 md:py-7">
         <div class="flex items-center justify-between">
@@ -94,7 +91,7 @@
         </div>
       </div>
     </div>
-    <CreateUser />
+    <add-task-popup :show-popup="popup" @close="popup = false" />
   </div>
 </template>
 
@@ -102,7 +99,6 @@
 import AddTaskPopup from "./AddTaskPopup.vue";
 import navbar from "./Navbar.vue";
 import TableTr from "./TableTr.vue";
-import CreateUser from "./CreateUser.vue";
 
 export default {
   setup() {
@@ -112,7 +108,6 @@ export default {
     TableTr,
     AddTaskPopup,
     navbar,
-    CreateUser,
   },
   data() {
     return {
