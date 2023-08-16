@@ -99,7 +99,8 @@
         </svg>
       </a>
 
-      <a
+      <router-link
+        to="/settings"
         href="#"
         class="p-1.5 text-gray-500 focus:outline-nones transition-colors duration-200 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800 hover:bg-gray-100"
       >
@@ -122,7 +123,7 @@
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-      </a>
+      </router-link>
     </div>
     <!-- accounts -->
 

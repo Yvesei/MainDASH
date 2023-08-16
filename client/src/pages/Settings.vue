@@ -5,11 +5,11 @@ import Navbar from "../components/Navbar.vue";
 </script>
 
 <template>
-  <header>
+  <div class="flex justify-between">
     <Navbar />
     <Settings />
-    <Footer />
-  </header>
+    <div></div>
+  </div>
 </template>
 
 <script>
