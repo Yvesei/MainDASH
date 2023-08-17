@@ -6,14 +6,16 @@
       class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white opacity-100 dark:bg-slate-850 rounded-2xl bg-clip-border"
     >
       <div class="flex justify-between">
-        <h5 class="mb-0 font-bold dark:text-white flex">
+        <h5
+          class="flex items-center text-2xl mb-0 font-bold dark:text-white flex"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             stroke-width="1.5"
             stroke="currentColor"
-            class="w-6 h-6 mr-2"
+            class="w-8 h-8 mr-2"
           >
             <path
               stroke-linecap="round"
