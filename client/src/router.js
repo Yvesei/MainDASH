@@ -5,11 +5,13 @@ import Home from "./pages/Home.vue";
 import SignUp from "./pages/SignUp.vue";
 import Settings from "./pages/Settings.vue";
 import Clients from "./pages/Clients.vue";
+import Result from "./pages/Result.vue";
 
 const routes = [
   { path: "/", component: Home },
   { path: "/Clients", component: Clients },
   { path: "/login", component: Login },
+  { path: "/result", component: Result },
   { path: "/signup", component: SignUp },
   { path: "/settings", component: Settings, meta: { requiresAuth: true } },
 ];
