@@ -11,10 +11,11 @@ POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-    "name" : "testuser1",
-    "email":"testuser1@gmail.com",
-    "password":"testuser1",
-    "role": "AUTHOR"
+    "name" : "username5",
+    "email":"user5@gmail.com",
+    "image":"user5 image",
+    "password":"user5",
+    "role": "ADMIN"
 }
 
 ###
@@ -29,7 +30,8 @@ Content-Type: application/json
 {
     "id" : 3,
     "name" : "username3",
-    "email":"user3@gmail.com",
+    "email":"user3333@gmail.com",
+    "image":"user3 image",
     "password":"user3",
-    "role": "AUTHOR"
+    "role": "USER"
 }
