@@ -84,8 +84,11 @@
                     </tr>
                   </thead>
                   <tbody class="text-gray-600 text-sm font-light">
-                    <TableTr />
-                    <TableTr />
+                    <TableTr
+                      v-for="task in tasks"
+                      v-bind:key="task.id"
+                      :task="task"
+                    />
                   </tbody>
                 </table>
               </div>
@@ -103,6 +106,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import AddTaskPopup from "./AddTaskPopup.vue";
 import navbar from "./Navbar.vue";
 import TableTr from "./TableTr.vue";
@@ -110,6 +114,9 @@ import TableTr from "./TableTr.vue";
 export default {
   setup() {
     name: "hero";
+  },
+  mounted() {
+    this.fetchTasks();
   },
   components: {
     TableTr,
@@ -120,7 +127,20 @@ export default {
     return {
       popup: false,
       create: true,
+      tasks: [],
     };
+  },
+  methods: {
+    fetchTasks() {
+      axios
+        .get(`/tasks/latest`)
+        .then((response) => {
+          this.tasks = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
 };
 </script>
