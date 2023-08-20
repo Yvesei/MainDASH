@@ -10,24 +10,7 @@ GET  http://localhost:3000/tasks/1
 ###
 GET http://localhost:3000/tasks?take=2&skip=2
 
-###
-POST http://localhost:3000/tasks
-Content-Type: application/json
 
-{
-    "Date": "1",
-    "dateStart": "1",
-    "dateEnd": "1",
-    "type": "bruh",
-    "supply": "1",
-    "supplyFile": "1",
-    "devis": "1",
-    "endTask": true,
-    "result": "1",
-    "followupBool": true,
-    "followupAutre": "asdljansdjk",
-    "client": "1"
-}
 
 ###
 DELETE http://localhost:3000/tasks/3
@@ -39,15 +22,22 @@ PATCH http://localhost:3000/tasks
 Content-Type: application/json
 
 {
-    "id": 2,
-    "titre":"post2 modifed",
-    "contenu" : "bla bla bla 222",
-    "image" : "",
-    "published": true
+    "id" : 2,
+    "Date": "2023-08-19T12:00:00Z",
+    "dateStart": "2023-08-19T12:00:00Z",
+    "dateEnd": "2023-08-20T12:00:00Z",
+    "type": "hiuhuhuh",
+    "supply": "1",
+    "supplyFile": "1",
+    "devis": "1",
+    "endTask": true,
+    "result": "1",
+    "followupBool": true,
+    "followupAutre": "asdljansdjk"
 }
 
 ###
-POST http://localhost:3000/tasks/create-task
+POST http://localhost:3000/tasks
 Content-Type: application/json
 
 {
