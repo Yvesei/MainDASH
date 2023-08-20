@@ -4,20 +4,22 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 router.post("/create-task", async (req, res) => {
-  const { clientName, clientNumber, taskData } = req.body;
+  const { clientName, clientNumber, distance, image, taskData } = req.body;
 
   try {
-    let client = await prisma.client.findUnique({
+    let clientexists = await prisma.client.findUnique({
       where: {
         name: clientName,
       },
     });
 
-    if (!client) {
+    if (!clientexists) {
       client = await prisma.client.create({
         data: {
           name: clientName,
           number: clientNumber,
+          distance: distance,
+          image: image,
         },
       });
     }
