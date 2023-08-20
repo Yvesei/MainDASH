@@ -12,6 +12,7 @@ app.use(cors());
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var clientsRouter = require("./routes/clients");
 var tasksRouter = require("./routes/tasks");
 var loginRouter = require("./routes/login");
 
@@ -25,5 +26,6 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/tasks", tasksRouter);
 app.use("/login", loginRouter);
+app.use("/clients", clientsRouter);
 
 module.exports = app;
