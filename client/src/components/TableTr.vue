@@ -43,12 +43,12 @@
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
-        <span class="font-medium">22-07-2022</span>
+        <span class="font-medium">{{ task.Date }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center">
       <div>
-        <span>9:30-10:30</span>
+        <span>{{ task.dateStart }}-{{ task.dateEnd }}</span>
       </div>
     </td>
 
@@ -81,10 +81,7 @@
           </svg>
         </div>
         <div
-          @click="
-            popup = true;
-            create = false;
-          "
+          @click="editpopup = true"
           class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
         >
           <svg
@@ -118,28 +115,38 @@
         </div>
       </div>
     </td>
-    <add-task-popup
-      :show-popup="popup"
-      :create="create"
-      @close="popup = false"
+    <add-task-popup :show-popup="popup" @close="popup = false" />
+    <edit-task-popup
+      :task="task"
+      :show-popup="editpopup"
+      @close="editpopup = false"
     />
   </tr>
 </template>
 
 <script>
 import AddTaskPopup from "./AddTaskPopup.vue";
+import editTaskPopup from "./editTaskPopup.vue";
 
 export default {
   setup() {
     name: "TableTr";
   },
+  props: {
+    task: {
+      type: Object, // Specify the type of the prop
+      required: true, // Set to true if the prop is required
+    },
+  },
+  mounted() {},
   components: {
     AddTaskPopup,
+    editTaskPopup,
   },
   data() {
     return {
       popup: false,
-      create: false,
+      editpopup: false,
     };
   },
 };
