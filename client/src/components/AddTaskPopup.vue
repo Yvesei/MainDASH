@@ -44,13 +44,11 @@
                   </svg>
                 </div>
                 <input
-                  datepicker
+                  v-model="this.Date"
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date"
                 />
-                <!--     class="                                                                      leading-5.6 ease block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
- -->
               </div>
             </div>
             <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
@@ -60,6 +58,7 @@
                 >Distance</label
               >
               <input
+                v-model="distance"
                 type="text"
                 name="Last Name"
                 placeholder="eg. Prior"
@@ -75,6 +74,7 @@
                 >Heure debut</label
               >
               <input
+                v-model="providedDateStart"
                 type="text"
                 name="Company"
                 placeholder="eg. Creative Tim"
@@ -88,6 +88,7 @@
                 >Heure fin</label
               >
               <input
+                v-model="dateEnd"
                 type="email"
                 name="Email Address"
                 placeholder="eg. soft@dashboard.com"
@@ -134,6 +135,7 @@
                 >Nom</label
               >
               <input
+                v-model="name"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -147,6 +149,7 @@
                 >Num Tel</label
               >
               <input
+                v-model="number"
                 type="text"
                 name="Last Name"
                 placeholder="eg. Prior"
@@ -199,6 +202,7 @@
                 >Type de maintenance</label
               >
               <input
+                v-model="type"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -214,6 +218,7 @@
                 >Fourniture</label
               >
               <input
+                v-model="supply"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -271,6 +276,7 @@
                 >Demande de devis</label
               >
               <input
+                v-model="devis"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -292,7 +298,10 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      type="checkbox"
+                      v-model="endTask"
+                      value="true"
+                      type="radio"
+                      name="taskEndRadio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="fav"
                     />
@@ -302,18 +311,22 @@
                   </label>
 
                   <label
-                    for="defa"
+                    for="defav"
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      type="checkbox"
+                      v-model="endTask"
+                      value="false"
+                      type="radio"
+                      name="taskEndRadio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="defa"
+                      id="defav"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
                       >Defavourable</span
                     >
                   </label>
+                  <button @click.prevent="consol()">which one ??</button>
                 </div>
               </div>
             </div>
@@ -326,6 +339,7 @@
                 >Resultat</label
               >
               <textarea
+                v-model="result"
                 name="Bio"
                 rows="5"
                 placeholder="Say a few words about who you are or what you're working on."
@@ -349,7 +363,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      type="checkbox"
+                      v-model="followupBool"
+                      value="true"
+                      type="radio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="a-suivre"
                     />
@@ -364,7 +380,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      type="checkbox"
+                      v-model="followupBool"
+                      value="false"
+                      type="radio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="Autre"
                     />
@@ -380,6 +398,7 @@
           <div v-if="maintenanceAutre" class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <textarea
+                v-model="followupAutre"
                 name="Bio"
                 rows="5"
                 placeholder="Say a few words about who you are or what you're working on."
@@ -402,7 +421,7 @@
             </button>
             <button
               v-if="create"
-              @click="SubmitTask()"
+              @click="handleSubmit()"
               type="button"
               aria-controls="address"
               next-form-btn=""
@@ -419,12 +438,14 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     showPopup: Boolean,
     create: Boolean,
   },
-
+  mounted() {},
   methods: {
     closePopup() {
       this.$emit("close");
@@ -432,11 +453,61 @@ export default {
     addTask() {
       this.closePopup();
     },
+    async handleSubmit() {
+      const response = await axios.post("tasks/", {
+        name: this.name,
+        number: this.number,
+        distance: this.distance,
+        image: this.image,
+        Date: new Date(this.Date),
+        providedDateStart: new Date(this.providedDateStart),
+        dateEnd: this.convertDate(this.dateEnd),
+        type: this.type,
+        supply: this.supply,
+        supplyFile: this.supplyFile,
+        devis: this.devis,
+        endTask: JSON.parse(this.endTask),
+        result: this.result,
+        followupBool: JSON.parse(this.followupBool),
+        followupAutre: this.followupAutre,
+      });
+    },
+
+    consol() {
+      console.log(this.followupBool);
+    },
+    convertDate(timeString) {
+      const currentDate = new Date(); // Get the current date
+
+      // Split the time string into hours and minutes
+      const [hours, minutes] = timeString.split(":");
+
+      // Set the time on the current date
+      currentDate.setHours(Number(hours));
+      currentDate.setMinutes(Number(minutes));
+      return currentDate;
+    },
   },
   data() {
     return {
       currentDivIndex: 0, // Start with the first div
       maintenanceAutre: false,
+      // post
+      name: "",
+      number: "",
+      distance: "",
+      image: "",
+      Date: "",
+      providedDateStart: "",
+      dateEnd: "",
+      type: "",
+      supply: "",
+      supplyFile: "",
+      devis: "",
+      endTask: Boolean,
+      result: "",
+      followupBool: Boolean,
+      followupAutre: "",
     };
   },
 };

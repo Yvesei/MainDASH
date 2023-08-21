@@ -12,7 +12,7 @@ app.use(cors());
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
-var clientsRouter = require("./routes/clients");
+var clientsRouter = require("./routes/client");
 var tasksRouter = require("./routes/tasks");
 var loginRouter = require("./routes/login");
 

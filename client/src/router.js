@@ -9,7 +9,7 @@ import Result from "./pages/Result.vue";
 
 const routes = [
   { path: "/", component: Home },
-  { path: "/Clients", component: Clients },
+  { path: "/clients", component: Clients },
   { path: "/login", component: Login },
   { path: "/result", component: Result },
   { path: "/signup", component: SignUp },

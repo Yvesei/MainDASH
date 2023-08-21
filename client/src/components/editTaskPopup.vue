@@ -44,11 +44,11 @@
                   </svg>
                 </div>
                 <input
+                  v-model="this.Date"
                   datepicker
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date"
-                  :value="[[task.Date]]"
                 />
               </div>
             </div>
@@ -59,6 +59,7 @@
                 >Distance</label
               >
               <input
+                v-model="client.distance"
                 type="text"
                 name="Last Name"
                 placeholder="eg. Prior"
@@ -74,7 +75,7 @@
                 >Heure debut</label
               >
               <input
-                :value="[[task.dateStart]]"
+                v-model="this.dateStart"
                 type="text"
                 name="Company"
                 placeholder="eg. Creative Tim"
@@ -88,7 +89,7 @@
                 >Heure fin</label
               >
               <input
-                :value="[[task.dateEnd]]"
+                v-model="this.dateEnd"
                 type="email"
                 name="Email Address"
                 placeholder="eg. soft@dashboard.com"
@@ -135,6 +136,7 @@
                 >Nom</label
               >
               <input
+                v-model="client.name"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -148,6 +150,7 @@
                 >Num Tel</label
               >
               <input
+                v-model="client.number"
                 type="text"
                 name="Last Name"
                 placeholder="eg. Prior"
@@ -200,7 +203,7 @@
                 >Type de maintenance</label
               >
               <input
-                :value="[[task.type]]"
+                v-model="this.type"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -216,7 +219,7 @@
                 >Fourniture</label
               >
               <input
-                :value="[[task.supply]]"
+                v-model="this.supply"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -274,7 +277,7 @@
                 >Demande de devis</label
               >
               <input
-                :value="[[task.devis]]"
+                v-model="this.devis"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -296,6 +299,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      v-model="endTask"
+                      value="1"
+                      :checked="task.endTask == 1"
                       type="checkbox"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="fav"
@@ -310,6 +316,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      v-model="endTask"
+                      value="0"
+                      :checked="task.endTask == 0"
                       type="checkbox"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="defa"
@@ -330,7 +339,7 @@
                 >Resultat</label
               >
               <textarea
-                :value="[[task.result]]"
+                v-model="this.result"
                 name="Bio"
                 rows="5"
                 placeholder="Say a few words about who you are or what you're working on."
@@ -353,6 +362,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      v-model="followupBool"
+                      value="0"
+                      :checked="task.followupBool == 0"
                       type="checkbox"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="a-suivre"
@@ -367,6 +379,9 @@
                     class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      v-model="followupBool"
+                      value="1"
+                      :checked="task.followupBool == 1"
                       type="checkbox"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="Autre"
@@ -383,7 +398,7 @@
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <textarea
-                :value="[[task.followupAutre]]"
+                v-model="this.followupAutre"
                 name="Bio"
                 rows="5"
                 placeholder="Say a few words about who you are or what you're working on."
@@ -423,6 +438,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     showPopup: Boolean,
@@ -431,6 +448,20 @@ export default {
       required: true, // Set to true if the prop is required
     },
   },
+  mounted() {
+    this.fetchClient(this.task.clientId);
+    this.Date = this.task.Date;
+    this.dateStart = this.task.dateStart;
+    this.dateEnd = this.task.dateEnd;
+    this.type = this.task.type;
+    this.supply = this.task.supply;
+    this.supplyFile = this.task.supplyFile;
+    this.devis = this.task.devis;
+    this.endTask = this.task.endTask;
+    this.result = this.task.result;
+    this.followupBool = this.task.followupBool;
+    this.followupAutre = this.task.followupAutre;
+  },
   methods: {
     closePopup() {
       this.$emit("close");
@@ -438,11 +469,41 @@ export default {
     addTask() {
       this.closePopup();
     },
+    fetchClient(id) {
+      axios
+        .get(`clients/${id}`)
+        .then((response) => {
+          this.client = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    SubmitTask() {},
   },
   data() {
     return {
       currentDivIndex: 0, // Start with the first div
       maintenanceAutre: false,
+      client: {
+        type: Object,
+      },
+      name: "",
+      number: "",
+      distance: "",
+      image: "",
+      Date: "",
+      dateStart: "",
+      dateEnd: "",
+      type: "",
+      supply: "",
+      supplyFile: "",
+      devis: "",
+      endTask: Boolean,
+      result: "",
+      followupBool: Boolean,
+      followupAutre: "",
+      clientId: "",
     };
   },
 };

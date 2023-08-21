@@ -4,26 +4,29 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 router.post("/", async (req, res) => {
-  const { clientName, clientNumber, distance, image, taskData } = req.body;
+  const { name, number, distance, providedDateStart, image, ...taskData } =
+    req.body;
 
   try {
-    let clientexists = await prisma.client.findUnique({
+    let client = await prisma.client.findUnique({
       where: {
-        name: clientName,
+        name: name,
       },
     });
 
-    if (!clientexists) {
+    if (!client) {
       client = await prisma.client.create({
         data: {
-          name: clientName,
-          number: clientNumber,
+          name: name,
+          number: number,
           distance: distance,
           image: image,
         },
       });
     }
-
+    if (providedDateStart != "" && providedDateStart != null) {
+      taskData.dateStart = providedDateStart;
+    }
     const task = await prisma.task.create({
       data: {
         ...taskData,
@@ -43,6 +46,7 @@ router.post("/", async (req, res) => {
       .json({ error: "An error occurred while creating the task" });
   }
 });
+
 router.get("/", function (req, res, next) {
   const { take, skip, clientId } = req.query;
   if (clientId) {

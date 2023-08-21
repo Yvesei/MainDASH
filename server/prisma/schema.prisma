@@ -27,8 +27,8 @@ model Client {
 
 model Task {
   id            Int       @id @default(autoincrement())
-  Date          DateTime
-  dateStart     DateTime  @default(now())
+  Date          DateTime?
+  dateStart     DateTime? @default(now())
   dateEnd       DateTime?
   type          String?   @db.VarChar(999)
   supply        String?   @db.VarChar(999)
