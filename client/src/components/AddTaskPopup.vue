@@ -326,7 +326,6 @@
                       >Defavourable</span
                     >
                   </label>
-                  <button @click.prevent="consol()">which one ??</button>
                 </div>
               </div>
             </div>
@@ -457,10 +456,10 @@ export default {
       const response = await axios.post("tasks/", {
         name: this.name,
         number: this.number,
-        distance: this.distance,
+        distance: JSON.parse(this.distance),
         image: this.image,
         Date: new Date(this.Date),
-        providedDateStart: new Date(this.providedDateStart),
+        providedDateStart: this.convertDate(this.providedDateStart),
         dateEnd: this.convertDate(this.dateEnd),
         type: this.type,
         supply: this.supply,
@@ -471,10 +470,6 @@ export default {
         followupBool: JSON.parse(this.followupBool),
         followupAutre: this.followupAutre,
       });
-    },
-
-    consol() {
-      console.log(this.followupBool);
     },
     convertDate(timeString) {
       const currentDate = new Date(); // Get the current date
@@ -495,7 +490,7 @@ export default {
       // post
       name: "",
       number: "",
-      distance: "",
+      distance: 0,
       image: "",
       Date: "",
       providedDateStart: "",
