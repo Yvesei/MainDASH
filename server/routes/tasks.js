@@ -100,15 +100,82 @@ router.delete("/:id", function (req, res, next) {
 });
 
 //modify a acticles
-router.patch("/", function (req, res, next) {
-  prisma.task
-    .update({
+// router.patch("/", function (req, res, next) {
+//   prisma.task
+//     .update({
+//       where: {
+//         id: parseInt(req.body.id),
+//       },
+//       data: req.body,
+//     })
+//     .then((task) => res.send(task));
+// });
+
+router.patch("/", async (req, res) => {
+  const {
+    taskId,
+    name,
+    number,
+    distance,
+    providedDateStart,
+    image,
+    ...taskData
+  } = req.body;
+
+  try {
+    let client = await prisma.client.findUnique({
       where: {
-        id: parseInt(req.body.id),
+        name: name,
       },
-      data: req.body,
-    })
-    .then((task) => res.send(task));
+    });
+
+    if (!client) {
+      client = await prisma.client.create({
+        data: {
+          name: name,
+          number: number,
+          distance: distance,
+          image: image,
+        },
+      });
+    } else {
+      client = await prisma.client.update({
+        where: {
+          id: client.id,
+        },
+        data: {
+          name: name,
+          number: number,
+          distance: distance,
+          image: image,
+        },
+      });
+    }
+    if (providedDateStart !== "" && providedDateStart !== null) {
+      taskData.dateStart = providedDateStart;
+    }
+
+    const updatedTask = await prisma.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        ...taskData,
+        client: {
+          connect: {
+            id: client.id,
+          },
+        },
+      },
+    });
+
+    res.json({ message: "Task updated successfully", task: updatedTask });
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating the task" });
+  }
 });
 
 module.exports = router;
