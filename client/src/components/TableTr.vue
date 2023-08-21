@@ -100,6 +100,7 @@
         </div>
         <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
           <svg
+            @click="deleteTask()"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -125,6 +126,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 import AddTaskPopup from "./AddTaskPopup.vue";
 import editTaskPopup from "./editTaskPopup.vue";
 
@@ -148,6 +151,9 @@ export default {
     editTaskPopup,
   },
   methods: {
+    async deleteTask() {
+      const response = await axios.delete(`tasks/${this.task.id}`, {});
+    },
     extractDate(isoDateString) {
       const isoDate = new Date(isoDateString);
       // Extract date
