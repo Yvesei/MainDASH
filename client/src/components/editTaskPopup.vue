@@ -75,7 +75,7 @@
                 >Heure debut</label
               >
               <input
-                v-model="this.dateStart"
+                v-model="providedDateStart"
                 type="text"
                 name="Company"
                 placeholder="eg. Creative Tim"
@@ -300,9 +300,10 @@
                   >
                     <input
                       v-model="endTask"
-                      value="1"
-                      :checked="task.endTask == 1"
-                      type="checkbox"
+                      value="true"
+                      type="radio"
+                      name="taskEndRadio"
+                      :checked="task.endTask == true"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="fav"
                     />
@@ -317,11 +318,12 @@
                   >
                     <input
                       v-model="endTask"
-                      value="0"
-                      :checked="task.endTask == 0"
-                      type="checkbox"
+                      value="false"
+                      type="radio"
+                      name="taskEndRadio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="defa"
+                      id="defav"
+                      :checked="task.endTask == false"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
                       >Defavourable</span
@@ -363,9 +365,9 @@
                   >
                     <input
                       v-model="followupBool"
-                      value="0"
-                      :checked="task.followupBool == 0"
-                      type="checkbox"
+                      value="true"
+                      :checked="task.followupBool == true"
+                      type="radio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="a-suivre"
                     />
@@ -380,9 +382,9 @@
                   >
                     <input
                       v-model="followupBool"
-                      value="1"
-                      :checked="task.followupBool == 1"
-                      type="checkbox"
+                      value="false"
+                      :checked="task.followupBool == false"
+                      type="radio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="Autre"
                     />
@@ -421,7 +423,7 @@
             </button>
 
             <button
-              @click="SubmitTask()"
+              @click="AlterTask()"
               type="button"
               aria-controls="address"
               next-form-btn=""
@@ -449,10 +451,11 @@ export default {
     },
   },
   mounted() {
+    this.taskId = this.task.id;
     this.fetchClient(this.task.clientId);
-    this.Date = this.task.Date;
-    this.dateStart = this.task.dateStart;
-    this.dateEnd = this.task.dateEnd;
+    this.Date = this.extractDate(this.task.Date);
+    this.providedDateStart = this.extractHours(this.task.dateStart);
+    this.dateEnd = this.extractHours(this.task.dateEnd);
     this.type = this.task.type;
     this.supply = this.task.supply;
     this.supplyFile = this.task.supplyFile;
@@ -461,8 +464,50 @@ export default {
     this.result = this.task.result;
     this.followupBool = this.task.followupBool;
     this.followupAutre = this.task.followupAutre;
+    // format date
   },
   methods: {
+    convertDate(timeString) {
+      const currentDate = new Date(); // Get the current date
+
+      // Split the time string into hours and minutes
+      const [hours, minutes] = timeString.split(":");
+
+      // Set the time on the current date
+      currentDate.setHours(Number(hours));
+      currentDate.setMinutes(Number(minutes));
+      return currentDate;
+    },
+    extractDate(isoDateString) {
+      const isoDate = new Date(isoDateString);
+      // Extract date
+      const year = isoDate.getUTCFullYear();
+      const month = isoDate.getUTCMonth() + 1;
+      const day = isoDate.getUTCDate();
+
+      // Extract time
+      const hours = isoDate.getUTCHours();
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${year}-${month}-${day}`;
+    },
+    extractHours(isoDateString) {
+      const isoDate = new Date(isoDateString);
+
+      // Extract time
+      const hours = isoDate.getUTCHours() + 1;
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${formattedTime}`;
+    },
     closePopup() {
       this.$emit("close");
     },
@@ -479,7 +524,26 @@ export default {
           console.error(error);
         });
     },
-    SubmitTask() {},
+    async AlterTask() {
+      const response = await axios.patch("tasks/", {
+        taskId: this.taskId,
+        name: this.name,
+        number: this.number,
+        distance: JSON.parse(this.distance),
+        image: this.image,
+        Date: new Date(this.Date),
+        providedDateStart: this.convertDate(this.providedDateStart),
+        dateEnd: this.convertDate(this.dateEnd),
+        type: this.type,
+        supply: this.supply,
+        supplyFile: this.supplyFile,
+        devis: this.devis,
+        endTask: JSON.parse(this.endTask),
+        result: this.result,
+        followupBool: JSON.parse(this.followupBool),
+        followupAutre: this.followupAutre,
+      });
+    },
   },
   data() {
     return {
@@ -488,9 +552,10 @@ export default {
       client: {
         type: Object,
       },
+      taskId: "",
       name: "",
       number: "",
-      distance: "",
+      distance: 0,
       image: "",
       Date: "",
       dateStart: "",
