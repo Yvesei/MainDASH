@@ -419,7 +419,6 @@
               Prev
             </button>
             <button
-              v-if="create"
               @click="handleSubmit()"
               type="button"
               aria-controls="address"
@@ -442,7 +441,6 @@ import axios from "axios";
 export default {
   props: {
     showPopup: Boolean,
-    create: Boolean,
   },
   mounted() {},
   methods: {
