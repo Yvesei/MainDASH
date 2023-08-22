@@ -303,7 +303,7 @@
                       value="true"
                       type="radio"
                       name="taskEndRadio"
-                      :checked="task.endTask == true"
+                      :checked="this.endTask == true"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="fav"
                     />
@@ -323,7 +323,7 @@
                       name="taskEndRadio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="defav"
-                      :checked="task.endTask == false"
+                      :checked="this.endTask == false"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
                       >Defavourable</span
@@ -451,8 +451,8 @@ export default {
     },
   },
   mounted() {
-    this.taskId = this.task.id;
     this.fetchClient(this.task.clientId);
+    this.taskId = this.task.id;
     this.Date = this.extractDate(this.task.Date);
     this.providedDateStart = this.extractHours(this.task.dateStart);
     this.dateEnd = this.extractHours(this.task.dateEnd);
@@ -464,7 +464,13 @@ export default {
     this.result = this.task.result;
     this.followupBool = this.task.followupBool;
     this.followupAutre = this.task.followupAutre;
-    // format date
+    this.id = this.client.id;
+    // this.name = this.client.name;
+    // console.log(this.client.id);
+    // this.number = this.client.number;
+    // this.distance = this.client.distance;
+    // this.image = this.client.image;
+    // // format date
   },
   methods: {
     convertDate(timeString) {
@@ -511,9 +517,6 @@ export default {
     closePopup() {
       this.$emit("close");
     },
-    addTask() {
-      this.closePopup();
-    },
     fetchClient(id) {
       axios
         .get(`clients/${id}`)
@@ -527,10 +530,11 @@ export default {
     async AlterTask() {
       const response = await axios.patch("tasks/", {
         taskId: this.taskId,
-        name: this.name,
-        number: this.number,
-        distance: JSON.parse(this.distance),
-        image: this.image,
+        id: this.client.id,
+        name: this.client.name,
+        number: this.client.number,
+        distance: JSON.parse(this.client.distance),
+        image: this.client.image,
         Date: new Date(this.Date),
         providedDateStart: this.convertDate(this.providedDateStart),
         dateEnd: this.convertDate(this.dateEnd),
@@ -547,11 +551,12 @@ export default {
   },
   data() {
     return {
-      currentDivIndex: 0, // Start with the first div
+      currentDivIndex: 0,
       maintenanceAutre: false,
       client: {
         type: Object,
       },
+      id: "",
       taskId: "",
       name: "",
       number: "",
