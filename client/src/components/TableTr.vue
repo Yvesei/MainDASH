@@ -38,7 +38,7 @@
             src="https://randomuser.me/api/portraits/men/1.jpg"
           />
         </div>
-        <span>Eshal Rosas</span>
+        <span>{{ client.name }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
@@ -127,13 +127,19 @@
 
 <script>
 import axios from "axios";
-
 import AddTaskPopup from "./AddTaskPopup.vue";
 import editTaskPopup from "./editTaskPopup.vue";
 
 export default {
   setup() {
     name: "TableTr";
+  },
+  data() {
+    return {
+      popup: false,
+      editpopup: false,
+      client: {},
+    };
   },
   props: {
     task: {
@@ -142,6 +148,7 @@ export default {
     },
   },
   mounted() {
+    this.fetchClient(this.task.clientId);
     this.task.Date = this.extractDate(this.task.Date);
     this.task.dateStart = this.extractHours(this.task.dateStart);
     this.task.dateEnd = this.extractHours(this.task.dateEnd);
@@ -153,6 +160,16 @@ export default {
   methods: {
     async deleteTask() {
       const response = await axios.delete(`tasks/${this.task.id}`, {});
+    },
+    async fetchClient(id) {
+      const response = await axios
+        .get(`clients/${id}`)
+        .then((response) => {
+          this.client = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     extractDate(isoDateString) {
       const isoDate = new Date(isoDateString);
@@ -184,12 +201,6 @@ export default {
         .padStart(2, "0")}`;
       return `${formattedTime}`;
     },
-  },
-  data() {
-    return {
-      popup: false,
-      editpopup: false,
-    };
   },
 };
 </script>

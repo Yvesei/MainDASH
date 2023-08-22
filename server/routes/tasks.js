@@ -112,7 +112,9 @@ router.delete("/:id", function (req, res, next) {
 // });
 
 router.patch("/", async (req, res) => {
+  console.log("editing Task using info" + req.body);
   const {
+    id,
     taskId,
     name,
     number,
@@ -125,10 +127,10 @@ router.patch("/", async (req, res) => {
   try {
     let client = await prisma.client.findUnique({
       where: {
-        name: name,
+        id: id,
       },
     });
-
+    // can't change the name of an existing user into an existing user
     if (!client) {
       client = await prisma.client.create({
         data: {
@@ -150,6 +152,7 @@ router.patch("/", async (req, res) => {
           image: image,
         },
       });
+      console.log("create or edit" + client);
     }
     if (providedDateStart !== "" && providedDateStart !== null) {
       taskData.dateStart = providedDateStart;

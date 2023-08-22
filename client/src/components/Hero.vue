@@ -97,11 +97,7 @@
         </div>
       </div>
     </div>
-    <add-task-popup
-      :show-popup="popup"
-      :create="create"
-      @close="popup = false"
-    />
+    <add-task-popup :show-popup="popup" @close="popup = false" />
   </div>
 </template>
 
