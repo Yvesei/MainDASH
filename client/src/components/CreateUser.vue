@@ -60,6 +60,7 @@
                 >Nom</label
               >
               <input
+                v-model="this.name"
                 type="text"
                 name="First Name"
                 placeholder="eg. Michael"
@@ -71,13 +72,14 @@
             <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Last Name"
-                >Number</label
+                for="email"
+                >Email</label
               >
               <input
+                v-model="this.email"
                 type="text"
-                name="Last Name"
-                placeholder="eg. Prior"
+                name="email"
+                placeholder="ex: user@tridentsystems.com"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -86,13 +88,13 @@
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Distance</label
+                for="password"
+                >Password</label
               >
               <input
-                type="text"
-                name="First Name"
-                placeholder="eg. Michael"
+                v-model="this.password"
+                type="password"
+                name="password"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -101,30 +103,21 @@
             <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Last Name"
-                >Password</label
+                for="role"
+                >type</label
               >
               <input
-                type="password"
-                name="Last Name"
-                placeholder="eg. Prior"
+                v-model="this.role"
+                type="text"
+                name="role"
+                placeholder="USER/ADMINr"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
           <div class="flex mt-6">
             <button
-              v-if="create"
-              type="button"
-              aria-controls="address"
-              next-form-btn=""
-              href="javascript:;"
-              class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
-            >
-              Create
-            </button>
-            <button
-              v-if="!create"
+              @click="createUser(), closeUserPopup()"
               type="button"
               aria-controls="address"
               next-form-btn=""
@@ -141,6 +134,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     showUserPopup: Boolean,
@@ -153,9 +148,22 @@ export default {
     addTask() {
       this.closeUserPopup();
     },
+    createUser() {
+      const response = axios.post("users/", {
+        name: this.name,
+        email: this.email,
+        password: this.password,
+        role: this.role,
+      });
+    },
   },
   data() {
-    return {};
+    return {
+      name: "",
+      email: "",
+      password: "",
+      role: "",
+    };
   },
 };
 </script>
