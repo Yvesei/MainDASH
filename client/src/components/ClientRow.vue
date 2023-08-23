@@ -31,6 +31,7 @@
       <div class="flex item-center justify-center">
         <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
           <svg
+            @click="popup = true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -62,15 +63,29 @@
         </div>
       </div>
     </td>
+    <edit-client-popup
+      :show-popup="popup"
+      :client="client"
+      @close="popup = false"
+    />
   </tr>
 </template>
 
 <script>
 import axios from "axios";
+import EditClientPopup from "./EditClientPopup.vue";
 
 export default {
   setup() {
     name: "ClientRow";
+  },
+  data() {
+    return {
+      popup: false,
+    };
+  },
+  components: {
+    EditClientPopup,
   },
   props: {
     client: {

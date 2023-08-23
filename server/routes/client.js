@@ -26,6 +26,7 @@ router.get("/:id", function (req, res, next) {
 //post a new client
 
 router.post("/", function (req, res, next) {
+  console.log(req.body);
   prisma.client
     .create({ data: req.body })
     .then((client) => res.send(client))
@@ -42,13 +43,21 @@ router.delete("/:id", function (req, res, next) {
 
 //modify a client
 router.patch("/", function (req, res, next) {
-  const { id, ...clientData } = req.body;
+  console.log(req.body);
+  let { id, name, number, distance, image } = req.body;
+  distance = parseInt(distance);
+
   prisma.client
     .update({
       where: {
         id: +id,
       },
-      data: clientData,
+      data: {
+        name,
+        number,
+        distance,
+        image,
+      },
     })
     .then((client) => res.send(client))
     .catch((err) => res.send(err));
