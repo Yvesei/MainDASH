@@ -112,7 +112,6 @@ router.delete("/:id", function (req, res, next) {
 // });
 
 router.patch("/", async (req, res) => {
-  console.log("editing Task using info" + req.body);
   const {
     id,
     taskId,
