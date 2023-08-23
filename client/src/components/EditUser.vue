@@ -115,7 +115,16 @@
               />
             </div>
           </div>
-          <div class="flex mt-6">
+          <div class="flex mt-6 justify-between">
+            <button
+              @click="deleteUser(), closeUserPopup()"
+              type="button"
+              aria-controls="address"
+              next-form-btn=""
+              class="inline-block px-6 py-3 mb-0 text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
+            >
+              Delete
+            </button>
             <button
               @click="editUser(), closeUserPopup()"
               type="button"
@@ -160,6 +169,9 @@ export default {
         password: this.user.password,
         role: this.user.role,
       });
+    },
+    deleteUser() {
+      const response = axios.delete(`users/${this.user.id}`, {});
     },
   },
   data() {
