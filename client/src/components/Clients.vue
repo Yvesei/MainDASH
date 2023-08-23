@@ -70,8 +70,11 @@
                     </tr>
                   </thead>
                   <tbody class="text-gray-600 text-sm font-light">
-                    <ClientRow />
-                    <ClientRow />
+                    <ClientRow
+                      v-for="client in clients"
+                      v-bind:key="client.id"
+                      :client="client"
+                    />
                   </tbody>
                 </table>
               </div>
@@ -85,6 +88,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 import AddClientPopup from "./AddClientPopup.vue";
 import ClientRow from "./ClientRow.vue";
 import navbar from "./Navbar.vue";
@@ -98,9 +103,25 @@ export default {
     AddClientPopup,
     navbar,
   },
+  mounted() {
+    this.fetchClients();
+  },
+  methods: {
+    fetchClients() {
+      axios
+        .get(`/clients`)
+        .then((response) => {
+          this.clients = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
   data() {
     return {
       popup: false,
+      clients: [],
     };
   },
 };

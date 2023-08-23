@@ -8,17 +8,17 @@
             src="https://randomuser.me/api/portraits/men/1.jpg"
           />
         </div>
-        <span>Eshal Rosas</span>
+        <span>{{ client.name }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
-        <span class="font-medium">0600779988</span>
+        <span class="font-medium">{{ client.number }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center">
       <div>
-        <span>14 km</span>
+        <span>{{ client.distance }}</span>
       </div>
     </td>
 
@@ -46,6 +46,7 @@
         </div>
         <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
           <svg
+            @click="deleteClient()"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -65,9 +66,23 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   setup() {
     name: "ClientRow";
   },
+  props: {
+    client: {
+      type: Object,
+      required: true,
+    },
+  },
+  methods: {
+    deleteClient() {
+      const response = axios.delete(`clients/${this.client.id}`, {});
+    },
+  },
+  mounted() {},
 };
 </script>
