@@ -18,26 +18,28 @@
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
+                for="full name"
                 >Nom</label
               >
               <input
+                v-model="name"
                 type="text"
-                name="First Name"
-                placeholder="eg. Michael"
+                name="full name"
+                placeholder="full name.."
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Last Name"
+                for="number"
                 >Number</label
               >
               <input
+                v-model="number"
                 type="text"
-                name="Last Name"
-                placeholder="eg. Prior"
+                name="number"
+                placeholder="0600000000"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -46,20 +48,21 @@
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Distance</label
+                for="distance"
+                >Distance (km)</label
               >
               <input
+                v-model="distance"
                 type="text"
-                name="First Name"
-                placeholder="eg. Michael"
+                name="distance"
+                placeholder="14.."
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
+                for="image"
                 >Image</label
               >
               <input
@@ -71,7 +74,7 @@
           </div>
           <div class="flex mt-6">
             <button
-              @click="currentDivIndex = (currentDivIndex + 1) % 3"
+              @click="createClient()"
               type="button"
               aria-controls="address"
               next-form-btn=""
@@ -88,6 +91,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     showPopup: Boolean,
@@ -99,9 +104,22 @@ export default {
     addTask() {
       this.closePopup();
     },
+    createClient() {
+      const response = axios.post(`/clients/`, {
+        name: this.name,
+        number: this.number,
+        distance: JSON.parse(this.distance),
+        image: "test",
+      });
+      console.log(response);
+    },
   },
   data() {
-    return {};
+    return {
+      name: "",
+      number: "",
+      distance: "",
+    };
   },
 };
 </script>
