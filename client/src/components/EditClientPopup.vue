@@ -115,7 +115,6 @@ export default {
         distance: this.client.distance,
         image: this.client.image,
       });
-      console.log(response);
     },
   },
   data() {
