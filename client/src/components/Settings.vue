@@ -135,22 +135,7 @@
             />
           </div>
         </div>
-        <div class="flex flex-wrap mt-4 -mx-3">
-          <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0">
-            <label
-              class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-              for="role"
-              >type</label
-            >
-            <input
-              v-model="role"
-              type="text"
-              name="role"
-              placeholder="USER/ADMIN"
-              class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-        </div>
+
         <div class="flex mt-6 justify-between">
           <button
             @click="editUser()"
