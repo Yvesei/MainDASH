@@ -35,3 +35,7 @@ Content-Type: application/json
     "password":"user3",
     "role": "USER"
 }
+
+// to test user images
+###
+GET http://localhost:3000/uploads/330806820_6226543644098040_99468803775825536_n.jpg
