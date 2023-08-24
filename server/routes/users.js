@@ -17,14 +17,17 @@ router.post("/upload", (req, res) => {
   const myFile = req.files.file;
 
   //  mv() method places the file inside public directory
-  myFile.mv(`${__dirname}/../public/uploads/${myFile.name}`, function (err) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send({ msg: "Error occured" });
+  myFile.mv(
+    `${__dirname}/../public/uploads/users/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
     }
-    // returing the response with file path and name
-    return res.send({ name: myFile.name, path: `/${myFile.name}` });
-  });
+  );
 });
 
 /* GET users listing. */

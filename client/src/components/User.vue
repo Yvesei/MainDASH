@@ -7,8 +7,8 @@
       <div class="relative">
         <img
           class="object-cover w-8 h-8 rounded-full"
-          src="https://images.unsplash.com/photo-1608174386344-80898cec6beb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&h=687&q=80"
-          alt=""
+          :src="getimg()"
+          v-bind:alt="pic"
         />
         <span
           class="h-2 w-2 rounded-full bg-emerald-500 absolute right-0.5 ring-1 ring-white bottom-0"
@@ -34,6 +34,7 @@
 </template>
 <script>
 import EditUser from "./EditUser.vue";
+import axios from "axios";
 
 export default {
   name: "Navbar",
@@ -46,7 +47,11 @@ export default {
       required: true,
     },
   },
-
+  methods: {
+    getimg() {
+      return `http://localhost:3000/uploads/users/${this.user.image}`;
+    },
+  },
   data() {
     return {
       edituserpopup: false,
