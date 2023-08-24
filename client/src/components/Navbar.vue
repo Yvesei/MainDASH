@@ -38,7 +38,7 @@ dark:text-blue-400
  dark:bg-gray-800
 -->
       <a
-        @click="users = !users"
+        @click="showusers = !showusers"
         href="#"
         class="p-1.5 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800 hover:bg-gray-100"
       >
@@ -130,7 +130,7 @@ dark:text-blue-400
     <!-- accounts -->
 
     <div
-      v-if="users"
+      v-if="showusers"
       class="h-screen py-8 overflow-y-auto bg-white border-l border-r sm:w-64 w-60 dark:bg-gray-900 dark:border-gray-700"
     >
       <h2 class="px-5 text-lg font-medium text-gray-800 dark:text-white">
@@ -165,6 +165,7 @@ export default {
   data() {
     return {
       users: [],
+      showusers: false,
       Userpopup: false,
     };
   },
