@@ -10,7 +10,7 @@
         class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
         <div class="flex justify-between">
-          <h5 class="mb-0 font-bold dark:text-white">Client</h5>
+          <h5 class="mb-0 font-bold dark:text-white">Add New User</h5>
 
           <svg
             @click="closeUserPopup"
@@ -30,27 +30,20 @@
             class="flex flex-row items-center justify-center bg-grey-lighter round"
             style="flex-direction: column"
           >
-            <label
-              class="flex flex-col items-center px-6 py-6 mb-4 mt-8 bg-white text-blue rounded-full shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white"
-            >
-              <svg
-                class="w-8 h-8"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
+            <div class="file-upload">
+              <input type="file" @change="onFileChange" />
+              <a
+                @click="onUploadFile"
+                class="upload-button"
+                :disabled="!this.selectedFile"
               >
-                <path
-                  d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"
-                />
-              </svg>
-
-              <input type="file" class="hidden" />
-            </label>
-            <label
+                Upload file
+              </a>
+            </div>
+            <!-- <label
               class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
               for="First Name"
-              >Profile</label
-            >
+              >Profile</label> -->
           </div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
@@ -142,27 +135,62 @@ export default {
     create: Boolean,
   },
   methods: {
-    closeUserPopup() {
+    async closeUserPopup() {
       this.$emit("close");
     },
-    addTask() {
-      this.closeUserPopup();
+    async addTask() {
+      await this.closeUserPopup();
     },
-    createUser() {
-      const response = axios.post("users/", {
-        name: this.name,
-        email: this.email,
-        password: this.password,
-        role: this.role,
-      });
+    async createUser() {
+      try {
+        const uploadedImageName = await this.onUploadFile(); // Get the uploaded image name
+        console.log("after upload : ");
+        console.log(this.image);
+
+        const response = await axios.post("users/", {
+          name: this.name,
+          image: uploadedImageName, // Use the uploaded image name
+          email: this.email,
+          password: this.password,
+          role: this.role,
+        });
+
+        // Handle the response as needed
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async onFileChange(e) {
+      const selectedFile = e.target.files[0];
+      this.selectedFile = selectedFile;
+    },
+    async onUploadFile() {
+      try {
+        const formData = new FormData();
+        formData.append("file", this.selectedFile);
+
+        const response = await axios.post("users/upload", formData);
+
+        console.log("before affecting value to image : " + response.data.name);
+        this.image = response.data.name;
+        console.log("after affecting value to image : " + this.image);
+
+        return response.data.name; // Return the image name
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
     },
   },
+
   data() {
     return {
       name: "",
       email: "",
       password: "",
       role: "",
+      image: "",
+      selectedFile: "",
     };
   },
 };
