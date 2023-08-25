@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { verifyToken } = require("../middleware/authMiddleware"); // Import the middleware
 
 // upload
 const fileUpload = require("express-fileupload");
@@ -127,7 +128,7 @@ router.get("/", function (req, res, next) {
   }
 });
 
-router.get("/latest", function (req, res, next) {
+router.get("/latest", verifyToken, function (req, res, next) {
   prisma.task
     .findMany({
       skip: 0,
