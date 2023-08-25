@@ -289,22 +289,26 @@
               />
               <!-- File uplaod -->
               <div class="bg-white p7 rounded mx-auto">
-                <div
-                  x-data="dataFileDnD()"
-                  class="relative flex flex-col p-4 text-gray-400"
-                >
+                <div class="relative flex flex-col p-4 text-gray-400">
                   <div
                     x-ref="dnd"
                     class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
                   >
                     <input
+                      @change="onFileChangeFourniture"
                       accept="*"
                       type="file"
-                      multiple
                       class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
                     />
+                    <button
+                      v-if="addedfilefourniture"
+                      :href="selectedFileFournitureFront"
+                    >
+                      {{ this.selectedFileFournitureFront }}
+                    </button>
 
                     <div
+                      v-if="!addedfilefourniture"
                       class="flex flex-col items-center justify-center py-10 text-center"
                     >
                       <svg
@@ -516,6 +520,7 @@ export default {
     async handleSubmit() {
       try {
         const uploadedImageName = await this.onUploadFile();
+        const uploadedFileNameFourniture = await this.onUploadFileFourniture();
         const response = await axios.post("tasks/", {
           name: this.name,
           number: this.number,
@@ -526,7 +531,7 @@ export default {
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
           supply: this.supply,
-          supplyFile: this.supplyFile,
+          supplyFile: uploadedFileNameFourniture,
           devis: this.devis,
           endTask: this.endTask,
           result: this.result,
@@ -549,6 +554,7 @@ export default {
       return currentDate;
     },
     async onFileChange(e) {
+      console.log("onchange ");
       const selectedFile = e.target.files[0];
       this.selectedFile = selectedFile;
       if (selectedFile) {
@@ -560,6 +566,28 @@ export default {
       try {
         const formData = new FormData();
         formData.append("file", this.selectedFile);
+        const response = await axios.post("tasks/upload", formData);
+        return response.data.name; // Return the image name
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    },
+    async onFileChangeFourniture(e) {
+      console.log("onchange fourniture");
+      const selectedFileFourniture = e.target.files[0];
+      this.selectedFileFourniture = selectedFileFourniture;
+      if (selectedFileFourniture) {
+        this.selectedFileFournitureFront = URL.createObjectURL(
+          selectedFileFourniture
+        );
+        this.addedfilefourniture = true;
+      }
+    },
+    async onUploadFileFourniture() {
+      try {
+        const formData = new FormData();
+        formData.append("file", this.selectedFileFourniture);
         const response = await axios.post("tasks/upload", formData);
         return response.data.name; // Return the image name
       } catch (error) {
@@ -590,7 +618,10 @@ export default {
       followupAutre: "",
       selectedFileFront: "",
       selectedFile: "",
+      selectedFileFourniture: "",
       addedfile: "",
+      addedfilefourniture: "",
+      selectedFileFournitureFront: "",
     };
   },
 };

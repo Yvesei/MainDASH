@@ -4,7 +4,8 @@
       class="flex flex-col items-center w-16 h-screen py-8 space-y-8 bg-white dark:bg-gray-900 dark:border-gray-700"
     >
       <a href="#">
-        <img class="w-auto h-6" src="" alt="" />
+        <!-- :src="getimg()" -->
+        <img class="object-cover w-8 h-8 rounded-full" v-bind:alt="pic" />
       </a>
 
       <router-link
@@ -161,6 +162,9 @@ export default {
   data() {
     return {
       users: [],
+      // currentuser: {
+      //   type: Object,
+      // },
       showusers: false,
       Userpopup: false,
     };
@@ -176,8 +180,25 @@ export default {
           console.error(error);
         });
     },
+    // fetchUser() {
+    //   axios
+    //     .get(`/users/current-user`)
+    //     .then((response) => {
+    //       this.currentuser = response.data;
+    //       console.log("response.data : ");
+    //       console.log(this.currentuser);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // },
+    // getimg() {
+    //   return `http://localhost:3000/uploads/users/${this.currentuser.image}`;
+    // },
   },
+
   mounted() {
+    // this.fetchUser();
     this.fetchUsers();
   },
 };

@@ -114,13 +114,49 @@
                 for="role"
                 >type</label
               >
-              <input
+              <div class="grid sm:grid-cols-2 gap-2">
+                <label
+                  for="user"
+                  class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                >
+                  <input
+                    v-model="type"
+                    value="false"
+                    type="radio"
+                    name="roleRadio"
+                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                    id="user"
+                  />
+                  <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
+                    >USER</span
+                  >
+                </label>
+
+                <label
+                  for="admin"
+                  class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                >
+                  <input
+                    v-model="type"
+                    value="true"
+                    type="radio"
+                    name="roleRadio"
+                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                    id="admin"
+                  />
+                  <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
+                    >ADMIN</span
+                  >
+                </label>
+              </div>
+              <!-- <input
                 v-model="this.role"
                 type="text"
                 name="role"
                 placeholder="USER/ADMINr"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
+            </div> -->
             </div>
           </div>
           <div class="flex mt-6">
@@ -164,7 +200,7 @@ export default {
           image: uploadedImageName, // uploaded image
           email: this.email,
           password: this.password,
-          role: this.role,
+          role: this.type == "false" ? "USER" : "ADMIN",
         });
 
         // Handle the response as needed
@@ -206,6 +242,7 @@ export default {
       selectedFileFront: "",
       selectedFile: "",
       addedfile: "",
+      type: Boolean,
     };
   },
 };

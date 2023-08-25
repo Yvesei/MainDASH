@@ -1,4 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Cookies from "vue-cookies";
+
+import axios from "axios";
 
 import Login from "./pages/Login.vue";
 import Home from "./pages/Home.vue";
@@ -8,11 +11,11 @@ import Clients from "./pages/Clients.vue";
 import Result from "./pages/Result.vue";
 
 const routes = [
-  { path: "/", component: Home },
-  { path: "/clients", component: Clients },
+  { path: "/", component: Home, meta: { requiresAuth: true } },
+  { path: "/clients", component: Clients, meta: { requiresAuth: true } },
   { path: "/login", component: Login },
-  { path: "/result", component: Result },
-  { path: "/signup", component: SignUp },
+  { path: "/result", component: Result, meta: { requiresAuth: true } },
+  { path: "/signup", component: SignUp, meta: { requiresAuth: true } },
   { path: "/settings", component: Settings, meta: { requiresAuth: true } },
 ];
 
@@ -23,20 +26,18 @@ const router = createRouter({
     return { top: 0 };
   },
 });
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem("token") !== null;
 
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some((route) => route.meta.requiresAuth)) {
-    if (isAuthenticated) {
-      next();
-    } else {
+    try {
+      const response = await axios.get("/users/verify-user");
+      if (response.data.success) {
+        next();
+      } else {
+        next("/login");
+      }
+    } catch (error) {
       next("/login");
-    }
-  } else if (to.matched.some((route) => route.meta.requiresGuest)) {
-    if (isAuthenticated) {
-      next("/");
-    } else {
-      next();
     }
   } else {
     next();

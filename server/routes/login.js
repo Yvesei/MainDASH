@@ -3,7 +3,7 @@ var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
-const { verifyToken } = require("../middleware/authMiddleware"); // Import the middleware
+const { verifyToken } = require("../middleware/authMiddleware");
 
 router.post("/", async (req, res) => {
   const { email, password } = req.body;

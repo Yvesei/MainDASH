@@ -2,6 +2,12 @@ var express = require("express");
 var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { verifyToken } = require("../middleware/authMiddleware.js");
+
+router.get("/verify-user", verifyToken, (req, res) => {
+  // If the request reaches here, it means the user exists and the token is valid
+  res.json({ success: true });
+});
 
 // upload
 const fileUpload = require("express-fileupload");
@@ -11,7 +17,7 @@ router.use(fileUpload());
 
 router.post("/upload", (req, res) => {
   if (!req.files) {
-    return res.send({ msg: "file-not-found" });
+    return res.send({ name: "avatar.png", path: "/avatar.png" });
   }
 
   const myFile = req.files.file;
@@ -82,4 +88,26 @@ router.patch("/", function (req, res, next) {
     .then((user) => res.send(user))
     .catch((err) => res.send(err));
 });
+
+// router.get("/current-user", verifyToken, function (req, res, next) {
+//   const userid = req.user.id;
+//   prisma.user
+//     .findUnique({ where: { id: userid } })
+//     .then((user) => res.send(user))
+//     .catch((err) => res.send(err));
+// });
+
+router.patch("/current-user", verifyToken, function (req, res, next) {
+  const id = req.user.id;
+  prisma.user
+    .update({
+      where: {
+        id: +id,
+      },
+      data: req.body,
+    })
+    .then((user) => res.send(user))
+    .catch((err) => res.send(err));
+});
+
 module.exports = router;

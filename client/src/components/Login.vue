@@ -16,7 +16,6 @@
               v-model="email"
               type="email"
               name=""
-              id=""
               placeholder="Enter Email Address"
               class="w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
               autofocus
@@ -34,7 +33,6 @@
               v-model="password"
               type="password"
               name=""
-              id=""
               placeholder="Enter Password"
               minlength="6"
               class="w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
