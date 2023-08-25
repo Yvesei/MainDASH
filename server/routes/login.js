@@ -3,23 +3,7 @@ var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
-
-// Middleware to verify JWT token from the cookie
-const verifyToken = (req, res, next) => {
-  const token = req.cookies.token;
-
-  if (token) {
-    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ error: "Invalid token" });
-      }
-      req.user = decoded;
-      next();
-    });
-  } else {
-    return res.status(403).json({ error: "Token not provided" });
-  }
-};
+const { verifyToken } = require("../middleware/authMiddleware"); // Import the middleware
 
 router.post("/", async (req, res) => {
   const { email, password } = req.body;
