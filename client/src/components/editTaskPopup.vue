@@ -137,20 +137,27 @@
             style="flex-direction: column"
           >
             <label
-              class="flex flex-col items-center px-6 py-6 mb-4 mt-8 bg-white text-blue rounded-full shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white"
+              v-bind:class="client.image ? 'p-0' : 'p-5'"
+              class="mb-4 mt-8 rounded-full border cursor-pointer"
             >
+              <img
+                v-if="client.image"
+                class="w-20 h-20 rounded-full"
+                :src="selectedFileFront ? selectedFileFront : getimg()"
+                alt=""
+              />
               <svg
-                class="w-8 h-8"
-                fill="currentColor"
+                v-if="!client.image"
+                class="w-10 h-10 fill-black"
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
+                viewBox="0 0 512 512"
               >
                 <path
-                  d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"
+                  d="M272 54.6V368c0 8.8-7.2 16-16 16s-16-7.2-16-16V54.6L139.3 155.3c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l128-128c6.2-6.2 16.4-6.2 22.6 0l128 128c6.2 6.2 6.2 16.4 0 22.6s-16.4 6.2-22.6 0L272 54.6zM208 352H64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H448c17.7 0 32-14.3 32-32V384c0-17.7-14.3-32-32-32H304V320H448c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V384c0-35.3 28.7-64 64-64H208v32zm176 64a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"
                 />
               </svg>
 
-              <input type="file" class="hidden" />
+              <input type="file" class="hidden" @change="onFileChange" />
             </label>
             <label
               class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
@@ -581,25 +588,52 @@ export default {
         });
     },
     async AlterTask() {
-      const response = await axios.patch("tasks/", {
-        taskId: this.taskId,
-        id: this.client.id,
-        name: this.client.name,
-        number: this.client.number,
-        distance: JSON.parse(this.client.distance),
-        image: this.client.image,
-        Date: new Date(this.Date),
-        providedDateStart: this.convertDate(this.providedDateStart),
-        dateEnd: this.convertDate(this.dateEnd),
-        type: this.type,
-        supply: this.supply,
-        supplyFile: this.supplyFile,
-        devis: this.devis,
-        endTask: JSON.parse(this.endTask),
-        result: this.result,
-        followupBool: JSON.parse(this.followupBool),
-        followupAutre: this.followupAutre,
-      });
+      try {
+        const uploadedImageName = await this.onUploadFile();
+        const response = await axios.patch("tasks/", {
+          taskId: this.taskId,
+          id: this.client.id,
+          name: this.client.name,
+          number: this.client.number,
+          distance: JSON.parse(this.client.distance),
+          image: uploadedImageName,
+          Date: new Date(this.Date),
+          providedDateStart: this.convertDate(this.providedDateStart),
+          dateEnd: this.convertDate(this.dateEnd),
+          type: this.type,
+          supply: this.supply,
+          supplyFile: this.supplyFile,
+          devis: this.devis,
+          endTask: JSON.parse(this.endTask),
+          result: this.result,
+          followupBool: JSON.parse(this.followupBool),
+          followupAutre: this.followupAutre,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async onFileChange(e) {
+      const selectedFile = e.target.files[0];
+      this.selectedFile = selectedFile;
+      if (selectedFile) {
+        this.selectedFileFront = URL.createObjectURL(selectedFile);
+        this.addedfile = true;
+      }
+    },
+    async onUploadFile() {
+      try {
+        const formData = new FormData();
+        formData.append("file", this.selectedFile);
+        const response = await axios.post("tasks/upload", formData);
+        return response.data.name; // Return the image name
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    },
+    getimg() {
+      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },
   },
   data() {
@@ -627,6 +661,9 @@ export default {
       followupBool: Boolean,
       followupAutre: "",
       clientId: "",
+      selectedFileFront: "",
+      selectedFile: "",
+      addedfile: "",
     };
   },
 };

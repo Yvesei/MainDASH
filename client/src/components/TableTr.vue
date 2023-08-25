@@ -33,10 +33,7 @@
     <td class="ml-6 py-3 px-6 text-center">
       <div class="flex items-center">
         <div class="mr-2">
-          <img
-            class="w-6 h-6 rounded-full"
-            src="https://randomuser.me/api/portraits/men/1.jpg"
-          />
+          <img class="w-6 h-6 rounded-full" :src="getimg()" v-bind:alt="pic" />
         </div>
         <span>{{ client.name }}</span>
       </div>
@@ -200,6 +197,9 @@ export default {
         .toString()
         .padStart(2, "0")}`;
       return `${formattedTime}`;
+    },
+    getimg() {
+      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },
   },
 };

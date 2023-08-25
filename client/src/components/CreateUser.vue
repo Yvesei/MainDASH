@@ -24,27 +24,42 @@
           </svg>
         </div>
         <div>
-          <!-- component -->
-
+          <!-- file upload -->
           <div
             class="flex flex-row items-center justify-center bg-grey-lighter round"
             style="flex-direction: column"
           >
-            <div class="file-upload">
-              <input type="file" @change="onFileChange" />
-              <a
-                @click="onUploadFile"
-                class="upload-button"
-                :disabled="!this.selectedFile"
+            <label
+              v-bind:class="addedfile ? 'p-0' : 'p-5'"
+              class="mb-4 mt-8 rounded-full border cursor-pointer"
+            >
+              <img
+                class="w-20 h-20 rounded-full"
+                v-if="addedfile"
+                :src="selectedFileFront"
+                alt=""
+              />
+              <svg
+                v-if="!addedfile"
+                class="w-10 h-10 fill-black"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
               >
-                Upload file
-              </a>
-            </div>
-            <!-- <label
+                <path
+                  d="M272 54.6V368c0 8.8-7.2 16-16 16s-16-7.2-16-16V54.6L139.3 155.3c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l128-128c6.2-6.2 16.4-6.2 22.6 0l128 128c6.2 6.2 6.2 16.4 0 22.6s-16.4 6.2-22.6 0L272 54.6zM208 352H64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H448c17.7 0 32-14.3 32-32V384c0-17.7-14.3-32-32-32H304V320H448c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V384c0-35.3 28.7-64 64-64H208v32zm176 64a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"
+                />
+              </svg>
+
+              <input type="file" class="hidden" @change="onFileChange" />
+            </label>
+            <label
               class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
               for="First Name"
-              >Profile</label> -->
+              >Profile</label
+            >
           </div>
+          <!-- file upload -->
+
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <label
@@ -143,13 +158,10 @@ export default {
     },
     async createUser() {
       try {
-        const uploadedImageName = await this.onUploadFile(); // Get the uploaded image name
-        console.log("after upload : ");
-        console.log(this.image);
-
+        const uploadedImageName = await this.onUploadFile(); // uploaded
         const response = await axios.post("users/", {
           name: this.name,
-          image: uploadedImageName, // Use the uploaded image name
+          image: uploadedImageName, // uploaded image
           email: this.email,
           password: this.password,
           role: this.role,
@@ -160,27 +172,27 @@ export default {
         console.error(error);
       }
     },
+    // upload
     async onFileChange(e) {
       const selectedFile = e.target.files[0];
       this.selectedFile = selectedFile;
+      if (selectedFile) {
+        this.selectedFileFront = URL.createObjectURL(selectedFile);
+        this.addedfile = true;
+      }
     },
     async onUploadFile() {
       try {
         const formData = new FormData();
         formData.append("file", this.selectedFile);
-
         const response = await axios.post("users/upload", formData);
-
-        console.log("before affecting value to image : " + response.data.name);
-        this.image = response.data.name;
-        console.log("after affecting value to image : " + this.image);
-
         return response.data.name; // Return the image name
       } catch (error) {
         console.log(error);
         throw error;
       }
     },
+    //upload
   },
 
   data() {
@@ -190,7 +202,10 @@ export default {
       password: "",
       role: "",
       image: "",
+      // upload
+      selectedFileFront: "",
       selectedFile: "",
+      addedfile: "",
     };
   },
 };
