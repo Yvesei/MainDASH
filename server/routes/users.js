@@ -3,20 +3,22 @@ var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// upload
 const fileUpload = require("express-fileupload");
-
 // middle ware
 router.use(express.static("public")); //to access the files in public folder
 router.use(fileUpload());
 
 router.post("/upload", (req, res) => {
   if (!req.files) {
-    return res.status(500).send({ msg: "file is not found" });
+    return res.send({ msg: "file-not-found" });
   }
-  // accessing the file
-  const myFile = req.files.file;
 
-  //  mv() method places the file inside public directory
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
   myFile.mv(
     `${__dirname}/../public/uploads/users/${myFile.name}`,
     function (err) {

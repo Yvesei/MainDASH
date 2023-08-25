@@ -3,10 +3,61 @@ var router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-router.post("/", async (req, res) => {
-  const { name, number, distance, providedDateStart, image, ...taskData } =
-    req.body;
+// upload
+const fileUpload = require("express-fileupload");
+// middle ware
+router.use(express.static("public")); //to access the files in public folder
+router.use(fileUpload());
 
+router.post("/upload", (req, res) => {
+  if (!req.files) {
+    return res.send({ name: "avatar.png", path: "/avatar.png" });
+  }
+
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
+  myFile.mv(
+    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+    }
+  );
+});
+
+router.post("/", async (req, res) => {
+  var {
+    name,
+    number,
+    distance,
+    providedDateStart,
+    image,
+    endTask,
+    followupBool,
+    ...taskData
+  } = req.body;
+  // endTask = +endTask;
+  // followupBool = +followupBool;
+  if (endTask === "") {
+    endTask = null;
+  } else {
+    endTask == "true" ? (endTask = true) : (endTask = false);
+  }
+  if (followupBool === "") {
+    followupBool = null;
+  } else {
+    followupBool == "true" ? (followupBool = true) : (followupBool = false);
+  }
+
+  console.log(endTask);
+  console.log(followupBool);
   try {
     let client = await prisma.client.findUnique({
       where: {
@@ -19,7 +70,7 @@ router.post("/", async (req, res) => {
         data: {
           name: name,
           number: number,
-          distance: distance,
+          distance: parseInt(distance),
           image: image,
         },
       });
@@ -29,6 +80,8 @@ router.post("/", async (req, res) => {
     }
     const task = await prisma.task.create({
       data: {
+        endTask,
+        followupBool,
         ...taskData,
         client: {
           connect: {
