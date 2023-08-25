@@ -1,7 +1,5 @@
 <template>
   <form class="relative w-2/3 flex mt-6">
-    <!-- component -->
-
     <div
       class="flex flex-row items-center justify-center bg-grey-lighter round"
       style="flex-direction: column"
@@ -162,14 +160,20 @@ export default {
       const response = axios.patch("users/", {
         id: this.id,
         name: this.name,
+        image: this.image,
         email: this.email,
         password: this.password,
-        role: this.role,
       });
     },
   },
   data() {
-    return {};
+    return {
+      id: "",
+      name: "",
+      image: "",
+      email: "",
+      password: "",
+    };
   },
 };
 </script>

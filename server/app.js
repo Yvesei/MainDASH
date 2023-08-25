@@ -4,11 +4,14 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true, // Allow cookies to be sent
+};
 var app = express();
 
 // Enable CORS for all routes
-app.use(cors());
+app.use(cors(corsOptions));
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");

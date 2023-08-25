@@ -79,6 +79,8 @@
 
 <script>
 import axios from "axios";
+import Cookies from "vue-cookies";
+
 export default {
   name: "Login",
   data() {
@@ -94,13 +96,12 @@ export default {
         email: this.email,
         password: this.password,
       });
-      // Handle the response based on the authentication result
+
       if (response.data.success) {
-        // Redirect the user to the authenticated portion of your application
-        localStorage.setItem("token", response.data.token);
+        // Set the token as an HttpOnly cookie
+        Cookies.set("token", response.data.token);
         this.$router.push("/");
       } else {
-        // Display an error message indicating invalid credentials
         this.WrongCred = true;
       }
     },

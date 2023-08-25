@@ -4,11 +4,7 @@
       class="flex flex-col items-center w-16 h-screen py-8 space-y-8 bg-white dark:bg-gray-900 dark:border-gray-700"
     >
       <a href="#">
-        <img
-          class="w-auto h-6"
-          src="https://merakiui.com/images/logo.svg"
-          alt=""
-        />
+        <img class="w-auto h-6" src="" alt="" />
       </a>
 
       <router-link

@@ -4,11 +4,27 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 
+// Middleware to verify JWT token from the cookie
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (token) {
+    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ error: "Invalid token" });
+      }
+      req.user = decoded;
+      next();
+    });
+  } else {
+    return res.status(403).json({ error: "Token not provided" });
+  }
+};
+
 router.post("/", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Query the database for a user with the provided email and password
     const user = await prisma.user.findFirst({
       where: {
         email,
@@ -20,26 +36,35 @@ router.post("/", async (req, res) => {
       const token = jwt.sign(
         {
           id: user.id,
-          name: user.name,
           email: user.email,
-          password: user.password,
-          role: user.role,
         },
-        process.env.JWT_KEY
+        process.env.JWT_KEY,
+        {
+          expiresIn: "20h",
+        }
       );
-      // User found, return success response
-      res.json({ success: true, token, user });
+
+      // Set the token as an HttpOnly cookie
+      res.cookie("token", token, { httpOnly: true, sameSite: "strict" });
+
+      res.json({ success: true, token });
     } else {
-      // User not found or invalid credentials, return error response
       res.json({ success: false });
     }
   } catch (error) {
-    // Handle any error that occurred during the database query
     console.error(error);
     res
       .status(500)
       .json({ error: "An error occurred. Please try again later." });
   }
 });
+
+// Protected route example
+// router.get("/protected", verifyToken, (req, res) => {
+//   res.json({
+//     message: "Protected route accessed successfully",
+//     user: req.user,
+//   });
+// });
 
 module.exports = router;
