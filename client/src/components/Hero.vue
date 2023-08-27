@@ -29,16 +29,16 @@
         <div class="sm:flex items-center justify-between">
           <div class="flex items-center">
             <a
+              @click="fetchTasks()"
               class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
-              href=" javascript:void(0)"
             >
               <div class="py-2 px-8 bg-indigo-100 text-indigo-700 rounded-full">
                 <p>All</p>
               </div>
             </a>
             <a
+              @click="fetchTasksDone()"
               class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
-              href="javascript:void(0)"
             >
               <div
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
@@ -47,8 +47,8 @@
               </div>
             </a>
             <a
+              @click="fetchTasksPending()"
               class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
-              href="javascript:void(0)"
             >
               <div
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
@@ -58,10 +58,7 @@
             </a>
           </div>
           <button
-            @click="
-              popup = true;
-              create = true;
-            "
+            @click="popup = true"
             class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
           >
             <p class="text-sm font-medium leading-none text-white">Add Task</p>
@@ -122,7 +119,7 @@ export default {
   data() {
     return {
       popup: false,
-      create: true,
+
       tasks: [],
     };
   },
@@ -130,6 +127,27 @@ export default {
     fetchTasks() {
       axios
         .get(`/tasks/latest`)
+        .then((response) => {
+          this.tasks = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    fetchTasksDone() {
+      console.log("fetchTasksDone");
+      axios
+        .get(`/tasks/latest?type=done`)
+        .then((response) => {
+          this.tasks = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    fetchTasksPending() {
+      axios
+        .get(`/tasks/latest?type=pending`)
         .then((response) => {
           this.tasks = response.data;
         })

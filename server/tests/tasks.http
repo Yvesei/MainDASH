@@ -2,7 +2,7 @@ GET http://localhost:3000/tasks
 
 
 ###
-GET http://localhost:3000/tasks/latest
+GET http://localhost:3000/tasks/latest?type=done
 
 ###
 GET  http://localhost:3000/tasks/1

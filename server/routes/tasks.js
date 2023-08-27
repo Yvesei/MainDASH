@@ -218,15 +218,41 @@ router.get("/", function (req, res, next) {
 });
 
 router.get("/latest", verifyToken, function (req, res, next) {
-  prisma.task
-    .findMany({
-      skip: 0,
-      take: 9,
-      orderBy: {
-        Date: "desc",
-      },
-    })
-    .then((tasks) => res.send(tasks));
+  const { type } = req.query;
+  console.log(type);
+  if (!type) {
+    prisma.task
+      .findMany({
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  if (type == "done") {
+    prisma.task
+      .findMany({
+        where: {
+          status: false,
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  if (type == "pending") {
+    prisma.task
+      .findMany({
+        where: {
+          status: true,
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
 });
 // get a single tasks
 router.get("/:id", function (req, res, next) {
