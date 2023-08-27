@@ -126,6 +126,7 @@ router.post("/", async (req, res) => {
     number,
     distance,
     providedDateStart,
+    providedDate,
     image,
     endTask,
     followupBool,
@@ -133,19 +134,16 @@ router.post("/", async (req, res) => {
   } = req.body;
   // endTask = +endTask;
   // followupBool = +followupBool;
-  if (endTask === "") {
+  if (endTask === undefined) {
     endTask = null;
   } else {
     endTask == "true" ? (endTask = true) : (endTask = false);
   }
-  if (followupBool === "") {
+  if (followupBool === undefined) {
     followupBool = null;
   } else {
     followupBool == "true" ? (followupBool = true) : (followupBool = false);
   }
-
-  console.log(endTask);
-  console.log(followupBool);
   try {
     let client = await prisma.client.findUnique({
       where: {
@@ -165,6 +163,10 @@ router.post("/", async (req, res) => {
     }
     if (providedDateStart != "" && providedDateStart != null) {
       taskData.dateStart = providedDateStart;
+    }
+    if (providedDate != "" && providedDate != null) {
+      console.log(providedDate);
+      taskData.Date = providedDate;
     }
     const task = await prisma.task.create({
       data: {
@@ -253,16 +255,32 @@ router.delete("/:id", function (req, res, next) {
 // });
 
 router.patch("/", async (req, res) => {
-  const {
+  var {
     id,
     taskId,
     name,
     number,
     distance,
     providedDateStart,
+    providedDate,
+    endTask,
+    followupBool,
     image,
     ...taskData
   } = req.body;
+  console.log("endTask");
+
+  console.log(endTask);
+  if (endTask === undefined) {
+    endTask = null;
+  } else {
+    taskData.endTask = endTask;
+  }
+  if (followupBool === undefined) {
+    followupBool = null;
+  } else {
+    taskData.followupBool = followupBool;
+  }
 
   try {
     let client = await prisma.client.findUnique({
@@ -292,10 +310,13 @@ router.patch("/", async (req, res) => {
           image: image,
         },
       });
-      console.log("create or edit" + client);
     }
     if (providedDateStart !== "" && providedDateStart !== null) {
       taskData.dateStart = providedDateStart;
+    }
+    if (providedDate !== "" && providedDate !== null) {
+      console.log(providedDate);
+      taskData.date = providedDate;
     }
 
     const updatedTask = await prisma.task.update({

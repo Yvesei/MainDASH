@@ -50,8 +50,14 @@
     </td>
 
     <td class="py-3 px-6 text-center">
-      <span class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
-        >Active</span
+      <span
+        v-if="task.status === false"
+        class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
+        >Pending</span
+      ><span
+        v-if="task.status == true"
+        class="bg-blue-200 text-blue-600 py-1 px-3 rounded-full text-xs"
+        >Done</span
       >
     </td>
     <td class="py-3 px-6 text-center">
