@@ -20,8 +20,9 @@
     </td>
 
     <td class="py-3 px-6 text-center">
-      <span class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
-        >Active</span
+      <span
+        class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
+        >{{ this.tasks }}</span
       >
     </td>
     <td class="py-3 px-6 text-center">
@@ -79,6 +80,7 @@ export default {
   data() {
     return {
       popup: false,
+      tasks: "",
     };
   },
   components: {
@@ -91,6 +93,16 @@ export default {
     },
   },
   methods: {
+    getTasksNumber() {
+      axios
+        .get(`/tasks/count?id=${this.client.id}`)
+        .then((response) => {
+          this.tasks = response.data.taskCount;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     deleteClient() {
       const response = axios.delete(`clients/${this.client.id}`, {});
     },
@@ -98,6 +110,8 @@ export default {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },
   },
-  mounted() {},
+  mounted() {
+    this.getTasksNumber();
+  },
 };
 </script>

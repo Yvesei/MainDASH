@@ -101,6 +101,24 @@ router.post("/uploadFileEdit", (req, res) => {
     }
   );
 });
+router.get("/count", async function (req, res, next) {
+  const clientId = +req.query.id;
+
+  try {
+    const taskCount = await prisma.task.count({
+      where: {
+        clientId: clientId,
+      },
+    });
+
+    res.status(200).json({ taskCount });
+  } catch (error) {
+    console.error("Error fetching task count:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching task count." });
+  }
+});
 
 router.post("/", async (req, res) => {
   var {

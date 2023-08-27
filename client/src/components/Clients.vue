@@ -65,7 +65,7 @@
                       <th class="py-3 px-6 text-left">Client</th>
                       <th class="py-3 px-6 text-center">Number</th>
                       <th class="py-3 px-6 text-center">Distance</th>
-                      <th class="py-3 px-6 text-center">Status</th>
+                      <th class="py-3 px-6 text-center">Tasks</th>
                       <th class="py-3 px-6 text-center">Actions</th>
                     </tr>
                   </thead>
