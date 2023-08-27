@@ -163,7 +163,7 @@ export default {
       try {
         const formData = new FormData();
         formData.append("file", this.selectedFile);
-        const response = await axios.post("tasks/upload", formData);
+        const response = await axios.post("tasks/uploadEdit", formData);
         return response.data.name; // Return the image name
       } catch (error) {
         console.log(error);

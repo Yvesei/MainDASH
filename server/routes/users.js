@@ -37,7 +37,28 @@ router.post("/upload", (req, res) => {
     }
   );
 });
+router.post("/uploadEdit", (req, res) => {
+  if (!req.files) {
+    return res.status(404).send({ msg: "no-image" });
+  }
 
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
+  myFile.mv(
+    `${__dirname}/../public/uploads/users/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+    }
+  );
+});
 /* GET users listing. */
 router.get("/", function (req, res, next) {
   const { take, skip } = req.query; // Extract take and skip from query parameters
@@ -98,13 +119,23 @@ router.patch("/", function (req, res, next) {
 // });
 
 router.patch("/current-user", verifyToken, function (req, res, next) {
-  const id = req.user.id;
+  const user = req.user; // id + email + iat + exp
+  const userdata = req.body;
+  const propertyKeys = Object.keys(userdata);
+
+  for (const propertyKey of propertyKeys) {
+    if (userdata[propertyKey] === "") {
+      console.log(`Property name: ${propertyKey}`);
+      delete userdata[propertyKey];
+    }
+  }
+  console.log(userdata);
   prisma.user
     .update({
       where: {
-        id: +id,
+        id: +user.id,
       },
-      data: req.body,
+      data: userdata,
     })
     .then((user) => res.send(user))
     .catch((err) => res.send(err));

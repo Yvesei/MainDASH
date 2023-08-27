@@ -32,12 +32,12 @@
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
-        <span class="font-medium">22-07-2022</span>
+        <span class="font-medium">{{ task.Date }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
-        <span class="font-medium">Carte graphique</span>
+        <span class="font-medium">{{ task.type }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center">
@@ -108,9 +108,7 @@
                 <p
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit
-                  quidem quam facilis dignissimos modi reprehenderit vel alias,
-                  commodi magni perferendis?
+                  {{ task.type }}
                 </p>
               </div>
             </div>
@@ -124,9 +122,7 @@
                 <p
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit
-                  quidem quam facilis dignissimos modi reprehenderit vel alias,
-                  commodi magni perferendis?
+                  {{ task.supply }}
                 </p>
                 <!-- File uplaod -->
                 <p>File ????</p>
@@ -143,10 +139,7 @@
                 <p
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                  Porro repellat voluptas autem aspernatur doloribus maiores ad
-                  voluptatum veritatis eum sequi et odio enim libero laudantium
-                  eius repudiandae praesentium, quisquam perspiciatis!
+                  {{ task.devis }}
                 </p>
               </div>
             </div>
@@ -203,9 +196,7 @@
                 <p
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit
-                  quidem quam facilis dignissimos modi reprehenderit vel alias,
-                  commodi magni perferendis?
+                  {{ task.result }}
                 </p>
               </div>
             </div>
@@ -254,9 +245,7 @@
                   <p
                     class="mt-2 focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                   >
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Fugit quidem quam facilis dignissimos modi reprehenderit vel
-                    alias, commodi magni perferendis?
+                    {{ task.followupAutre }}
                   </p>
                 </div>
               </div>
@@ -269,7 +258,17 @@
                   rows="5"
                   placeholder="Say a few words about who you are or what you're working on."
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                ></textarea>
+                >
+                <p
+                    class="mt-2 focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+                  >
+                  {{ task.type }}
+
+                  </p>
+
+              
+              </textarea
+                >
               </div>
             </div>
 
@@ -287,6 +286,53 @@ import AddTaskPopup from "./AddTaskPopup.vue";
 export default {
   setup() {
     name: "TableTr";
+  },
+  props: {
+    task: {
+      type: Object,
+      required: true,
+    },
+  },
+  methods: {
+    extractDate(isoDateString) {
+      const isoDate = new Date(isoDateString);
+      // Extract date
+      const year = isoDate.getUTCFullYear();
+      const month = isoDate.getUTCMonth() + 1;
+      const day = isoDate.getUTCDate();
+
+      // Extract time
+      const hours = isoDate.getUTCHours();
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${year}-${month}-${day}`;
+    },
+    extractHours(isoDateString) {
+      const isoDate = new Date(isoDateString);
+
+      // Extract time
+      const hours = isoDate.getUTCHours() + 1;
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${formattedTime}`;
+    },
+    // calculate between two times and then return it
+    //
+    //
+    //
+  },
+  mounted() {
+    this.task.Date = this.extractDate(this.task.Date);
+    this.task.dateStart = this.extractHours(this.task.dateStart);
+    this.task.dateEnd = this.extractHours(this.task.dateEnd);
   },
   components: {
     AddTaskPopup,

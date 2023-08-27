@@ -33,6 +33,29 @@ router.post("/upload", (req, res) => {
   );
 });
 
+router.post("/uploadEdit", (req, res) => {
+  if (!req.files) {
+    return res.status(404).send({ msg: "no-image" });
+  }
+
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
+  myFile.mv(
+    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+    }
+  );
+});
+
 router.post("/", async (req, res) => {
   var {
     name,
@@ -105,11 +128,11 @@ router.get("/", function (req, res, next) {
   const { take, skip, clientId } = req.query;
   if (clientId) {
     // Handle fetching tasks by user ID
-    const userId = parseInt(clientId);
+    const clientid = parseInt(clientId);
     prisma.task
       .findMany({
         where: {
-          clientId: clientId,
+          clientId: clientid,
         },
       })
       .then((tasks) => res.send(tasks))
