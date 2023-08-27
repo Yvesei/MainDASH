@@ -574,8 +574,8 @@ export default {
     this.fetchClient(this.task.clientId);
     this.taskId = this.task.id;
     this.providedDate = this.extractDate(this.task.Date);
-    this.providedDateStart = this.extractHours(this.task.dateStart);
-    this.dateEnd = this.extractHours(this.task.dateEnd);
+    this.providedDateStart = this.task.dateStart;
+    this.dateEnd = this.task.dateEnd;
     this.type = this.task.type;
     this.supply = this.task.supply;
     this.supplyFile = this.task.supplyFile;

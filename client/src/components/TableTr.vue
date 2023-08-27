@@ -152,9 +152,9 @@ export default {
   },
   mounted() {
     this.fetchClient(this.task.clientId);
-    this.task.Date = this.extractDate(this.task.Date);
-    this.task.dateStart = this.extractHours(this.task.dateStart);
-    this.task.dateEnd = this.extractHours(this.task.dateEnd);
+    // this.task.Date = this.extractDate(this.task.Date);
+    // this.task.dateStart = this.extractHours(this.task.dateStart);
+    // this.task.dateEnd = this.extractHours(this.task.dateEnd);
   },
   components: {
     AddTaskPopup,
@@ -174,36 +174,36 @@ export default {
           console.error(error);
         });
     },
-    extractDate(isoDateString) {
-      const isoDate = new Date(isoDateString);
-      // Extract date
-      const year = isoDate.getUTCFullYear();
-      const month = isoDate.getUTCMonth() + 1;
-      const day = isoDate.getUTCDate();
+    // extractDate(isoDateString) {
+    //   const isoDate = new Date(isoDateString);
+    //   // Extract date
+    //   const year = isoDate.getUTCFullYear();
+    //   const month = isoDate.getUTCMonth() + 1;
+    //   const day = isoDate.getUTCDate();
 
-      // Extract time
-      const hours = isoDate.getUTCHours();
-      const minutes = isoDate.getUTCMinutes();
+    //   // Extract time
+    //   const hours = isoDate.getUTCHours();
+    //   const minutes = isoDate.getUTCMinutes();
 
-      // Format the time as HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-      return `${year}-${month}-${day}`;
-    },
-    extractHours(isoDateString) {
-      const isoDate = new Date(isoDateString);
+    //   // Format the time as HH:MM
+    //   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+    //     .toString()
+    //     .padStart(2, "0")}`;
+    //   return `${year}-${month}-${day}`;
+    // },
+    // extractHours(isoDateString) {
+    //   const isoDate = new Date(isoDateString);
 
-      // Extract time
-      const hours = isoDate.getUTCHours() + 1;
-      const minutes = isoDate.getUTCMinutes();
+    //   // Extract time
+    //   const hours = isoDate.getUTCHours() + 1;
+    //   const minutes = isoDate.getUTCMinutes();
 
-      // Format the time as HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-      return `${formattedTime}`;
-    },
+    //   // Format the time as HH:MM
+    //   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+    //     .toString()
+    //     .padStart(2, "0")}`;
+    //   return `${formattedTime}`;
+    // },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },

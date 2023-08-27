@@ -128,18 +128,29 @@ export default {
       axios
         .get(`/tasks/latest`)
         .then((response) => {
-          this.tasks = response.data;
+          this.tasks = response.data.map((task) => {
+            task.Date = this.extractDate(task.Date);
+
+            task.dateStart = this.extractHours(task.dateStart);
+
+            task.dateEnd = this.extractHours(task.dateEnd);
+            return task;
+          });
         })
         .catch((error) => {
           console.error(error);
         });
     },
     fetchTasksDone() {
-      console.log("fetchTasksDone");
       axios
         .get(`/tasks/latest?type=done`)
         .then((response) => {
-          this.tasks = response.data;
+          this.tasks = response.data.map((task) => {
+            task.Date = this.extractDate(task.Date);
+            task.dateStart = this.extractHours(task.dateStart);
+            task.dateEnd = this.extractHours(task.dateEnd);
+            return task;
+          });
         })
         .catch((error) => {
           console.error(error);
@@ -149,11 +160,46 @@ export default {
       axios
         .get(`/tasks/latest?type=pending`)
         .then((response) => {
-          this.tasks = response.data;
+          this.tasks = response.data.map((task) => {
+            task.Date = this.extractDate(task.Date);
+            task.dateStart = this.extractHours(task.dateStart);
+            task.dateEnd = this.extractHours(task.dateEnd);
+            return task;
+          });
         })
         .catch((error) => {
           console.error(error);
         });
+    },
+    extractDate(isoDateString) {
+      const isoDate = new Date(isoDateString);
+      // Extract date
+      const year = isoDate.getUTCFullYear();
+      const month = isoDate.getUTCMonth() + 1;
+      const day = isoDate.getUTCDate();
+
+      // Extract time
+      const hours = isoDate.getUTCHours();
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${year}-${month}-${day}`;
+    },
+    extractHours(isoDateString) {
+      const isoDate = new Date(isoDateString);
+
+      // Extract time
+      const hours = isoDate.getUTCHours() + 1;
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${formattedTime}`;
     },
   },
 };
