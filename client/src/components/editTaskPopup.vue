@@ -285,8 +285,8 @@
                 placeholder="eg. Michael"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
-              <!-- File uplaod -->
-              <div class="bg-white p7 rounded mx-auto">
+              <!-- File upload -->
+              <!-- <div class="bg-white p7 rounded mx-auto">
                 <div
                   x-data="dataFileDnD()"
                   class="relative flex flex-col p-4 text-gray-400"
@@ -323,6 +323,66 @@
                         Drag your files here or click in this area.
                       </p>
                     </div>
+                  </div>
+                </div>
+              </div> -->
+              <div class="bg-white p7 rounded mx-auto">
+                <div class="relative flex flex-col p-4 text-gray-400">
+                  <div
+                    v-if="!addedfilefourniture"
+                    x-ref="dnd"
+                    class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
+                  >
+                    <input
+                      @change="onFileChangeFourniture"
+                      accept="*"
+                      type="file"
+                      class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
+                    />
+
+                    <div
+                      class="flex flex-col items-center justify-center py-10 text-center"
+                    >
+                      <svg
+                        class="w-6 h-6 mr-1 text-current-50"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <p class="m-0">
+                        Drag your files here or click in this area.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mt-6 margin-auto">
+                    <a
+                      v-if="task.supplyFile != ''"
+                      :href="getFile()"
+                      target="_blank"
+                      class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                    >
+                      <p class="text-sm font-medium leading-none text-white">
+                        View Old File
+                      </p>
+                    </a>
+                    <a
+                      v-if="addedfilefourniture"
+                      :href="getFileFront()"
+                      target="_blank"
+                      class="ml-5 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                    >
+                      <p class="text-sm font-medium leading-none text-white">
+                        View New File
+                      </p>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -590,6 +650,7 @@ export default {
     async AlterTask() {
       try {
         const uploadedImageName = await this.onUploadFile();
+        const uploadedFileNameFourniture = await this.onUploadFileFourniture();
         const response = await axios.patch("tasks/", {
           taskId: this.taskId,
           id: this.client.id,
@@ -602,7 +663,7 @@ export default {
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
           supply: this.supply,
-          supplyFile: this.supplyFile,
+          supplyFile: uploadedFileNameFourniture,
           devis: this.devis,
           endTask: JSON.parse(this.endTask),
           result: this.result,
@@ -632,8 +693,43 @@ export default {
         throw error;
       }
     },
+    async onFileChangeFourniture(e) {
+      console.log("onchange fourniture");
+      const selectedFileFourniture = e.target.files[0];
+      this.selectedFileFourniture = selectedFileFourniture;
+      if (selectedFileFourniture) {
+        this.selectedFileFournitureFront = URL.createObjectURL(
+          selectedFileFourniture
+        );
+        this.addedfilefourniture = true;
+      }
+    },
+
+    async onUploadFileFourniture() {
+      try {
+        const formData = new FormData();
+        formData.append("file", this.selectedFileFourniture);
+        const response = await axios.post("tasks/uploadFileEdit", formData);
+        return response.data.name; // Return the image name
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+    },
+    getFile() {
+      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile}`;
+    },
+    getFileFront() {
+      if (this.selectedFileFourniture) {
+        const blob = new Blob([this.selectedFileFourniture], {
+          type: this.selectedFileFourniture.type,
+        });
+        return URL.createObjectURL(blob);
+      }
+      return "";
     },
   },
   data() {
@@ -664,6 +760,9 @@ export default {
       selectedFileFront: "",
       selectedFile: "",
       addedfile: "",
+      addedfilefourniture: "",
+      selectedFileFourniture: "",
+      selectedFileFournitureFront: "",
     };
   },
 };

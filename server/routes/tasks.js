@@ -33,9 +33,55 @@ router.post("/upload", (req, res) => {
   );
 });
 
+router.post("/uploadSupply", (req, res) => {
+  if (!req.files) {
+    return res.send({ name: "" });
+  }
+
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
+  myFile.mv(
+    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+    }
+  );
+});
+
 router.post("/uploadEdit", (req, res) => {
   if (!req.files) {
-    return res.status(404).send({ msg: "no-image" });
+    return res.send();
+  }
+
+  const myFile = req.files.file;
+  const myFileSplit = myFile.name.split(".");
+  const date = new Date();
+  myFile.name = date.getTime() + "." + myFileSplit[1];
+
+  myFile.mv(
+    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
+    function (err) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "Error occured" });
+      }
+      // returing the response with file path and name
+      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+    }
+  );
+});
+
+router.post("/uploadFileEdit", (req, res) => {
+  if (!req.files) {
+    return res.send({ name: "" });
   }
 
   const myFile = req.files.file;

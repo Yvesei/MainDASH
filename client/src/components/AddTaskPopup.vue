@@ -291,6 +291,7 @@
               <div class="bg-white p7 rounded mx-auto">
                 <div class="relative flex flex-col p-4 text-gray-400">
                   <div
+                    v-if="!addedfilefourniture"
                     x-ref="dnd"
                     class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
                   >
@@ -300,15 +301,8 @@
                       type="file"
                       class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
                     />
-                    <button
-                      v-if="addedfilefourniture"
-                      :href="selectedFileFournitureFront"
-                    >
-                      {{ this.selectedFileFournitureFront }}
-                    </button>
 
                     <div
-                      v-if="!addedfilefourniture"
                       class="flex flex-col items-center justify-center py-10 text-center"
                     >
                       <svg
@@ -330,6 +324,16 @@
                       </p>
                     </div>
                   </div>
+                  <a
+                    v-if="addedfilefourniture"
+                    :href="getFile()"
+                    target="_blank"
+                    class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                  >
+                    <p class="text-sm font-medium leading-none text-white">
+                      View File
+                    </p>
+                  </a>
                 </div>
               </div>
               <!-- end file opload -->
@@ -584,11 +588,20 @@ export default {
         this.addedfilefourniture = true;
       }
     },
+    getFile() {
+      if (this.selectedFileFourniture) {
+        const blob = new Blob([this.selectedFileFourniture], {
+          type: this.selectedFileFourniture.type,
+        });
+        return URL.createObjectURL(blob);
+      }
+      return "";
+    },
     async onUploadFileFourniture() {
       try {
         const formData = new FormData();
         formData.append("file", this.selectedFileFourniture);
-        const response = await axios.post("tasks/upload", formData);
+        const response = await axios.post("tasks/uploadSupply", formData);
         return response.data.name; // Return the image name
       } catch (error) {
         console.log(error);
