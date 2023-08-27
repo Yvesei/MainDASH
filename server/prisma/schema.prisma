@@ -27,7 +27,7 @@ model Client {
 
 model Task {
   id            Int       @id @default(autoincrement())
-  Date          DateTime?
+  Date          DateTime? @default(now())
   dateStart     DateTime? @default(now())
   dateEnd       DateTime?
   type          String?   @db.VarChar(999)
@@ -38,6 +38,7 @@ model Task {
   result        String?   @db.VarChar(9999)
   followupBool  Boolean?
   followupAutre String?   @db.VarChar(999)
+  status        Boolean?
   client        Client?   @relation(fields: [clientId], references: [id])
   clientId      Int?
 }
