@@ -54,7 +54,7 @@
                   </svg>
                 </div>
                 <input
-                  v-model="this.Date"
+                  v-model="providedDate"
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date"
@@ -530,7 +530,7 @@ export default {
           number: this.number,
           distance: this.distance,
           image: uploadedImageName,
-          Date: new Date(this.Date),
+          providedDate: this.convertDate(this.providedDate),
           providedDateStart: this.convertDate(this.providedDateStart),
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
@@ -541,6 +541,7 @@ export default {
           result: this.result,
           followupBool: this.followupBool,
           followupAutre: this.followupAutre,
+          status: false,
         });
       } catch (error) {
         console.error(error);
@@ -618,7 +619,7 @@ export default {
       number: "",
       distance: 0,
       image: "",
-      Date: "",
+      providedDate: "",
       providedDateStart: "",
       dateEnd: "",
       type: "",
@@ -628,6 +629,7 @@ export default {
       endTask: Boolean,
       result: "",
       followupBool: Boolean,
+      status: Boolean,
       followupAutre: "",
       selectedFileFront: "",
       selectedFile: "",

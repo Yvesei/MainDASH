@@ -53,7 +53,7 @@
                   </svg>
                 </div>
                 <input
-                  v-model="this.Date"
+                  v-model="providedDate"
                   datepicker
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -573,7 +573,7 @@ export default {
   mounted() {
     this.fetchClient(this.task.clientId);
     this.taskId = this.task.id;
-    this.Date = this.extractDate(this.task.Date);
+    this.providedDate = this.extractDate(this.task.Date);
     this.providedDateStart = this.extractHours(this.task.dateStart);
     this.dateEnd = this.extractHours(this.task.dateEnd);
     this.type = this.task.type;
@@ -585,12 +585,6 @@ export default {
     this.followupBool = this.task.followupBool;
     this.followupAutre = this.task.followupAutre;
     this.id = this.client.id;
-    // this.name = this.client.name;
-    // console.log(this.client.id);
-    // this.number = this.client.number;
-    // this.distance = this.client.distance;
-    // this.image = this.client.image;
-    // // format date
   },
   methods: {
     convertDate(timeString) {
@@ -658,7 +652,7 @@ export default {
           number: this.client.number,
           distance: JSON.parse(this.client.distance),
           image: uploadedImageName,
-          Date: new Date(this.Date),
+          providedDate: this.convertDate(this.providedDate),
           providedDateStart: this.convertDate(this.providedDateStart),
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
@@ -763,6 +757,7 @@ export default {
       addedfilefourniture: "",
       selectedFileFourniture: "",
       selectedFileFournitureFront: "",
+      providedDate: "",
     };
   },
 };
