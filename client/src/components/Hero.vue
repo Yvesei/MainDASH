@@ -119,7 +119,6 @@ export default {
   data() {
     return {
       popup: false,
-
       tasks: [],
     };
   },

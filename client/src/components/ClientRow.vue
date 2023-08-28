@@ -1,7 +1,7 @@
 <template>
   <tr class="border-b border-gray-200 hover:bg-gray-100">
     <td class="ml-6 py-3 px-6 text-center">
-      <div class="flex items-center">
+      <div @click="Result()" class="hover:cursor-pointer flex items-center">
         <div class="mr-2">
           <img class="w-6 h-6 rounded-full" :src="getimg()" v-bind:alt="pic" />
         </div>
@@ -108,6 +108,10 @@ export default {
     },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+    },
+    Result() {
+      localStorage.setItem("clientResult", this.client.id);
+      this.$router.push("/result");
     },
   },
   mounted() {
