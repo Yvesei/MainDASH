@@ -3,33 +3,18 @@
     <td>
       <div @click="addidtoarray()" class="ml-5">
         <div
-          class="bg-gray-200 rounded-sm w-5 h-5 flex flex-shrink-0 justify-center items-center relative"
+          :class="this.clicked == true ? 'bg-blue-500' : 'bg-gray-200'"
+          class="rounded-sm w-5 h-5 flex flex-shrink-0 justify-center items-center relative"
         >
-          <input
+          <!-- <input
             placeholder="checkbox"
             type="checkbox"
             class="focus:opacity-100 checkbox opacity-0 absolute cursor-pointer w-full h-full"
-          />
-          <div class="check-icon hidden bg-indigo-700 text-white rounded-sm">
-            <svg
-              class="icon icon-tabler icon-tabler-check"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z"></path>
-              <path d="M5 12l5 5l10 -10"></path>
-            </svg>
-          </div>
+          /> -->
         </div>
       </div>
     </td>
+
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
         <span class="font-medium">{{ task.Date }}</span>
@@ -37,18 +22,28 @@
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
-        <span class="font-medium">{{ task.type }}</span>
+        <span
+          :class="task.type == 'this case is empty' ? 'text-red-400' : ''"
+          class="font-medium"
+          >{{ task.type }}</span
+        >
       </div>
     </td>
     <td class="py-3 px-6 text-center">
       <div>
-        <span>1:30</span>
+        <span>{{ this.totalHours }}</span>
       </div>
     </td>
 
     <td class="py-3 px-6 text-center">
-      <span class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
-        >Active</span
+      <span
+        v-if="task.status === false"
+        class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
+        >Pending</span
+      ><span
+        v-if="task.status == true"
+        class="bg-blue-200 text-blue-600 py-1 px-3 rounded-full text-xs"
+        >Done</span
       >
     </td>
     <td class="py-3 px-6 text-center">
@@ -83,19 +78,11 @@
   <tr>
     <td :colspan="6">
       <!-- Dropdown menu -->
-      <div
-        v-if="isOpen"
-        x-transition:enter="transition ease-out duration-100"
-        x-transition:enter-start="opacity-0 scale-90"
-        x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-100"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-90"
-      >
+      <div v-if="isOpen">
         <div
           active=""
           form="user"
-          class="mb-4 flex flex-col visible w-full min-w-0 p-4 break-words bg-white opacity-100 dark:bg-slate-850 rounded-2xl bg-clip-border"
+          class="mb-4 flex flex-col visible w-full min-w-0 p-4 break-words bg-white opacity-100 dark:bg-slate-850 bg-clip-border border"
         >
           <div>
             <div class="flex flex-wrap mt-4 -mx-3">
@@ -106,6 +93,9 @@
                   >Type de maintenance</label
                 >
                 <p
+                  :class="
+                    task.type == 'this case is empty' ? 'text-red-400' : ''
+                  "
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
                   {{ task.type }}
@@ -120,16 +110,33 @@
                   >Fourniture</label
                 >
                 <p
+                  :class="
+                    task.supply == 'this case is empty' ? 'text-red-400' : ''
+                  "
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
                   {{ task.supply }}
                 </p>
                 <!-- File uplaod -->
-                <p>File ????</p>
+                <div class="bg-white p7 rounded mx-auto">
+                  <div class="relative flex flex-col p-4 text-gray-400">
+                    <div class="m-auto">
+                      <a
+                        :href="getFile()"
+                        target="_blank"
+                        class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                      >
+                        <p class="text-sm font-medium leading-none text-white">
+                          View File
+                        </p>
+                      </a>
+                    </div>
+                  </div>
+                </div>
                 <!-- end file opload -->
               </div>
             </div>
-            <div class="flex flex-wrap mt-4 -mx-3">
+            <div class="flex flex-wrap -mx-3">
               <div class="w-full max-w-full px-3 flex-0">
                 <label
                   class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
@@ -137,6 +144,9 @@
                   >Demande de devis</label
                 >
                 <p
+                  :class="
+                    task.devis == 'this case is empty' ? 'text-red-400' : ''
+                  "
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
                   {{ task.devis }}
@@ -153,12 +163,14 @@
                 <div>
                   <div class="grid sm:grid-cols-2 gap-2">
                     <label
+                      :class="task.endTask == true ? 'border-blue-500' : ''"
                       for="fav"
                       class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
-                        checked
+                        :checked="task.endTask == true"
                         type="checkbox"
+                        disabled=""
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="fav"
                       />
@@ -167,12 +179,14 @@
                         >Favourable</span
                       >
                     </label>
-                    <!--    I'm gonna create a variable fav? and then display one based on it's value     -->
                     <label
                       for="defa"
-                      class="hidden flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                      :class="task.endTask == false ? 'border-blue-500' : ''"
+                      class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
+                        :checked="task.endTask == false"
+                        disabled=""
                         type="checkbox"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="defa"
@@ -194,6 +208,9 @@
                   >Resultat</label
                 >
                 <p
+                  :class="
+                    task.result == 'this case is empty' ? 'text-red-400' : ''
+                  "
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                 >
                   {{ task.result }}
@@ -211,11 +228,15 @@
                 <div>
                   <div class="grid sm:grid-cols-2 gap-2">
                     <label
-                      @click="maintenanceAutre = false"
+                      :class="
+                        task.followupBool == true ? 'border-blue-500' : ''
+                      "
                       for="a-suivre"
                       class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
+                        :checked="task.followupBool == true"
+                        disabled=""
                         type="checkbox"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="a-suivre"
@@ -227,11 +248,15 @@
                     </label>
 
                     <label
-                      @click="maintenanceAutre = true"
                       for="Autre"
+                      :class="
+                        task.followupBool == false ? 'border-blue-500' : ''
+                      "
                       class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
+                        :checked="task.followupBool == false"
+                        disabled=""
                         type="checkbox"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="Autre"
@@ -243,6 +268,12 @@
                     </label>
                   </div>
                   <p
+                    :class="
+                      task.followupAutre == 'this case is empty'
+                        ? 'text-red-400'
+                        : ''
+                    "
+                    v-if="task.followupBool == false"
                     class="mt-2 focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                   >
                     {{ task.followupAutre }}
@@ -250,29 +281,6 @@
                 </div>
               </div>
             </div>
-            <!-- when autre is check, show this, need a new function -->
-            <div v-if="maintenanceAutre" class="flex flex-wrap mt-4 -mx-3">
-              <div class="w-full max-w-full px-3 flex-0">
-                <textarea
-                  name="Bio"
-                  rows="5"
-                  placeholder="Say a few words about who you are or what you're working on."
-                  class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                >
-                <p
-                    class="mt-2 focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                  >
-                  {{ task.type }}
-
-                  </p>
-
-              
-              </textarea
-                >
-              </div>
-            </div>
-
-            <!--  Buttons  -->
           </div>
         </div>
       </div>
@@ -281,6 +289,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 import AddTaskPopup from "./AddTaskPopup.vue";
 
 export default {
@@ -324,15 +334,37 @@ export default {
         .padStart(2, "0")}`;
       return `${formattedTime}`;
     },
-    // calculate between two times and then return it
-    //
-    //
-    //
+    getFile() {
+      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile}`;
+    },
+    vide() {
+      const propertyKeys = Object.keys(this.task);
+
+      for (const propertyKey of propertyKeys) {
+        if (this.task[propertyKey] === "") {
+          this.task[propertyKey] = "this case is empty";
+        }
+      }
+    },
+    addidtoarray() {
+      this.clicked == false ? (this.clicked = true) : (this.clicked = false);
+      this.$emit("add-id", this.task.id);
+    },
+
+    async totalTime() {
+      await axios
+        .get(`/tasks/calculate-time-difference/?id=${this.task.id}`)
+        .then((response) => {
+          this.totalHours = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   mounted() {
-    this.task.Date = this.extractDate(this.task.Date);
-    this.task.dateStart = this.extractHours(this.task.dateStart);
-    this.task.dateEnd = this.extractHours(this.task.dateEnd);
+    this.vide();
+    this.totalTime();
   },
   components: {
     AddTaskPopup,
@@ -340,8 +372,9 @@ export default {
   data() {
     return {
       popup: false,
-      create: false,
       isOpen: false,
+      clicked: false,
+      totalHours: "",
     };
   },
 };

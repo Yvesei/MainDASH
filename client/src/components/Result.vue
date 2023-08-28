@@ -44,6 +44,44 @@
         </div>
       </div>
       <div class="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
+        <div class="sm:flex items-center justify-between">
+          <div class="flex items-center">
+            <a
+              @click="fetchTasks()"
+              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
+            >
+              <div class="py-2 px-8 bg-indigo-100 text-indigo-700 rounded-full">
+                <p>All</p>
+              </div>
+            </a>
+            <a
+              @click="fetchTasksDone()"
+              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Done</p>
+              </div>
+            </a>
+            <a
+              @click="fetchTasksPending()"
+              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Pending</p>
+              </div>
+            </a>
+          </div>
+          <button
+            @click="calculateAllTime()"
+            class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+          >
+            <p class="text-sm font-medium leading-none text-white">Calculate</p>
+          </button>
+        </div>
         <!-- component -->
         <div class="overflow-x-auto">
           <div>
@@ -66,6 +104,7 @@
                       v-for="task in tasks"
                       v-bind:key="task.id"
                       :task="task"
+                      @add-id="addIdToArray"
                     />
                   </tbody>
                 </table>
@@ -79,7 +118,7 @@
                     <p
                       class="ml-2 uppercase text-sm leading-normal text-gray-600 font-bold"
                     >
-                      14:21
+                      {{ this.totalTime }}
                     </p>
                   </div>
                   <div class="flex">
@@ -91,7 +130,7 @@
                     <p
                       class="ml-2 uppercase text-sm leading-normal text-gray-600 font-bold"
                     >
-                      34 km
+                      {{ this.totalDistance }}
                     </p>
                   </div>
                 </div>
@@ -120,37 +159,151 @@ export default {
     navbar,
   },
   methods: {
+    async calculateAllTime() {
+      try {
+        const response = await axios.get("/tasks/calculate-total-time", {
+          params: { idArray: this.idArray },
+        });
+
+        this.totalTime = response.data; // The backend sends the formatted total time
+
+        console.log("Total Time:", totalTime);
+        // You can display the total time or use it as needed
+      } catch (error) {
+        console.error("Error calculating total time:", error);
+      }
+      const ids = this.idArray.length;
+      this.totalDistance = this.client.distance * ids;
+    },
+    addIdToArray(id) {
+      if (this.idArray.includes(id)) {
+        this.removeIdFromArray(id);
+      } else {
+        this.idArray.push(id);
+      }
+      console.log(this.idArray);
+    },
+    removeIdFromArray(id) {
+      const index = this.idArray.indexOf(id);
+      if (index !== -1) {
+        this.idArray.splice(index, 1);
+      }
+    },
     async fetchUser() {
       const id = localStorage.getItem("clientResult");
       await axios
         .get(`/clients/${id}`)
         .then((response) => {
           this.client = response.data;
-          axios
-            .get(`/tasks?clientId=${response.data.id}`)
-            .then((response) => {
-              this.tasks = response.data;
-            })
-            .catch((error) => {
-              console.error(error);
-            });
         })
         .catch((error) => {
           console.error(error);
         });
     },
+    async fetchTasks() {
+      const id = localStorage.getItem("clientResult");
+      await axios
+        .get(`/tasks?clientId=${id}`)
+        .then((response) => {
+          this.tasks = response.data;
+          this.getDateForm();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    async fetchTasksDone() {
+      const id = localStorage.getItem("clientResult");
+      await axios
+        .get(`/tasks/?clientId=${id}&type=Done`)
+        .then((response) => {
+          this.tasks = response.data;
+          this.getDateForm();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    async fetchTasksPending() {
+      const id = localStorage.getItem("clientResult");
+      await axios
+        .get(`/tasks/?clientId=${id}&type=Pending`)
+        .then((response) => {
+          this.tasks = response.data;
+          this.getDateForm();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    getDateForm() {
+      this.tasks.forEach((task) => {
+        task.Date = this.extractDate(task.Date);
+        task.dateStart = this.extractHours(task.dateStart);
+        task.dateEnd = this.extractHours(task.dateEnd);
+      });
+    },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+    },
+    extractDate(isoDateString) {
+      const isoDate = new Date(isoDateString);
+      // Extract date
+      const year = isoDate.getUTCFullYear();
+      const month = isoDate.getUTCMonth() + 1;
+      const day = isoDate.getUTCDate();
+
+      // Extract time
+      const hours = isoDate.getUTCHours();
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${year}-${month}-${day}`;
+    },
+    extractHours(isoDateString) {
+      const isoDate = new Date(isoDateString);
+
+      // Extract time
+      const hours = isoDate.getUTCHours() + 1;
+      const minutes = isoDate.getUTCMinutes();
+
+      // Format the time as HH:MM
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+      return `${formattedTime}`;
+    },
+    async calculateTotalTime() {
+      try {
+        const response = await axios.get("/calculate-total-time", {
+          params: { idArray: this.idArray },
+        });
+
+        const totalTime = response.data; // The backend sends the formatted total time
+
+        console.log("Total Time:", totalTime);
+        // You can display the total time or use it as needed
+      } catch (error) {
+        console.error("Error calculating total time:", error);
+      }
     },
   },
   mounted() {
     this.fetchUser();
+    this.fetchTasks();
   },
   data() {
     return {
       popup: false,
       client: {},
       tasks: [],
+      task: {},
+      idArray: [],
+      totalTime: "Vide",
+      totalDistance: "Vide",
     };
   },
 };
