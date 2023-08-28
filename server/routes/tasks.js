@@ -1,5 +1,7 @@
 var express = require("express");
 var router = express.Router();
+const moment = require("moment");
+
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { verifyToken } = require("../middleware/authMiddleware"); // Import the middleware
@@ -9,6 +11,75 @@ const fileUpload = require("express-fileupload");
 // middle ware
 router.use(express.static("public")); //to access the files in public folder
 router.use(fileUpload());
+
+router.get("/calculate-time-difference", async (req, res) => {
+  const id = +req.query.id;
+
+  try {
+    const task = await prisma.task.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!task) {
+      return res.status(404).json({ error: "Task not found." });
+    }
+
+    const startDateTime = moment(task.dateStart);
+    const endDateTime = moment(task.dateEnd);
+
+    const duration = moment.duration(endDateTime.diff(startDateTime));
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+
+    res.status(200).send(formattedTime);
+  } catch (error) {
+    console.error("Error fetching task count:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching task count." });
+  }
+});
+
+router.get("/calculate-total-time", async (req, res) => {
+  try {
+    const idArray = req.query.idArray.map(Number);
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        id: {
+          in: idArray,
+        },
+      },
+    });
+
+    let totalHours = 0;
+    let totalMinutes = 0;
+
+    for (const task of tasks) {
+      const startDateTime = moment(task.dateStart);
+      const endDateTime = moment(task.dateEnd);
+
+      const duration = moment.duration(endDateTime.diff(startDateTime));
+      totalHours += duration.hours();
+      totalMinutes += duration.minutes();
+    }
+
+    const formattedTotalTime = `${totalHours
+      .toString()
+      .padStart(2, "0")}:${totalMinutes.toString().padStart(2, "0")}`;
+
+    res.status(200).send(formattedTotalTime);
+  } catch (error) {
+    console.error("Error calculating total time:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while calculating total time." });
+  }
+});
 
 router.post("/upload", (req, res) => {
   if (!req.files) {
@@ -191,9 +262,9 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", function (req, res, next) {
-  const { take, skip, clientId } = req.query;
-  if (clientId) {
-    // Handle fetching tasks by user ID
+  const { clientId, type } = req.query;
+  if (!type) {
+    console.log("no  type");
     const clientid = parseInt(clientId);
     prisma.task
       .findMany({
@@ -203,14 +274,29 @@ router.get("/", function (req, res, next) {
       })
       .then((tasks) => res.send(tasks))
       .catch((error) => next(error));
-  } else {
-    // Handle fetching all tasks
-    const takeValue = parseInt(take) || undefined;
-    const skipValue = parseInt(skip) || undefined;
+  }
+  if (type == "Pending") {
+    console.log("pending");
+    const clientid = parseInt(clientId);
     prisma.task
       .findMany({
-        take: takeValue,
-        skip: skipValue,
+        where: {
+          status: false,
+          clientId: clientid,
+        },
+      })
+      .then((tasks) => res.send(tasks))
+      .catch((error) => next(error));
+  }
+  if (type == "Done") {
+    console.log("done");
+    const clientid = parseInt(clientId);
+    prisma.task
+      .findMany({
+        where: {
+          status: true,
+          clientId: clientid,
+        },
       })
       .then((tasks) => res.send(tasks))
       .catch((error) => next(error));
