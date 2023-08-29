@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
       );
 
       // Set the token as an HttpOnly cookie
-      res.cookie("token", token, { httpOnly: true, sameSite: "strict" });
+      res.cookie("token", token, { httpOnly: true, sameSite: "Lax" });
 
       res.json({ success: true, token });
     } else {
@@ -43,6 +43,12 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.post("/logout", (req, res) => {
+  // Clear the token cookie by setting it to an empty string with an expired date
+  res.cookie("token", "", { expires: new Date(0), httpOnly: true });
+
+  res.json({ success: true, message: "Logged out successfully" });
+});
 // Protected route example
 // router.get("/protected", verifyToken, (req, res) => {
 //   res.json({
