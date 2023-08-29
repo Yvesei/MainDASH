@@ -147,6 +147,8 @@ export default {
           distance: this.client.distance,
           image: uploadedImageName,
         });
+
+        this.closePopup();
       } catch (error) {
         console.error(error);
       }

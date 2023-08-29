@@ -140,9 +140,11 @@ export default {
         const response = axios.post(`/clients/`, {
           name: this.name,
           number: this.number,
-          distance: JSON.parse(this.distance),
+          distance: this.distance,
           image: uploadedImageName,
         });
+        this.$emit("client-added");
+        this.closePopup();
       } catch (error) {
         console.error(error);
       }

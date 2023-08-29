@@ -202,6 +202,8 @@ export default {
           password: this.password,
           role: this.type == "false" ? "USER" : "ADMIN",
         });
+        this.$emit("user-added");
+        this.closeUserPopup();
 
         // Handle the response as needed
       } catch (error) {

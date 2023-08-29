@@ -47,40 +47,78 @@
         <div class="sm:flex items-center justify-between">
           <div class="flex items-center">
             <a
-              @click="fetchTasks()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
+              @click="
+                fetchTasks();
+                selectButton('all');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
             >
-              <div class="py-2 px-8 bg-indigo-100 text-indigo-700 rounded-full">
+              <div
+                :class="
+                  isSelected('all')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
+                class="py-2 px-8 text-gray-600 rounded-full"
+              >
                 <p>All</p>
               </div>
             </a>
             <a
-              @click="fetchTasksDone()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+              @click="
+                fetchTasksDone();
+                selectButton('done');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
             >
               <div
+                :class="
+                  isSelected('done')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Done</p>
               </div>
             </a>
             <a
-              @click="fetchTasksPending()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+              @click="
+                fetchTasksPending();
+                selectButton('pending');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
             >
               <div
+                :class="
+                  isSelected('pending')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Pending</p>
               </div>
             </a>
           </div>
-          <button
-            @click="calculateAllTime()"
-            class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
-          >
-            <p class="text-sm font-medium leading-none text-white">Calculate</p>
-          </button>
+          <div>
+            <button
+              @click="markAsDone()"
+              class="mr-4 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-500 hover:bg-indigo-600 focus:outline-none rounded"
+            >
+              <p class="text-sm font-medium leading-none text-white">
+                Mark Done
+              </p>
+            </button>
+            <button
+              @click="calculateAllTime()"
+              class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+            >
+              <p class="text-sm font-medium leading-none text-white">
+                Calculate
+              </p>
+            </button>
+          </div>
         </div>
         <!-- component -->
         <div class="overflow-x-auto">
@@ -174,6 +212,15 @@ export default {
       }
       const ids = this.idArray.length;
       this.totalDistance = this.client.distance * ids;
+    },
+    async markAsDone() {
+      try {
+        const response = await axios.patch("/tasks/markDone", {
+          params: { idArray: this.idArray },
+        });
+      } catch (error) {
+        console.error("Error setting as done :", error);
+      }
     },
     addIdToArray(id) {
       if (this.idArray.includes(id)) {
@@ -290,6 +337,12 @@ export default {
         console.error("Error calculating total time:", error);
       }
     },
+    selectButton(button) {
+      this.selectedButton = button;
+    },
+    isSelected(button) {
+      return this.selectedButton === button;
+    },
   },
   mounted() {
     this.fetchUser();
@@ -304,6 +357,7 @@ export default {
       idArray: [],
       totalTime: "Vide",
       totalDistance: "Vide",
+      selectedButton: "all",
     };
   },
 };

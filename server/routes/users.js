@@ -8,7 +8,13 @@ router.get("/verify-user", verifyToken, (req, res) => {
   // If the request reaches here, it means the user exists and the token is valid
   res.json({ success: true });
 });
-
+router.get("/current-user-get", verifyToken, async (req, res, next) => {
+  const userid = req.user.id;
+  await prisma.user
+    .findUnique({ where: { id: userid } })
+    .then((user) => res.send(user))
+    .catch((err) => res.send(err));
+});
 // upload
 const fileUpload = require("express-fileupload");
 // middle ware
@@ -39,7 +45,7 @@ router.post("/upload", (req, res) => {
 });
 router.post("/uploadEdit", (req, res) => {
   if (!req.files) {
-    return res.status(404).send({ msg: "no-image" });
+    return res.status(200).send({ msg: "no-image" });
   }
 
   const myFile = req.files.file;
@@ -109,14 +115,6 @@ router.patch("/", function (req, res, next) {
     .then((user) => res.send(user))
     .catch((err) => res.send(err));
 });
-
-// router.get("/current-user", verifyToken, function (req, res, next) {
-//   const userid = req.user.id;
-//   prisma.user
-//     .findUnique({ where: { id: userid } })
-//     .then((user) => res.send(user))
-//     .catch((err) => res.send(err));
-// });
 
 router.patch("/current-user", verifyToken, function (req, res, next) {
   const user = req.user; // id + email + iat + exp

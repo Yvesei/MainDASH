@@ -53,6 +53,7 @@
                   </svg>
                 </div>
                 <input
+                  :disabled="this.currentUserRole === 'USER'"
                   v-model="providedDate"
                   datepicker
                   type="text"
@@ -70,6 +71,7 @@
                 >Heure debut</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="providedDateStart"
                 type="text"
                 name="Company"
@@ -84,6 +86,7 @@
                 >Heure fin</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="this.dateEnd"
                 type="email"
                 name="Email Address"
@@ -157,7 +160,12 @@
                 />
               </svg>
 
-              <input type="file" class="hidden" @change="onFileChange" />
+              <input
+                :disabled="this.currentUserRole === 'USER'"
+                type="file"
+                class="hidden"
+                @change="onFileChange"
+              />
             </label>
             <label
               class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
@@ -173,6 +181,7 @@
                 >Nom</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="client.name"
                 type="text"
                 name="First Name"
@@ -187,6 +196,7 @@
                 >Num Tel</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="client.number"
                 type="text"
                 name="Last Name"
@@ -201,6 +211,7 @@
                 >Distance</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="client.distance"
                 type="text"
                 name="Last Name"
@@ -263,6 +274,7 @@
                 >Type de maintenance</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="this.type"
                 type="text"
                 name="First Name"
@@ -279,6 +291,7 @@
                 >Fourniture</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="this.supply"
                 type="text"
                 name="First Name"
@@ -286,46 +299,6 @@
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
               <!-- File upload -->
-              <!-- <div class="bg-white p7 rounded mx-auto">
-                <div
-                  x-data="dataFileDnD()"
-                  class="relative flex flex-col p-4 text-gray-400"
-                >
-                  <div
-                    x-ref="dnd"
-                    class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
-                  >
-                    <input
-                      accept="*"
-                      type="file"
-                      multiple
-                      class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
-                    />
-
-                    <div
-                      class="flex flex-col items-center justify-center py-10 text-center"
-                    >
-                      <svg
-                        class="w-6 h-6 mr-1 text-current-50"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <p class="m-0">
-                        Drag your files here or click in this area.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div> -->
               <div class="bg-white p7 rounded mx-auto">
                 <div class="relative flex flex-col p-4 text-gray-400">
                   <div
@@ -334,6 +307,7 @@
                     class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
                   >
                     <input
+                      :disabled="this.currentUserRole === 'USER'"
                       @change="onFileChangeFourniture"
                       accept="*"
                       type="file"
@@ -397,6 +371,7 @@
                 >Demande de devis</label
               >
               <input
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="this.devis"
                 type="text"
                 name="First Name"
@@ -415,10 +390,12 @@
               <div>
                 <div class="grid sm:grid-cols-2 gap-2">
                   <label
+                    :class="this.endTask == true ? 'border-blue-500' : ''"
                     for="fav"
-                    class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                    class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      :disabled="this.currentUserRole === 'USER'"
                       v-model="endTask"
                       value="true"
                       type="radio"
@@ -433,10 +410,12 @@
                   </label>
 
                   <label
+                    :class="this.endTask == false ? 'border-blue-500' : ''"
                     for="defa"
-                    class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                    class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      :disabled="this.currentUserRole === 'USER'"
                       v-model="endTask"
                       value="false"
                       type="radio"
@@ -480,10 +459,12 @@
               <div>
                 <div class="grid sm:grid-cols-2 gap-2">
                   <label
+                    :class="task.followupBool == true ? 'border-blue-500' : ''"
                     for="a-suivre"
-                    class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                    class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      :disabled="this.currentUserRole === 'USER'"
                       v-model="followupBool"
                       value="true"
                       :checked="task.followupBool == true"
@@ -497,10 +478,12 @@
                   </label>
 
                   <label
+                    :class="task.followupBool == false ? 'border-blue-500' : ''"
                     for="Autre"
-                    class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                    class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
+                      :disabled="this.currentUserRole === 'USER'"
                       v-model="followupBool"
                       value="false"
                       :checked="task.followupBool == false"
@@ -585,6 +568,7 @@ export default {
     this.followupBool = this.task.followupBool;
     this.followupAutre = this.task.followupAutre;
     this.id = this.client.id;
+    this.fetchUser();
   },
   methods: {
     convertDate(timeString) {
@@ -664,6 +648,7 @@ export default {
           followupBool: JSON.parse(this.followupBool),
           followupAutre: this.followupAutre,
         });
+        this.closePopup();
       } catch (error) {
         console.error(error);
       }
@@ -725,9 +710,20 @@ export default {
       }
       return "";
     },
+    fetchUser() {
+      axios
+        .get(`/users/current-user-get`)
+        .then((response) => {
+          this.currentUserRole = response.data.role;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   data() {
     return {
+      currentUserRole: "",
       currentDivIndex: 0,
       maintenanceAutre: false,
       client: {

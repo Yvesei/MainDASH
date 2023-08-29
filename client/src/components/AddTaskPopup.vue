@@ -543,6 +543,8 @@ export default {
           followupAutre: this.followupAutre,
           status: false,
         });
+        this.$emit("task-added");
+        this.closePopup();
       } catch (error) {
         console.error(error);
       }

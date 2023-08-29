@@ -80,6 +80,28 @@ router.get("/calculate-total-time", async (req, res) => {
       .json({ error: "An error occurred while calculating total time." });
   }
 });
+router.patch("/markDone", async (req, res) => {
+  try {
+    const idArray = req.body.params.idArray;
+    console.log(idArray);
+    for (const id of idArray) {
+      await prisma.task.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status: true,
+        },
+      });
+    }
+    res.status(200).send("");
+  } catch (error) {
+    console.error("Error setting as marked:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while  setting as marked." });
+  }
+});
 
 router.post("/upload", (req, res) => {
   if (!req.files) {
@@ -319,7 +341,7 @@ router.get("/latest", verifyToken, function (req, res, next) {
     prisma.task
       .findMany({
         where: {
-          status: false,
+          status: true,
         },
         orderBy: {
           Date: "desc",
@@ -331,7 +353,7 @@ router.get("/latest", verifyToken, function (req, res, next) {
     prisma.task
       .findMany({
         where: {
-          status: true,
+          status: false,
         },
         orderBy: {
           Date: "desc",
@@ -353,18 +375,6 @@ router.delete("/:id", function (req, res, next) {
     .delete({ where: { id: +req.params.id } })
     .then((task) => res.send(task));
 });
-
-//modify a acticles
-// router.patch("/", function (req, res, next) {
-//   prisma.task
-//     .update({
-//       where: {
-//         id: parseInt(req.body.id),
-//       },
-//       data: req.body,
-//     })
-//     .then((task) => res.send(task));
-// });
 
 router.patch("/", async (req, res) => {
   var {

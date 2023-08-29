@@ -1,35 +1,5 @@
 <template>
   <tr class="border-b border-gray-200 hover:bg-gray-100">
-    <td>
-      <div class="ml-5">
-        <div
-          class="bg-gray-200 rounded-sm w-5 h-5 flex flex-shrink-0 justify-center items-center relative"
-        >
-          <input
-            placeholder="checkbox"
-            type="checkbox"
-            class="focus:opacity-100 checkbox opacity-0 absolute cursor-pointer w-full h-full"
-          />
-          <div class="check-icon hidden bg-indigo-700 text-white rounded-sm">
-            <svg
-              class="icon icon-tabler icon-tabler-check"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z"></path>
-              <path d="M5 12l5 5l10 -10"></path>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </td>
     <td class="ml-6 py-3 px-6 text-center">
       <div class="flex items-center">
         <div class="mr-2">
@@ -152,9 +122,6 @@ export default {
   },
   mounted() {
     this.fetchClient(this.task.clientId);
-    // this.task.Date = this.extractDate(this.task.Date);
-    // this.task.dateStart = this.extractHours(this.task.dateStart);
-    // this.task.dateEnd = this.extractHours(this.task.dateEnd);
   },
   components: {
     AddTaskPopup,
@@ -163,6 +130,7 @@ export default {
   methods: {
     async deleteTask() {
       const response = await axios.delete(`tasks/${this.task.id}`, {});
+      this.$emit("task-deleted");
     },
     async fetchClient(id) {
       const response = await axios
@@ -174,36 +142,6 @@ export default {
           console.error(error);
         });
     },
-    // extractDate(isoDateString) {
-    //   const isoDate = new Date(isoDateString);
-    //   // Extract date
-    //   const year = isoDate.getUTCFullYear();
-    //   const month = isoDate.getUTCMonth() + 1;
-    //   const day = isoDate.getUTCDate();
-
-    //   // Extract time
-    //   const hours = isoDate.getUTCHours();
-    //   const minutes = isoDate.getUTCMinutes();
-
-    //   // Format the time as HH:MM
-    //   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-    //     .toString()
-    //     .padStart(2, "0")}`;
-    //   return `${year}-${month}-${day}`;
-    // },
-    // extractHours(isoDateString) {
-    //   const isoDate = new Date(isoDateString);
-
-    //   // Extract time
-    //   const hours = isoDate.getUTCHours() + 1;
-    //   const minutes = isoDate.getUTCMinutes();
-
-    //   // Format the time as HH:MM
-    //   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-    //     .toString()
-    //     .padStart(2, "0")}`;
-    //   return `${formattedTime}`;
-    // },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },

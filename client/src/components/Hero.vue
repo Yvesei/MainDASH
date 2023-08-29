@@ -29,28 +29,54 @@
         <div class="sm:flex items-center justify-between">
           <div class="flex items-center">
             <a
-              @click="fetchTasks()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
+              @click="
+                fetchTasks();
+                selectButton('all');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800"
             >
-              <div class="py-2 px-8 bg-indigo-100 text-indigo-700 rounded-full">
+              <div
+                :class="
+                  isSelected('all')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
+                class="py-2 px-8 text-gray-600 rounded-full"
+              >
                 <p>All</p>
               </div>
             </a>
             <a
-              @click="fetchTasksDone()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+              @click="
+                fetchTasksDone();
+                selectButton('done');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
             >
               <div
+                :class="
+                  isSelected('done')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Done</p>
               </div>
             </a>
             <a
-              @click="fetchTasksPending()"
-              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+              @click="
+                fetchTasksPending();
+                selectButton('pending');
+              "
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
             >
               <div
+                :class="
+                  isSelected('pending')
+                    ? 'py-2 px-8 bg-indigo-100 text-indigo-700'
+                    : ''
+                "
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Pending</p>
@@ -72,7 +98,6 @@
                 <table class="min-w-max w-full table-auto">
                   <thead>
                     <tr class="uppercase text-sm leading-normal">
-                      <th class="py-3 px-6 text-left"></th>
                       <th class="py-3 px-6 text-left">Client</th>
                       <th class="py-3 px-6 text-center">Date</th>
                       <th class="py-3 px-6 text-center">Heure</th>
@@ -85,6 +110,7 @@
                       v-for="task in tasks"
                       v-bind:key="task.id"
                       :task="task"
+                      @task-deleted="fetchTasks"
                     />
                   </tbody>
                 </table>
@@ -94,7 +120,11 @@
         </div>
       </div>
     </div>
-    <add-task-popup :show-popup="popup" @close="popup = false" />
+    <add-task-popup
+      :show-popup="popup"
+      @close="popup = false"
+      @task-added="fetchTasks"
+    />
   </div>
 </template>
 
@@ -120,9 +150,16 @@ export default {
     return {
       popup: false,
       tasks: [],
+      selectedButton: "all",
     };
   },
   methods: {
+    selectButton(button) {
+      this.selectedButton = button;
+    },
+    isSelected(button) {
+      return this.selectedButton === button;
+    },
     fetchTasks() {
       axios
         .get(`/tasks/latest`)

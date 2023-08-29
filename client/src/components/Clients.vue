@@ -83,7 +83,11 @@
         </div>
       </div>
     </div>
-    <add-client-popup :show-popup="popup" @close="popup = false" />
+    <add-client-popup
+      :show-popup="popup"
+      @close="popup = false"
+      @client-added="fetchClients"
+    />
   </div>
 </template>
 

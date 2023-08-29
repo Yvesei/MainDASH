@@ -4,8 +4,11 @@
       class="flex flex-col items-center w-16 h-screen py-8 space-y-8 bg-white dark:bg-gray-900 dark:border-gray-700"
     >
       <a href="#">
-        <!-- :src="getimg()" -->
-        <img class="object-cover w-8 h-8 rounded-full" v-bind:alt="pic" />
+        <img
+          :src="getimg()"
+          class="object-cover w-8 h-8 rounded-full"
+          v-bind:alt="pic"
+        />
       </a>
 
       <router-link
@@ -35,6 +38,7 @@ dark:text-blue-400
  dark:bg-gray-800
 -->
       <a
+        v-if="this.currentuser.role == 'ADMIN'"
         @click="showusers = !showusers"
         href="#"
         class="p-1.5 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-400 dark:hover:bg-gray-800 hover:bg-gray-100"
@@ -144,7 +148,13 @@ dark:text-blue-400
         </button>
       </div>
     </div>
-    <create-user :show-user-popup="Userpopup" @close="Userpopup = false" />
+
+    <create-user
+      :show-user-popup="Userpopup"
+      @close="Userpopup = false"
+      @user-added="fetchUsers"
+      
+    />
   </aside>
 </template>
 
@@ -162,9 +172,9 @@ export default {
   data() {
     return {
       users: [],
-      // currentuser: {
-      //   type: Object,
-      // },
+      currentuser: {
+        type: Object,
+      },
       showusers: false,
       Userpopup: false,
     };
@@ -180,25 +190,23 @@ export default {
           console.error(error);
         });
     },
-    // fetchUser() {
-    //   axios
-    //     .get(`/users/current-user`)
-    //     .then((response) => {
-    //       this.currentuser = response.data;
-    //       console.log("response.data : ");
-    //       console.log(this.currentuser);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-    // },
-    // getimg() {
-    //   return `http://localhost:3000/uploads/users/${this.currentuser.image}`;
-    // },
+    fetchUser() {
+      axios
+        .get(`/users/current-user-get`)
+        .then((response) => {
+          this.currentuser = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    getimg() {
+      return `http://localhost:3000/uploads/users/${this.currentuser.image}`;
+    },
   },
 
   mounted() {
-    // this.fetchUser();
+    this.fetchUser();
     this.fetchUsers();
   },
 };

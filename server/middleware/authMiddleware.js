@@ -10,6 +10,7 @@ const verifyToken = (req, res, next) => {
       }
       req.user = decoded;
       next();
+      // return res.status(200).send(req.user);
     });
   } else {
     return res.status(403).json({ error: "Token not provided" });
