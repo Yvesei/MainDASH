@@ -390,7 +390,7 @@
               <div>
                 <div class="grid sm:grid-cols-2 gap-2">
                   <label
-                    :class="this.endTask == true ? 'border-blue-500' : ''"
+                    :class="task.endTask == true ? 'border-blue-500' : ''"
                     for="fav"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
@@ -398,9 +398,8 @@
                       :disabled="this.currentUserRole === 'USER'"
                       v-model="endTask"
                       value="true"
-                      type="radio"
-                      name="taskEndRadio"
                       :checked="this.endTask == true"
+                      type="radio"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="fav"
                     />
@@ -410,8 +409,8 @@
                   </label>
 
                   <label
-                    :class="this.endTask == false ? 'border-blue-500' : ''"
-                    for="defa"
+                    :class="task.endTask == false ? 'border-blue-500' : ''"
+                    for="defav"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
@@ -419,10 +418,9 @@
                       v-model="endTask"
                       value="false"
                       type="radio"
-                      name="taskEndRadio"
-                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                      :checked="task.endTask == false"
+                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                       id="defav"
-                      :checked="this.endTask == false"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
                       >Defavourable</span
@@ -634,7 +632,7 @@ export default {
           id: this.client.id,
           name: this.client.name,
           number: this.client.number,
-          distance: JSON.parse(this.client.distance),
+          distance: this.client.distance,
           image: uploadedImageName,
           providedDate: this.convertDate(this.providedDate),
           providedDateStart: this.convertDate(this.providedDateStart),
