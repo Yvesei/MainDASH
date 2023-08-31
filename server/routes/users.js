@@ -86,8 +86,8 @@ router.get("/:id", function (req, res, next) {
 });
 
 //post a new user
-
 router.post("/", function (req, res, next) {
+  console.log(req.body);
   prisma.user
     .create({ data: req.body })
     .then((user) => res.send(user))

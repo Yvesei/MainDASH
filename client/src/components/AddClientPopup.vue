@@ -111,7 +111,7 @@
               href="javascript:;"
               class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
             >
-              Next
+              Create
             </button>
           </div>
         </div>
@@ -137,12 +137,13 @@ export default {
     async createClient() {
       try {
         const uploadedImageName = await this.onUploadFile();
-        const response = axios.post(`/clients/`, {
+        const response = await axios.post(`/clients/`, {
           name: this.name,
           number: this.number,
           distance: this.distance,
           image: uploadedImageName,
         });
+        console.log(response);
         this.$emit("client-added");
         this.closePopup();
       } catch (error) {
@@ -173,7 +174,7 @@ export default {
     return {
       name: "",
       number: "",
-      distance: "",
+      distance: 0,
       selectedFileFront: "",
       selectedFile: "",
       addedfile: "",

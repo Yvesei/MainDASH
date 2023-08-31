@@ -105,6 +105,7 @@ export default {
     },
     deleteClient() {
       const response = axios.delete(`clients/${this.client.id}`, {});
+      this.$emit("client-deleted");
     },
     getimg() {
       return `http://localhost:3000/uploads/tasks/${this.client.image}`;

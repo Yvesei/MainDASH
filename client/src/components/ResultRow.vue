@@ -165,11 +165,11 @@
                     <label
                       :class="task.endTask == true ? 'border-blue-500' : ''"
                       for="fav"
-                      class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                      class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
                         :checked="task.endTask == true"
-                        type="checkbox"
+                        type="radio"
                         disabled=""
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="fav"
@@ -182,12 +182,12 @@
                     <label
                       for="defa"
                       :class="task.endTask == false ? 'border-blue-500' : ''"
-                      class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                      class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
                         :checked="task.endTask == false"
                         disabled=""
-                        type="checkbox"
+                        type="radio"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="defa"
                       />
@@ -232,12 +232,12 @@
                         task.followupBool == true ? 'border-blue-500' : ''
                       "
                       for="a-suivre"
-                      class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                      class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
                         :checked="task.followupBool == true"
                         disabled=""
-                        type="checkbox"
+                        type="radio"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="a-suivre"
                       />
@@ -252,12 +252,12 @@
                       :class="
                         task.followupBool == false ? 'border-blue-500' : ''
                       "
-                      class="flex p-3 block w-full bg-white border border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
+                      class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                     >
                       <input
                         :checked="task.followupBool == false"
                         disabled=""
-                        type="checkbox"
+                        type="radio"
                         class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                         id="Autre"
                       />

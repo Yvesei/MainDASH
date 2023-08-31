@@ -26,6 +26,7 @@ router.get("/:id", function (req, res, next) {
 //post a new client
 
 router.post("/", function (req, res, next) {
+  req.body.distance = parseInt(req.body.distance);
   console.log(req.body);
   prisma.client
     .create({ data: req.body })

@@ -19,8 +19,8 @@ model User {
 model Client {
   id       Int     @id @default(autoincrement())
   name     String  @unique
-  number   String
-  distance Int
+  number   String?
+  distance Int?
   image    String?
   Task     Task[]
 }

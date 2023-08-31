@@ -390,9 +390,7 @@ router.patch("/", async (req, res) => {
     image,
     ...taskData
   } = req.body;
-  console.log("endTask");
 
-  console.log(endTask);
   if (endTask === undefined) {
     endTask = null;
   } else {
@@ -405,34 +403,59 @@ router.patch("/", async (req, res) => {
   }
 
   try {
-    let client = await prisma.client.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    // can't change the name of an existing user into an existing user
-    if (!client) {
-      client = await prisma.client.create({
-        data: {
-          name: name,
-          number: number,
-          distance: distance,
-          image: image,
+    let client = {};
+    let client2 = {};
+    if (id != undefined) {
+      console.log("id is defined");
+      client = await prisma.client.findUnique({
+        where: {
+          id: id,
         },
       });
+      // can't change the name of an existing user into an existing user
+      if (!client) {
+        client = await prisma.client.create({
+          data: {
+            name: name,
+            number: number,
+            distance: distance,
+            image: image,
+          },
+        });
+      } else {
+        client2 = await prisma.client.findUnique({
+          where: {
+            name: name,
+          },
+        });
+        if (client2.id == client.id) {
+          client = await prisma.client.update({
+            where: {
+              id: client.id,
+            },
+            data: {
+              name: name,
+              number: number,
+              distance: distance,
+              image: image,
+            },
+          });
+        } else {
+          client = client2;
+        }
+      }
     } else {
-      client = await prisma.client.update({
+      console.log("id is not defined");
+      // if id is not provided
+      client = await prisma.client.findUnique({
         where: {
-          id: client.id,
-        },
-        data: {
           name: name,
-          number: number,
-          distance: distance,
-          image: image,
         },
       });
     }
+    const ID = client.id;
+    console.log("ID");
+    console.log(ID);
     if (providedDateStart !== "" && providedDateStart !== null) {
       taskData.dateStart = providedDateStart;
     }
@@ -449,7 +472,7 @@ router.patch("/", async (req, res) => {
         ...taskData,
         client: {
           connect: {
-            id: client.id,
+            id: ID,
           },
         },
       },

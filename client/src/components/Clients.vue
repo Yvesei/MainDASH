@@ -74,6 +74,7 @@
                       v-for="client in clients"
                       v-bind:key="client.id"
                       :client="client"
+                      @client-deleted="fetchClients"
                     />
                   </tbody>
                 </table>
