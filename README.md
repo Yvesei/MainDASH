@@ -59,6 +59,14 @@ npx prisma migrate dev
 This command will create the necessary tables and schema in your database.
 
 
+#### Seed Data
+
+
+- you can head to the server folder and type in terminal
+```bash
+node seeds/seed.js
+```
+
 #### 5. Run the Development Servers
 In separate terminal windows, start the development servers for the client and server.
 
@@ -78,3 +86,7 @@ npm start
 
 Open your web browser and visit http://localhost:5173/ to access the application.
 
+## LOGIN
+you can use the credentials below : 
+*email* : admin
+*password* : admin
