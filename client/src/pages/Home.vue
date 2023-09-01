@@ -1,16 +1,21 @@
 <script setup>
-import Hero from "../components/Hero.vue";
+import Home from "../components/Home.vue";
+import Navbar from "../components/Navbar.vue";
 </script>
 
 <template>
-  <Hero />
+  <div class="flex justify-between">
+    <Navbar />
+    <Home />
+  </div>
 </template>
 
 <script>
 export default {
   name: "app",
   components: {
-    Hero,
+    Home,
+    Navbar,
   },
 };
 </script>

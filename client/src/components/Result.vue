@@ -228,7 +228,6 @@ export default {
       } else {
         this.idArray.push(id);
       }
-      console.log(this.idArray);
     },
     removeIdFromArray(id) {
       const index = this.idArray.indexOf(id);

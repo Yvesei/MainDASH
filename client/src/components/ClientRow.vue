@@ -3,7 +3,7 @@
     <td class="ml-6 py-3 px-6 text-center">
       <div @click="Result()" class="hover:cursor-pointer flex items-center">
         <div class="mr-2">
-          <img class="w-6 h-6 rounded-full" :src="getimg()" v-bind:alt="pic" />
+          <img class="w-6 h-6 rounded-full" :src="getimg()" alt="pic" />
         </div>
         <span>{{ client.name }}</span>
       </div>

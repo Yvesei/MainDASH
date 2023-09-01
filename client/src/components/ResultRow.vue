@@ -297,12 +297,14 @@ export default {
   setup() {
     name: "TableTr";
   },
+  emits: ["add-id"],
   props: {
     task: {
       type: Object,
       required: true,
     },
   },
+  emits: ["addId"],
   methods: {
     extractDate(isoDateString) {
       const isoDate = new Date(isoDateString);

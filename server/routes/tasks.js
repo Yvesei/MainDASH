@@ -12,6 +12,53 @@ const fileUpload = require("express-fileupload");
 router.use(express.static("public")); //to access the files in public folder
 router.use(fileUpload());
 
+router.get("/linechart", async (req, res) => {
+  const tasks = await prisma.task.findMany({
+    orderBy: {
+      Date: "desc",
+    },
+  });
+
+  const currentMonth = moment().month(); // Get the current month (0-indexed)
+  const monthCounts = new Array(12).fill(0); // Initialize an array for counts, one slot per month
+
+  // Count tasks for each month
+  for (const task of tasks) {
+    const date = moment(task.Date);
+    const month = date.month();
+    monthCounts[month]++;
+  }
+
+  // Define month names
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Create data array
+  const data = [];
+
+  // Construct data array for the last 12 months
+  for (let i = 0; i < 12; i++) {
+    const monthIndex = (currentMonth - i + 12) % 12; // Calculate the correct index
+    const monthName = monthNames[monthIndex];
+    const count = monthCounts[monthIndex];
+    data.unshift({ month: monthName, count });
+  }
+
+  res.send(data);
+});
+
 router.get("/calculate-time-difference", async (req, res) => {
   const id = +req.query.id;
 
@@ -194,6 +241,25 @@ router.post("/uploadFileEdit", (req, res) => {
     }
   );
 });
+router.get("/countAll", async function (req, res, next) {
+  try {
+    const taskCount = await prisma.task.count({});
+    const DoneCount = await prisma.task.count({
+      where: {
+        status: true,
+      },
+    });
+    const percent = ((DoneCount * 100) / taskCount).toFixed(2);
+
+    res.status(200).json({ taskCount, percent, DoneCount });
+  } catch (error) {
+    console.error("Error fetching task count:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching task count." });
+  }
+});
+
 router.get("/count", async function (req, res, next) {
   const clientId = +req.query.id;
 

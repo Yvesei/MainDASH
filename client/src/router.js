@@ -3,8 +3,9 @@ import Cookies from "vue-cookies";
 
 import axios from "axios";
 
-import Login from "./pages/Login.vue";
 import Home from "./pages/Home.vue";
+import Login from "./pages/Login.vue";
+import Tasks from "./pages/Tasks.vue";
 import SignUp from "./pages/SignUp.vue";
 import Settings from "./pages/Settings.vue";
 import Clients from "./pages/Clients.vue";
@@ -12,6 +13,7 @@ import Result from "./pages/Result.vue";
 
 const routes = [
   { path: "/", component: Home, meta: { requiresAuth: true } },
+  { path: "/tasks", component: Tasks, meta: { requiresAuth: true } },
   { path: "/clients", component: Clients, meta: { requiresAuth: true } },
   { path: "/login", component: Login },
   { path: "/result", component: Result, meta: { requiresAuth: true } },

@@ -84,12 +84,7 @@
               />
             </svg>
 
-            <input
-              :disabled="this.currentUserRole === 'USER'"
-              type="file"
-              class="hidden"
-              @change="onFileChange"
-            />
+            <input type="file" class="hidden" @change="onFileChange" />
           </label>
           <label
             class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"

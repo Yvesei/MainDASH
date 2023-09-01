@@ -525,12 +525,13 @@ export default {
       try {
         const uploadedImageName = await this.onUploadFile();
         const uploadedFileNameFourniture = await this.onUploadFileFourniture();
+
         const response = await axios.post("tasks/", {
           name: this.name,
           number: this.number,
           distance: this.distance,
           image: uploadedImageName,
-          providedDate: this.convertDate(this.providedDate),
+          providedDate: this.convertDateAll(this.providedDate),
           providedDateStart: this.convertDate(this.providedDateStart),
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
@@ -549,9 +550,21 @@ export default {
         console.error(error);
       }
     },
+    convertDateAll(timeString) {
+      // Split the time string into year, month, and day
+      const [year, month, day] = timeString.split("-");
+
+      // Create a new Date object with the parsed year, month (0-indexed), and day
+      const currentDate = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day)
+      );
+
+      return currentDate;
+    },
     convertDate(timeString) {
       const currentDate = new Date(); // Get the current date
-
       // Split the time string into hours and minutes
       const [hours, minutes] = timeString.split(":");
 

@@ -15,6 +15,18 @@ router.get("/current-user-get", verifyToken, async (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => res.send(err));
 });
+
+router.get("/countAll", async function (req, res, next) {
+  try {
+    const userCount = await prisma.user.count({});
+    res.status(200).json({ userCount });
+  } catch (error) {
+    console.error("Error fetching task count:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching task count." });
+  }
+});
 // upload
 const fileUpload = require("express-fileupload");
 // middle ware

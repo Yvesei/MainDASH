@@ -15,6 +15,17 @@ router.get("/", function (req, res, next) {
     .catch((err) => res.send(err));
 });
 
+router.get("/countAll", async function (req, res, next) {
+  try {
+    const clientCount = await prisma.client.count({});
+    res.status(200).json({ clientCount });
+  } catch (error) {
+    console.error("Error fetching task count:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching task count." });
+  }
+});
 // get a single client
 router.get("/:id", function (req, res, next) {
   prisma.client

@@ -8,7 +8,7 @@
         <img
           class="object-cover w-8 h-8 rounded-full"
           :src="getimg()"
-          v-bind:alt="pic"
+          alt="pic"
         />
         <span
           class="h-2 w-2 rounded-full bg-emerald-500 absolute right-0.5 ring-1 ring-white bottom-0"
