@@ -34,7 +34,7 @@
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
                 for="First Name"
-                >Date</label
+                >Date (optional)</label
               >
 
               <div class="relative">
@@ -67,7 +67,7 @@
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
                 for="Company"
-                >Heure debut</label
+                >Heure debut (optional)</label
               >
               <input
                 v-model="providedDateStart"
