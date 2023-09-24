@@ -57,7 +57,7 @@
                   v-model="providedDate"
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Select date"
+                  placeholder="Select date, ex: 21-01-2023"
                 />
               </div>
             </div>
@@ -73,7 +73,7 @@
                 v-model="providedDateStart"
                 type="text"
                 name="Company"
-                placeholder="eg. Creative Tim"
+                placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -87,7 +87,7 @@
                 v-model="dateEnd"
                 type="email"
                 name="Email Address"
-                placeholder="eg. soft@dashboard.com"
+                placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -111,7 +111,7 @@
     <form
       v-if="currentDivIndex === 1"
       class="relative w-2/3"
-      style="height: 406px"
+      style="height: 500px"
     >
       <div
         active=""
@@ -175,12 +175,44 @@
                 >Nom</label
               >
               <input
+                @click="(recommandations = !recommandations), filterClients()"
+                @input="filterClients"
                 v-model="name"
                 type="text"
-                name="First Name"
+                name="First
+              Name"
                 placeholder="eg. Michael"
-                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+                class="z-99 inputName focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
+              <ul
+                class="max-h-[10rem] bg-white w-full overflow-scroll border rounded"
+                v-if="recommandations"
+              >
+                <li v-for="client in filteredClients" :key="client.id">
+                  <button
+                    @click="selectClient(client.name)"
+                    class="flex items-center w-full px-5 py-2 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 gap-x-2 focus:outline-none"
+                  >
+                    <div class="relative">
+                      <img
+                        class="object-cover w-8 h-8 rounded-full"
+                        :src="getimg(client.image)"
+                        alt="pic"
+                      />
+                    </div>
+                    <div class="text-left rtl:text-right">
+                      <h1
+                        class="text-sm font-medium text-gray-700 capitalize dark:text-white"
+                      >
+                        {{ client.name }}
+                      </h1>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ client.number }}
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              </ul>
             </div>
             <div class="w-full max-w-full px-3 mt-4 flex-0">
               <label
@@ -192,7 +224,7 @@
                 v-model="number"
                 type="text"
                 name="Last Name"
-                placeholder="eg. Prior"
+                placeholder="eg. 06xxxxxxxx"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -206,7 +238,7 @@
                 v-model="distance"
                 type="text"
                 name="Last Name"
-                placeholder="eg. Prior"
+                placeholder="eg. 23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -268,7 +300,7 @@
                 v-model="type"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -284,7 +316,7 @@
                 v-model="supply"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
               <!-- File uplaod -->
@@ -350,7 +382,7 @@
                 v-model="devis"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -412,7 +444,7 @@
                 v-model="result"
                 name="Bio"
                 rows="5"
-                placeholder="Say a few words about who you are or what you're working on."
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               ></textarea>
             </div>
@@ -471,7 +503,7 @@
                 v-model="followupAutre"
                 name="Bio"
                 rows="5"
-                placeholder="Say a few words about who you are or what you're working on."
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               ></textarea>
             </div>
@@ -513,7 +545,9 @@ export default {
   props: {
     showPopup: Boolean,
   },
-  mounted() {},
+  mounted() {
+    this.fetchClients();
+  },
   methods: {
     closePopup() {
       this.$emit("close");
@@ -624,7 +658,38 @@ export default {
         throw error;
       }
     },
+    fetchClients() {
+      axios
+        .get(`/clients`)
+        .then((response) => {
+          this.clients = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    selectClient(clientName) {
+      this.name = clientName;
+      this.recommandations = false; // Hide recommendations after selecting a client
+    },
+    getimg(clientImage) {
+      return `http://localhost:3000/uploads/tasks/${clientImage}`;
+    },
+    filterClients() {
+      console.log("filtered clients");
+      const searchQuery = this.name.toLowerCase();
+      if (searchQuery === "") {
+        // If the input is empty, show all clients
+        this.filteredClients = this.clients;
+      } else {
+        // Otherwise, filter the clients based on the input value
+        this.filteredClients = this.clients.filter((client) =>
+          client.name.toLowerCase().includes(searchQuery)
+        );
+      }
+    },
   },
+
   data() {
     return {
       currentDivIndex: 0, // Start with the first div
@@ -652,6 +717,9 @@ export default {
       addedfile: "",
       addedfilefourniture: "",
       selectedFileFournitureFront: "",
+      recommandations: false,
+      clients: [],
+      filteredClients: [],
     };
   },
 };

@@ -58,7 +58,7 @@
                   datepicker
                   type="text"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Select date"
+                  placeholder="Select date, ex: 21-01-2023"
                 />
               </div>
             </div>
@@ -75,7 +75,7 @@
                 v-model="providedDateStart"
                 type="text"
                 name="Company"
-                placeholder="eg. Creative Tim"
+                placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -90,7 +90,7 @@
                 v-model="this.dateEnd"
                 type="email"
                 name="Email Address"
-                placeholder="eg. soft@dashboard.com"
+                placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -200,7 +200,7 @@
                 v-model="client.number"
                 type="text"
                 name="Last Name"
-                placeholder="eg. Prior"
+                placeholder="eg. 06xxxxxxxx"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -215,7 +215,7 @@
                 v-model="client.distance"
                 type="text"
                 name="Last Name"
-                placeholder="eg. Prior"
+                placeholder="eg. 23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -278,7 +278,7 @@
                 v-model="this.type"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -295,7 +295,7 @@
                 v-model="this.supply"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
               <!-- File upload -->
@@ -375,7 +375,7 @@
                 v-model="this.devis"
                 type="text"
                 name="First Name"
-                placeholder="eg. Michael"
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -438,10 +438,11 @@
                 >Resultat</label
               >
               <textarea
+                :disabled="this.currentUserRole === 'USER'"
                 v-model="this.result"
                 name="Bio"
                 rows="5"
-                placeholder="Say a few words about who you are or what you're working on."
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               ></textarea>
             </div>
@@ -504,7 +505,7 @@
                 v-model="this.followupAutre"
                 name="Bio"
                 rows="5"
-                placeholder="Say a few words about who you are or what you're working on."
+                placeholder=""
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               ></textarea>
             </div>
