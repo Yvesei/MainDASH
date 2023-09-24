@@ -131,6 +131,8 @@ router.patch("/markDone", async (req, res) => {
   try {
     const idArray = req.body.params.idArray;
     console.log(idArray);
+    const date = new Date();
+    console.log(date);
     for (const id of idArray) {
       await prisma.task.update({
         where: {
@@ -138,6 +140,7 @@ router.patch("/markDone", async (req, res) => {
         },
         data: {
           status: true,
+          dateEnd: date,
         },
       });
     }
