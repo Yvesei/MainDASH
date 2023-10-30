@@ -162,7 +162,7 @@ export default {
         });
     },
     getimg() {
-      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
     },
   },
 };

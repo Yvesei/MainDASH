@@ -695,10 +695,10 @@ export default {
       }
     },
     getimg() {
-      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
     },
     getFile() {
-      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile}`;
     },
     getFileFront() {
       if (this.selectedFileFourniture) {

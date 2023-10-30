@@ -282,7 +282,7 @@ export default {
       }
     },
     getimg() {
-      return `http://localhost:3000/uploads/users/${this.user.image}`;
+      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
     },
   },
   data() {

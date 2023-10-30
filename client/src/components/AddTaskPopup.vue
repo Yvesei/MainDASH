@@ -673,7 +673,7 @@ export default {
       this.recommandations = false; // Hide recommendations after selecting a client
     },
     getimg(clientImage) {
-      return `http://localhost:3000/uploads/tasks/${clientImage}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${clientImage}`;
     },
     filterClients() {
       console.log("filtered clients");

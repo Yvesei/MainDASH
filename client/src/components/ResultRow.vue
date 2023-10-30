@@ -337,7 +337,7 @@ export default {
       return `${formattedTime}`;
     },
     getFile() {
-      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile}`;
     },
     vide() {
       const propertyKeys = Object.keys(this.task);
