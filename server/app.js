@@ -4,10 +4,29 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+
+// Define an array of allowed origins
+const allowedOrigins = [
+  "https://1p5kdkfr-5173.uks1.devtunnels.ms",
+  "http://192.168.1.6:80",
+  "http://127.0.0.1:80",
+  "http://172.17.0.120:80/",
+  "http://192.168.137.100:8080/",
+  "http://localhost:80", // Replace with your actual IP address
+];
+
 const corsOptions = {
-  origin: "http://localhost:5173",
-  credentials: true, // Allow cookies to be sent
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+      // callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 };
+
 var app = express();
 
 // Enable CORS for all routes

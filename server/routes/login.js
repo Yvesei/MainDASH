@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
       );
 
       // Set the token as an HttpOnly cookie
-      res.cookie("token", token, { httpOnly: true, sameSite: "Lax" });
+      res.cookie("token", token, { sameSite: "None", secure: true });
 
       res.json({ success: true, token });
     } else {

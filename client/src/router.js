@@ -32,7 +32,9 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some((route) => route.meta.requiresAuth)) {
     try {
-      const response = await axios.get("/users/verify-user");
+      const response = await axios.get("users/verify-user", {
+        withCredentials: true,
+      });
       if (response.data.success) {
         next();
       } else {
