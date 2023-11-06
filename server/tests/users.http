@@ -38,4 +38,4 @@ Content-Type: application/json
 
 // to test user images
 ###
-GET http://192.168.1.146:3000/uploads/330806820_6226543644098040_99468803775825536_n.jpg
+GET http://192.168.1.146:3000/uploads/uploads/330806820_6226543644098040_99468803775825536_n.jpg

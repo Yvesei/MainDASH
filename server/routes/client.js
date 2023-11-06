@@ -28,6 +28,9 @@ router.get("/countAll", async function (req, res, next) {
 });
 // get a single client
 router.get("/:id", function (req, res, next) {
+  console.log(req.params.id);
+  console.log("8888888");
+
   prisma.client
     .findUnique({ where: { id: +req.params.id } })
     .then((client) => res.send(client))

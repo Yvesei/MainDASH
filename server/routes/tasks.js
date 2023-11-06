@@ -130,19 +130,31 @@ router.get("/calculate-total-time", async (req, res) => {
 router.patch("/markDone", async (req, res) => {
   try {
     const idArray = req.body.params.idArray;
-    console.log(idArray);
+    console.log(idArray.length);
     const date = new Date();
     console.log(date);
-    for (const id of idArray) {
+    if (idArray.length == undefined) {
       await prisma.task.update({
         where: {
-          id: id,
+          id: idArray,
         },
         data: {
           status: true,
           dateEnd: date,
         },
       });
+    } else {
+      for (const id of idArray) {
+        await prisma.task.update({
+          where: {
+            id: id,
+          },
+          data: {
+            status: true,
+            dateEnd: date,
+          },
+        });
+      }
     }
     res.status(200).send("");
   } catch (error) {
@@ -182,10 +194,14 @@ router.post("/uploadSupply", (req, res) => {
   }
 
   const myFile = req.files.file;
-  const myFileSplit = myFile.name.split(".");
+  var lastIndex = myFile.name.lastIndexOf(".");
+  const myFileSplit = [
+    myFile.name.slice(0, lastIndex),
+    myFile.name.slice(lastIndex + 1),
+  ];
   const date = new Date();
   myFile.name = date.getTime() + "." + myFileSplit[1];
-
+  console.log(myFile.name);
   myFile.mv(
     `${__dirname}/../public/uploads/tasks/${myFile.name}`,
     function (err) {
@@ -292,8 +308,10 @@ router.post("/", async (req, res) => {
     image,
     endTask,
     followupBool,
+    supplyFile,
     ...taskData
   } = req.body;
+  supplyFile = supplyFile.toString();
   // endTask = +endTask;
   // followupBool = +followupBool;
   if (endTask === undefined) {
@@ -334,6 +352,7 @@ router.post("/", async (req, res) => {
       data: {
         endTask,
         followupBool,
+        supplyFile,
         ...taskData,
         client: {
           connect: {
@@ -457,9 +476,10 @@ router.patch("/", async (req, res) => {
     endTask,
     followupBool,
     image,
+    supplyFile,
     ...taskData
   } = req.body;
-
+  supplyFile = supplyFile.toString();
   if (endTask === undefined) {
     endTask = null;
   } else {
@@ -532,7 +552,7 @@ router.patch("/", async (req, res) => {
       console.log(providedDate);
       taskData.date = providedDate;
     }
-
+    taskData.supplyFile = supplyFile;
     const updatedTask = await prisma.task.update({
       where: {
         id: taskId,
