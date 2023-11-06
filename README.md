@@ -74,7 +74,7 @@ In separate terminal windows, start the development servers for the client and s
 
 ```bash
 cd client
-npm run serve
+npm start
 Start the server
 ```
 ```bash
@@ -84,7 +84,7 @@ npm start
 
 ### 5. Access the Application
 
-Open your web browser and visit http://localhost:5173/ to access the application.
+Open your web browser and visit http://localhost:8080/ to access the application or local_IP:8080.
 
 ## LOGIN
 you can use the credentials below : 
