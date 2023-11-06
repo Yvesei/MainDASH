@@ -173,7 +173,7 @@ export default {
       }
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
+      return `http://192.168.1.146:3000/uploads/uploads/tasks/${this.client.image}`;
     },
   },
   data() {

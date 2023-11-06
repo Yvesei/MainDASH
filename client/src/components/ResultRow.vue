@@ -109,27 +109,38 @@
                   for="First Name"
                   >Fourniture</label
                 >
-                <p
+                <textarea
+                  disabled
                   :class="
                     task.supply == 'this case is empty' ? 'text-red-400' : ''
                   "
-                  class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                >
-                  {{ task.supply }}
-                </p>
+                  v-model="task.supply"
+                  name="Bio"
+                  rows="5"
+                  placeholder=""
+                  class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+                ></textarea>
+
                 <!-- File uplaod -->
                 <div class="bg-white p7 rounded mx-auto">
                   <div class="relative flex flex-col p-4 text-gray-400">
-                    <div class="m-auto">
-                      <a
-                        :href="getFile()"
-                        target="_blank"
-                        class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                    <div class="m-auto flex">
+                      <div
+                        v-for="num of task.supplyFile.length"
+                        v-bind:key="num"
                       >
-                        <p class="text-sm font-medium leading-none text-white">
-                          View File
-                        </p>
-                      </a>
+                        <a
+                          :href="getFile(num)"
+                          target="_blank"
+                          class="m-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                        >
+                          <p
+                            class="text-sm font-medium leading-none text-white"
+                          >
+                            View File
+                          </p>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -336,8 +347,10 @@ export default {
         .padStart(2, "0")}`;
       return `${formattedTime}`;
     },
-    getFile() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile}`;
+    getFile(num) {
+      console.log(this.task.supplyFile);
+      num--;
+      return `http://192.168.1.146:3000/uploads/uploads/tasks/${this.task.supplyFile[num]}`;
     },
     vide() {
       const propertyKeys = Object.keys(this.task);
@@ -365,6 +378,7 @@ export default {
     },
   },
   mounted() {
+    this.task.supplyFile = this.task.supplyFile.split(",");
     this.vide();
     this.totalTime();
   },

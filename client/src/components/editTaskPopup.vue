@@ -53,7 +53,9 @@
                   </svg>
                 </div>
                 <input
-                  :disabled="this.currentUserRole === 'USER'"
+                  :disabled="
+                    this.currentUserRole === 'USER' && this.status === true
+                  "
                   v-model="providedDate"
                   datepicker
                   type="text"
@@ -71,7 +73,9 @@
                 >Heure debut</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="providedDateStart"
                 type="text"
                 name="Company"
@@ -86,7 +90,9 @@
                 >Heure fin</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="this.dateEnd"
                 type="email"
                 name="Email Address"
@@ -161,7 +167,9 @@
               </svg>
 
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 type="file"
                 class="hidden"
                 @change="onFileChange"
@@ -181,7 +189,9 @@
                 >Nom</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="client.name"
                 type="text"
                 name="First Name"
@@ -196,7 +206,9 @@
                 >Num Tel</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="client.number"
                 type="text"
                 name="Last Name"
@@ -211,7 +223,9 @@
                 >Distance</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="client.distance"
                 type="text"
                 name="Last Name"
@@ -274,7 +288,9 @@
                 >Type de maintenance</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="this.type"
                 type="text"
                 name="First Name"
@@ -290,27 +306,32 @@
                 for="First Name"
                 >Fourniture</label
               >
-              <input
-                :disabled="this.currentUserRole === 'USER'"
+
+              <textarea
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="this.supply"
-                type="text"
-                name="First Name"
+                name="Bio"
+                rows="5"
                 placeholder=""
-                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              ></textarea>
               <!-- File upload -->
               <div class="bg-white p7 rounded mx-auto">
                 <div class="relative flex flex-col p-4 text-gray-400">
                   <div
-                    v-if="!addedfilefourniture"
                     x-ref="dnd"
                     class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
                   >
                     <input
-                      :disabled="this.currentUserRole === 'USER'"
+                      :disabled="
+                        this.currentUserRole === 'USER' && this.status === true
+                      "
                       @change="onFileChangeFourniture"
                       accept="*"
                       type="file"
+                      multiple
                       class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
                     />
 
@@ -336,27 +357,55 @@
                       </p>
                     </div>
                   </div>
-                  <div class="mt-6 margin-auto">
-                    <a
-                      v-if="task.supplyFile != ''"
-                      :href="getFile()"
-                      target="_blank"
-                      class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                  <div class="flex mt-6 margin-auto">
+                    <div
+                      v-for="num in this.supplyFile.length"
+                      v-bind:key="num"
+                      class="flex items-center"
                     >
-                      <p class="text-sm font-medium leading-none text-white">
-                        View Old File
-                      </p>
-                    </a>
-                    <a
-                      v-if="addedfilefourniture"
-                      :href="getFileFront()"
-                      target="_blank"
-                      class="ml-5 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                      <a
+                        v-if="task.supplyFile != ''"
+                        :href="getFile(num)"
+                        target="_blank"
+                        class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                      >
+                        <p
+                          class="text-sm font-medium leading-none text-white text-center"
+                        >
+                          View Old File
+                        </p>
+                      </a>
+
+                      <svg
+                        @click="deleteFile(num)"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        class="h-8"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      v-for="num in selectedFileFournitureFront.length"
+                      v-bind:key="num"
                     >
-                      <p class="text-sm font-medium leading-none text-white">
-                        View New File
-                      </p>
-                    </a>
+                      <a
+                        v-if="addedfilefourniture"
+                        :href="getFileFront(num)"
+                        target="_blank"
+                        class="ml-5 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                      >
+                        <p class="text-sm font-medium leading-none text-white">
+                          View New File
+                        </p>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -371,7 +420,9 @@
                 >Demande de devis</label
               >
               <input
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="this.devis"
                 type="text"
                 name="First Name"
@@ -395,7 +446,9 @@
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      :disabled="this.currentUserRole === 'USER'"
+                      :disabled="
+                        this.currentUserRole === 'USER' && this.status === true
+                      "
                       v-model="endTask"
                       value="true"
                       :checked="this.endTask == true"
@@ -414,7 +467,9 @@
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      :disabled="this.currentUserRole === 'USER'"
+                      :disabled="
+                        this.currentUserRole === 'USER' && this.status === true
+                      "
                       v-model="endTask"
                       value="false"
                       type="radio"
@@ -438,7 +493,9 @@
                 >Resultat</label
               >
               <textarea
-                :disabled="this.currentUserRole === 'USER'"
+                :disabled="
+                  this.currentUserRole === 'USER' && this.status === true
+                "
                 v-model="this.result"
                 name="Bio"
                 rows="5"
@@ -463,7 +520,9 @@
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      :disabled="this.currentUserRole === 'USER'"
+                      :disabled="
+                        this.currentUserRole === 'USER' && this.status === true
+                      "
                       v-model="followupBool"
                       value="true"
                       :checked="task.followupBool == true"
@@ -482,7 +541,9 @@
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
-                      :disabled="this.currentUserRole === 'USER'"
+                      :disabled="
+                        this.currentUserRole === 'USER' && this.status === true
+                      "
                       v-model="followupBool"
                       value="false"
                       :checked="task.followupBool == false"
@@ -553,6 +614,11 @@ export default {
     },
   },
   mounted() {
+    if (this.task.supplyFile) {
+      this.supplyFile = this.task.supplyFile.split(",");
+    }
+    console.log(this.supplyFile);
+
     this.fetchClient(this.task.clientId);
     this.taskId = this.task.id;
     this.providedDate = this.extractDate(this.task.Date);
@@ -560,12 +626,13 @@ export default {
     this.dateEnd = this.task.dateEnd;
     this.type = this.task.type;
     this.supply = this.task.supply;
-    this.supplyFile = this.task.supplyFile;
+
     this.devis = this.task.devis;
     this.endTask = this.task.endTask;
     this.result = this.task.result;
     this.followupBool = this.task.followupBool;
     this.followupAutre = this.task.followupAutre;
+    this.status = this.task.status;
     this.id = this.client.id;
     this.fetchUser();
   },
@@ -673,37 +740,62 @@ export default {
     },
     async onFileChangeFourniture(e) {
       console.log("onchange fourniture");
-      const selectedFileFourniture = e.target.files[0];
-      this.selectedFileFourniture = selectedFileFourniture;
-      if (selectedFileFourniture) {
-        this.selectedFileFournitureFront = URL.createObjectURL(
-          selectedFileFourniture
-        );
+      console.log(e.target.files);
+
+      for (const file of e.target.files) {
+        this.selectedFileFourniture.push(file);
+      }
+      console.log(this.selectedFileFourniture);
+      if (this.selectedFileFourniture) {
+        console.log(this.selectedFileFourniture);
+        this.selectedFileFournitureFront = [];
+        for (const file of this.selectedFileFourniture) {
+          console.log("file : ");
+          console.log(file);
+          this.selectedFileFournitureFront.push(URL.createObjectURL(file));
+        }
+
         this.addedfilefourniture = true;
       }
     },
 
     async onUploadFileFourniture() {
       try {
-        const formData = new FormData();
-        formData.append("file", this.selectedFileFourniture);
-        const response = await axios.post("tasks/uploadFileEdit", formData);
-        return response.data.name; // Return the image name
+        var responseName = [];
+        for (const file of this.selectedFileFourniture) {
+          console.log(file);
+          const formData = new FormData();
+          formData.append("file", file);
+          const response = await axios.post("tasks/uploadFileEdit", formData);
+          responseName.push(response.data.name);
+        }
+        for (const file of this.supplyFile) responseName.push(file);
+        console.log(responseName);
+        return responseName; // Return the image name
       } catch (error) {
         console.log(error);
         throw error;
       }
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
+      return `http://192.168.1.146:3000/uploads/uploads/tasks/${this.client.image}`;
     },
-    getFile() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile}`;
+    getFile(num) {
+      num--;
+      return `http://192.168.1.146:3000/uploads/uploads/tasks/${this.supplyFile[num]}`;
     },
-    getFileFront() {
+    deleteFile(num) {
+      num--;
+      this.supplyFile.splice(num, 1);
+    },
+    getFileFront(num) {
+      num--;
+      console.log(num);
+      console.log(this.selectedFileFourniture[num].name);
       if (this.selectedFileFourniture) {
-        const blob = new Blob([this.selectedFileFourniture], {
-          type: this.selectedFileFourniture.type,
+        console.log(this.selectedFileFourniture[num]);
+        const blob = new Blob([this.selectedFileFourniture[num]], {
+          type: this.selectedFileFourniture[num].type,
         });
         return URL.createObjectURL(blob);
       }
@@ -750,8 +842,8 @@ export default {
       selectedFile: "",
       addedfile: "",
       addedfilefourniture: "",
-      selectedFileFourniture: "",
-      selectedFileFournitureFront: "",
+      selectedFileFourniture: [],
+      selectedFileFournitureFront: [],
       providedDate: "",
     };
   },

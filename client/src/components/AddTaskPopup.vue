@@ -312,18 +312,18 @@
                 for="First Name"
                 >Fourniture</label
               >
-              <input
+              <textarea
                 v-model="supply"
-                type="text"
-                name="First Name"
+                name="Bio"
+                rows="5"
                 placeholder=""
-                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+                class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 min-h-unset text-sm leading-5.6 ease block h-auto w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              ></textarea>
+
               <!-- File uplaod -->
               <div class="bg-white p7 rounded mx-auto">
                 <div class="relative flex flex-col p-4 text-gray-400">
                   <div
-                    v-if="!addedfilefourniture"
                     x-ref="dnd"
                     class="relative flex flex-col text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer"
                   >
@@ -331,6 +331,7 @@
                       @change="onFileChangeFourniture"
                       accept="*"
                       type="file"
+                      multiple
                       class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
                     />
 
@@ -356,16 +357,21 @@
                       </p>
                     </div>
                   </div>
-                  <a
-                    v-if="addedfilefourniture"
-                    :href="getFile()"
-                    target="_blank"
-                    class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                  <div
+                    v-for="num in selectedFileFournitureFront.length"
+                    v-bind:key="num"
                   >
-                    <p class="text-sm font-medium leading-none text-white">
-                      View File
-                    </p>
-                  </a>
+                    <a
+                      v-if="addedfilefourniture"
+                      :href="getFile(num)"
+                      target="_blank"
+                      class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                    >
+                      <p class="text-sm font-medium leading-none text-white">
+                        View File
+                      </p>
+                    </a>
+                  </div>
                 </div>
               </div>
               <!-- end file opload -->
@@ -558,6 +564,7 @@ export default {
     async handleSubmit() {
       try {
         const uploadedImageName = await this.onUploadFile();
+
         const uploadedFileNameFourniture = await this.onUploadFileFourniture();
 
         const response = await axios.post("tasks/", {
@@ -629,19 +636,32 @@ export default {
     },
     async onFileChangeFourniture(e) {
       console.log("onchange fourniture");
-      const selectedFileFourniture = e.target.files[0];
-      this.selectedFileFourniture = selectedFileFourniture;
-      if (selectedFileFourniture) {
-        this.selectedFileFournitureFront = URL.createObjectURL(
-          selectedFileFourniture
-        );
+      console.log(e.target.files);
+
+      for (const file of e.target.files) {
+        this.selectedFileFourniture.push(file);
+      }
+      console.log(this.selectedFileFourniture);
+      if (this.selectedFileFourniture) {
+        console.log(this.selectedFileFourniture);
+        this.selectedFileFournitureFront = [];
+        for (const file of this.selectedFileFourniture) {
+          console.log("file : ");
+          console.log(file);
+          this.selectedFileFournitureFront.push(URL.createObjectURL(file));
+        }
+
         this.addedfilefourniture = true;
       }
     },
-    getFile() {
+    getFile(num) {
+      num--;
+      console.log(num);
+      console.log(this.selectedFileFourniture[num].name);
       if (this.selectedFileFourniture) {
-        const blob = new Blob([this.selectedFileFourniture], {
-          type: this.selectedFileFourniture.type,
+        console.log(this.selectedFileFourniture[num]);
+        const blob = new Blob([this.selectedFileFourniture[num]], {
+          type: this.selectedFileFourniture[num].type,
         });
         return URL.createObjectURL(blob);
       }
@@ -649,10 +669,16 @@ export default {
     },
     async onUploadFileFourniture() {
       try {
-        const formData = new FormData();
-        formData.append("file", this.selectedFileFourniture);
-        const response = await axios.post("tasks/uploadSupply", formData);
-        return response.data.name; // Return the image name
+        var responseName = [];
+        for (const file of this.selectedFileFourniture) {
+          console.log(file);
+          const formData = new FormData();
+          formData.append("file", file);
+          const response = await axios.post("tasks/uploadSupply", formData);
+          responseName.push(response.data.name);
+        }
+        console.log(responseName);
+        return responseName; // Return the image name
       } catch (error) {
         console.log(error);
         throw error;
@@ -673,7 +699,7 @@ export default {
       this.recommandations = false; // Hide recommendations after selecting a client
     },
     getimg(clientImage) {
-      return `http://192.168.1.146:3000/uploads/tasks/${clientImage}`;
+      return `http://192.168.1.146:3000/uploads/uploads/tasks/${clientImage}`;
     },
     filterClients() {
       console.log("filtered clients");
@@ -713,10 +739,10 @@ export default {
       followupAutre: "",
       selectedFileFront: "",
       selectedFile: "",
-      selectedFileFourniture: "",
+      selectedFileFourniture: [],
       addedfile: "",
       addedfilefourniture: "",
-      selectedFileFournitureFront: "",
+      selectedFileFournitureFront: [],
       recommandations: false,
       clients: [],
       filteredClients: [],

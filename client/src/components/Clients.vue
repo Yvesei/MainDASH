@@ -29,6 +29,7 @@
               href="javascript:void(0)"
             >
               <div
+                @click="fetchClientsDone()"
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Done</p>
@@ -39,6 +40,7 @@
               href="javascript:void(0)"
             >
               <div
+                @click="fetchClientsPending()"
                 class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
               >
                 <p>Pending</p>
@@ -112,6 +114,36 @@ export default {
     this.fetchClients();
   },
   methods: {
+    fetchClientsDone() {
+      this.clients = [];
+      axios
+        .get(`/tasks/latest?type=done`)
+        .then((response) => {
+          for (const task of Object.values(response.data)) {
+            axios.get(`/clients/${task.clientId}`).then((response) => {
+              this.clients.push(response.data);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    fetchClientsPending() {
+      this.clients = [];
+      axios
+        .get(`/tasks/latest?type=pending`)
+        .then((response) => {
+          for (const task of Object.values(response.data)) {
+            axios.get(`/clients/${task.clientId}`).then((response) => {
+              this.clients.push(response.data);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     fetchClients() {
       axios
         .get(`/clients`)
