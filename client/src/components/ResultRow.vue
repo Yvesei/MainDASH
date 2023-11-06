@@ -350,7 +350,7 @@ export default {
     getFile(num) {
       console.log(this.task.supplyFile);
       num--;
-      return `http://192.168.1.146:3000/uploads/uploads/tasks/${this.task.supplyFile[num]}`;
+      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile[num]}`;
     },
     vide() {
       const propertyKeys = Object.keys(this.task);

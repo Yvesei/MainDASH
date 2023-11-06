@@ -230,7 +230,7 @@ export default {
         });
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/uploads/users/${this.currentuser.image}`;
+      return `http://192.168.1.146:3000/uploads/users/${this.currentuser.image}`;
     },
     async logOut() {
       try {

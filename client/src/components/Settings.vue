@@ -231,7 +231,7 @@ export default {
       }
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/uploads/users/${this.user.image}`;
+      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
     },
   },
   data() {
