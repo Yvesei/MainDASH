@@ -361,13 +361,13 @@
                     <div
                       v-for="num in this.supplyFile.length"
                       v-bind:key="num"
-                      class="flex items-center"
+                      class="p-2 flex items-center"
                     >
                       <a
                         v-if="task.supplyFile != ''"
                         :href="getFile(num)"
                         target="_blank"
-                        class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
+                        class="p-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
                       >
                         <p
                           class="text-sm font-medium leading-none text-white text-center"
@@ -377,12 +377,16 @@
                       </a>
 
                       <svg
+                        v-if="
+                          this.currentUserRole === 'ADMIN' ||
+                          this.status === false
+                        "
                         @click="deleteFile(num)"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                        class="h-8"
+                        class="h-6"
                       >
                         <path
                           stroke-linecap="round"
@@ -617,16 +621,13 @@ export default {
     if (this.task.supplyFile) {
       this.supplyFile = this.task.supplyFile.split(",");
     }
-    console.log(this.supplyFile);
-
     this.fetchClient(this.task.clientId);
     this.taskId = this.task.id;
-    this.providedDate = this.extractDate(this.task.Date);
+    this.providedDate = this.task.Date;
     this.providedDateStart = this.task.dateStart;
     this.dateEnd = this.task.dateEnd;
     this.type = this.task.type;
     this.supply = this.task.supply;
-
     this.devis = this.task.devis;
     this.endTask = this.task.endTask;
     this.result = this.task.result;
@@ -665,6 +666,19 @@ export default {
         .padStart(2, "0")}`;
       return `${year}-${month}-${day}`;
     },
+    async convertDateAll(timeString) {
+      // Split the time string into year, month, and day
+      const [year, month, day] = timeString.split("-");
+
+      // Create a new Date object with the parsed year, month (0-indexed), and day
+      const currentDate = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day)
+      );
+      console.log(currentDate);
+      return currentDate;
+    },
     extractHours(isoDateString) {
       const isoDate = new Date(isoDateString);
 
@@ -695,6 +709,8 @@ export default {
       try {
         const uploadedImageName = await this.onUploadFile();
         const uploadedFileNameFourniture = await this.onUploadFileFourniture();
+        const providedDate = await this.convertDateAll(this.providedDate);
+        console.log(providedDate);
         const response = await axios.patch("tasks/", {
           taskId: this.taskId,
           id: this.client.id,
@@ -702,7 +718,7 @@ export default {
           number: this.client.number,
           distance: this.client.distance,
           image: uploadedImageName,
-          providedDate: this.convertDate(this.providedDate),
+          providedDate: providedDate,
           providedDateStart: this.convertDate(this.providedDateStart),
           dateEnd: this.convertDate(this.dateEnd),
           type: this.type,
@@ -734,24 +750,17 @@ export default {
         const response = await axios.post("tasks/uploadEdit", formData);
         return response.data.name; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },
     async onFileChangeFourniture(e) {
-      console.log("onchange fourniture");
-      console.log(e.target.files);
-
       for (const file of e.target.files) {
         this.selectedFileFourniture.push(file);
       }
-      console.log(this.selectedFileFourniture);
+
       if (this.selectedFileFourniture) {
-        console.log(this.selectedFileFourniture);
         this.selectedFileFournitureFront = [];
         for (const file of this.selectedFileFourniture) {
-          console.log("file : ");
-          console.log(file);
           this.selectedFileFournitureFront.push(URL.createObjectURL(file));
         }
 
@@ -763,17 +772,15 @@ export default {
       try {
         var responseName = [];
         for (const file of this.selectedFileFourniture) {
-          console.log(file);
           const formData = new FormData();
           formData.append("file", file);
           const response = await axios.post("tasks/uploadFileEdit", formData);
           responseName.push(response.data.name);
         }
         for (const file of this.supplyFile) responseName.push(file);
-        console.log(responseName);
+
         return responseName; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },
@@ -790,10 +797,8 @@ export default {
     },
     getFileFront(num) {
       num--;
-      console.log(num);
-      console.log(this.selectedFileFourniture[num].name);
+
       if (this.selectedFileFourniture) {
-        console.log(this.selectedFileFourniture[num]);
         const blob = new Blob([this.selectedFileFourniture[num]], {
           type: this.selectedFileFourniture[num].type,
         });

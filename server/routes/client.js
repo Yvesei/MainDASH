@@ -28,9 +28,6 @@ router.get("/countAll", async function (req, res, next) {
 });
 // get a single client
 router.get("/:id", function (req, res, next) {
-  console.log(req.params.id);
-  console.log("8888888");
-
   prisma.client
     .findUnique({ where: { id: +req.params.id } })
     .then((client) => res.send(client))
@@ -41,7 +38,7 @@ router.get("/:id", function (req, res, next) {
 
 router.post("/", function (req, res, next) {
   req.body.distance = parseInt(req.body.distance);
-  console.log(req.body);
+
   prisma.client
     .create({ data: req.body })
     .then((client) => res.send(client))
@@ -49,16 +46,24 @@ router.post("/", function (req, res, next) {
 });
 
 // delete a client
-router.delete("/:id", function (req, res, next) {
+router.delete("/:id", async function (req, res, next) {
+  const client = await prisma.client.findUnique({
+    where: { id: +req.params.id },
+  });
+  var value = false;
+  if (client.deleted == false) value = true;
   prisma.client
-    .delete({ where: { id: +req.params.id } })
-    .then((client) => res.send(client))
-    .catch((err) => res.send(err));
+    .update({
+      where: { id: +req.params.id },
+      data: {
+        deleted: value,
+      },
+    })
+    .then((task) => res.send(task));
 });
 
 //modify a client
 router.patch("/", function (req, res, next) {
-  console.log(req.body);
   let { id, name, number, distance, image } = req.body;
   distance = parseInt(distance);
 

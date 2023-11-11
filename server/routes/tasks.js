@@ -1,11 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const moment = require("moment");
-
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { verifyToken } = require("../middleware/authMiddleware"); // Import the middleware
-
+const { verifyToken } = require("../middleware/authMiddleware");
 // upload
 const fileUpload = require("express-fileupload");
 // middle ware
@@ -130,9 +128,9 @@ router.get("/calculate-total-time", async (req, res) => {
 router.patch("/markDone", async (req, res) => {
   try {
     const idArray = req.body.params.idArray;
-    console.log(idArray.length);
+
     const date = new Date();
-    console.log(date);
+
     if (idArray.length == undefined) {
       await prisma.task.update({
         where: {
@@ -179,7 +177,6 @@ router.post("/upload", (req, res) => {
     `${__dirname}/../public/uploads/tasks/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -201,12 +198,11 @@ router.post("/uploadSupply", (req, res) => {
   ];
   const date = new Date();
   myFile.name = date.getTime() + "." + myFileSplit[1];
-  console.log(myFile.name);
+
   myFile.mv(
     `${__dirname}/../public/uploads/tasks/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -229,7 +225,6 @@ router.post("/uploadEdit", (req, res) => {
     `${__dirname}/../public/uploads/tasks/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -252,7 +247,6 @@ router.post("/uploadFileEdit", (req, res) => {
     `${__dirname}/../public/uploads/tasks/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -262,10 +256,15 @@ router.post("/uploadFileEdit", (req, res) => {
 });
 router.get("/countAll", async function (req, res, next) {
   try {
-    const taskCount = await prisma.task.count({});
+    const taskCount = await prisma.task.count({
+      where: {
+        deleted: false,
+      },
+    });
     const DoneCount = await prisma.task.count({
       where: {
         status: true,
+        deleted: false,
       },
     });
     const percent = ((DoneCount * 100) / taskCount).toFixed(2);
@@ -286,6 +285,7 @@ router.get("/count", async function (req, res, next) {
     const taskCount = await prisma.task.count({
       where: {
         clientId: clientId,
+        deleted: false,
       },
     });
 
@@ -298,7 +298,8 @@ router.get("/count", async function (req, res, next) {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
+  const userid = req.user.id;
   var {
     name,
     number,
@@ -345,9 +346,9 @@ router.post("/", async (req, res) => {
       taskData.dateStart = providedDateStart;
     }
     if (providedDate != "" && providedDate != null) {
-      console.log(providedDate);
       taskData.Date = providedDate;
     }
+
     const task = await prisma.task.create({
       data: {
         endTask,
@@ -357,6 +358,11 @@ router.post("/", async (req, res) => {
         client: {
           connect: {
             id: client.id,
+          },
+        },
+        user: {
+          connect: {
+            id: userid,
           },
         },
       },
@@ -373,63 +379,227 @@ router.post("/", async (req, res) => {
 
 router.get("/", function (req, res, next) {
   const { clientId, type } = req.query;
+  var filter = [];
+
+  if (req.query.filter) {
+    filter = req.query.filter;
+
+    filter = filter.split(",");
+
+    filter[0] = new Date(filter[0]);
+    filter[1] = new Date(filter[1]);
+    filter[1].setDate(filter[1].getDate() + 1);
+  } else {
+    filter[0] = new Date("Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)");
+    filter[1] = new Date("Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)");
+  }
+  console.log(filter);
   if (!type) {
-    console.log("no  type");
     const clientid = parseInt(clientId);
     prisma.task
       .findMany({
         where: {
           clientId: clientid,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
         },
       })
       .then((tasks) => res.send(tasks))
       .catch((error) => next(error));
   }
   if (type == "Pending") {
-    console.log("pending");
     const clientid = parseInt(clientId);
     prisma.task
       .findMany({
         where: {
           status: false,
           clientId: clientid,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
         },
       })
       .then((tasks) => res.send(tasks))
       .catch((error) => next(error));
   }
   if (type == "Done") {
-    console.log("done");
     const clientid = parseInt(clientId);
     prisma.task
       .findMany({
         where: {
           status: true,
           clientId: clientid,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
         },
       })
       .then((tasks) => res.send(tasks))
       .catch((error) => next(error));
   }
 });
-
 router.get("/latest", verifyToken, function (req, res, next) {
   const { type } = req.query;
-  console.log(type);
-  if (!type) {
+  const { deleted } = req.query;
+  var filter = [];
+
+  if (req.query.filter) {
+    filter = req.query.filter;
+
+    filter = filter.split(",");
+
+    filter[0] = new Date(filter[0]);
+    filter[1] = new Date(filter[1]);
+    filter[1].setDate(filter[1].getDate() + 1);
+  } else {
+    filter[0] = new Date("Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)");
+    filter[1] = new Date("Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)");
+  }
+  console.log(filter);
+
+  if (!type && deleted == "undeleted") {
     prisma.task
       .findMany({
+        where: {
+          deleted: false,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+          // dateEnd: {
+          //   lte: filter[1],
+          // },
+        },
         orderBy: {
           Date: "desc",
         },
       })
       .then((tasks) => res.send(tasks));
   }
-  if (type == "done") {
+  // done + !deleted
+  if (type == "Done" && deleted == "undeleted") {
+    prisma.task
+      .findMany({
+        where: {
+          deleted: false,
+          status: true,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  // pending + !deleted
+  else if (type == "Pending" && deleted == "undeleted") {
+    prisma.task
+      .findMany({
+        where: {
+          deleted: false,
+          status: false,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  // deleted
+  if (!type && deleted == "deleted") {
+    prisma.task
+      .findMany({
+        where: {
+          deleted: true,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  } else if (type == "Pending" && deleted == "deleted") {
+    prisma.task
+      .findMany({
+        where: {
+          deleted: true,
+          status: false,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  } else if (type == "Done" && deleted == "deleted") {
+    prisma.task
+      .findMany({
+        where: {
+          deleted: true,
+          status: true,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  // show all
+
+  if (!type && deleted == "none") {
+    prisma.task
+      .findMany({
+        where: {
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
+        },
+        orderBy: {
+          Date: "desc",
+        },
+      })
+      .then((tasks) => res.send(tasks));
+  }
+  if (type == "Done" && deleted == "none") {
     prisma.task
       .findMany({
         where: {
           status: true,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
         },
         orderBy: {
           Date: "desc",
@@ -437,11 +607,15 @@ router.get("/latest", verifyToken, function (req, res, next) {
       })
       .then((tasks) => res.send(tasks));
   }
-  if (type == "pending") {
+  if (type == "Pending" && deleted == "none") {
     prisma.task
       .findMany({
         where: {
           status: false,
+          Date: {
+            gte: filter[0],
+            lte: filter[1],
+          },
         },
         orderBy: {
           Date: "desc",
@@ -457,10 +631,21 @@ router.get("/:id", function (req, res, next) {
     .then((task) => res.send(task));
 });
 
-// delete a tasks
-router.delete("/:id", function (req, res, next) {
+// delete a tasks 000000
+router.delete("/:id", async function (req, res, next) {
+  const task = await prisma.task.findUnique({
+    where: { id: +req.params.id },
+  });
+  console.log(task);
+  var value = false;
+  if (task.deleted == false) value = true;
   prisma.task
-    .delete({ where: { id: +req.params.id } })
+    .update({
+      where: { id: +req.params.id },
+      data: {
+        deleted: value,
+      },
+    })
     .then((task) => res.send(task));
 });
 
@@ -495,7 +680,6 @@ router.patch("/", async (req, res) => {
     let client = {};
     let client2 = {};
     if (id != undefined) {
-      console.log("id is defined");
       client = await prisma.client.findUnique({
         where: {
           id: id,
@@ -534,7 +718,6 @@ router.patch("/", async (req, res) => {
         }
       }
     } else {
-      console.log("id is not defined");
       // if id is not provided
       client = await prisma.client.findUnique({
         where: {
@@ -543,14 +726,20 @@ router.patch("/", async (req, res) => {
       });
     }
     const ID = client.id;
-    console.log("ID");
-    console.log(ID);
+
     if (providedDateStart !== "" && providedDateStart !== null) {
       taskData.dateStart = providedDateStart;
     }
+
     if (providedDate !== "" && providedDate !== null) {
-      console.log(providedDate);
-      taskData.date = providedDate;
+      // Assuming providedDate is a string in the format "2023-11-06T23:00:00.000Z1"
+      const adjustedDate = moment(providedDate).add(1, "hours");
+
+      // Set the taskData.Date with the adjusted date
+      taskData.Date = adjustedDate.toISOString();
+
+      console.log("providedDate");
+      console.log(adjustedDate);
     }
     taskData.supplyFile = supplyFile;
     const updatedTask = await prisma.task.update({

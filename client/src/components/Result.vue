@@ -100,6 +100,38 @@
                 <p>Pending</p>
               </div>
             </a>
+            <a
+              class="rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+              href="javascript:void(0)"
+            >
+              <div
+                @click="ShowHidden()"
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Show Hidden</p>
+              </div>
+            </a>
+            <a
+              v-if="this.filterDatesBool === false"
+              @click="popupFilter = true"
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Filter</p>
+              </div> </a
+            ><a
+              v-if="this.filterDatesBool === true"
+              @click="UndoFilter()"
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Undo Filter</p>
+              </div>
+            </a>
           </div>
           <div>
             <button
@@ -131,6 +163,12 @@
                       <th class="py-3 px-6 text-left"></th>
 
                       <th class="py-3 px-6 text-center">Date</th>
+                      <th
+                        v-if="this.currentUserRole === 'ADMIN'"
+                        class="py-3 px-6 text-left"
+                      >
+                        User
+                      </th>
                       <th class="py-3 px-6 text-center">Type de maintenance</th>
                       <th class="py-3 px-6 text-center">Total Hours</th>
                       <th class="py-3 px-6 text-center">Status</th>
@@ -141,6 +179,7 @@
                     <ResultRow
                       v-for="task in tasks"
                       v-bind:key="task.id"
+                      :ShowDel="ShowDel"
                       :task="task"
                       @add-id="addIdToArray"
                     />
@@ -178,6 +217,11 @@
         </div>
       </div>
     </div>
+    <Filter
+      :show-popup="popupFilter"
+      @close="popupFilter = false"
+      @task-filter="Filter"
+    />
   </div>
 </template>
 
@@ -186,6 +230,7 @@ import AddClientPopup from "./AddClientPopup.vue";
 import ResultRow from "./ResultRow.vue";
 import navbar from "./Navbar.vue";
 import axios from "axios";
+import Filter from "./Filter.vue";
 
 export default {
   setup() {
@@ -195,8 +240,12 @@ export default {
     ResultRow,
     AddClientPopup,
     navbar,
+    Filter,
   },
   methods: {
+    ShowHidden() {
+      this.ShowDel = !this.ShowDel;
+    },
     async calculateAllTime() {
       try {
         const response = await axios.get("/tasks/calculate-total-time", {
@@ -205,7 +254,6 @@ export default {
 
         this.totalTime = response.data; // The backend sends the formatted total time
 
-        console.log("Total Time:", totalTime);
         // You can display the total time or use it as needed
       } catch (error) {
         console.error("Error calculating total time:", error);
@@ -249,7 +297,7 @@ export default {
     async fetchTasks() {
       const id = localStorage.getItem("clientResult");
       await axios
-        .get(`/tasks?clientId=${id}`)
+        .get(`/tasks?clientId=${id}&filter=${this.filterDates}`)
         .then((response) => {
           this.tasks = response.data;
           this.getDateForm();
@@ -261,7 +309,7 @@ export default {
     async fetchTasksDone() {
       const id = localStorage.getItem("clientResult");
       await axios
-        .get(`/tasks/?clientId=${id}&type=Done`)
+        .get(`/tasks/?clientId=${id}&type=Done&filter=${this.filterDates}`)
         .then((response) => {
           this.tasks = response.data;
           this.getDateForm();
@@ -273,7 +321,7 @@ export default {
     async fetchTasksPending() {
       const id = localStorage.getItem("clientResult");
       await axios
-        .get(`/tasks/?clientId=${id}&type=Pending`)
+        .get(`/tasks/?clientId=${id}&type=Pending&filter=${this.filterDates}`)
         .then((response) => {
           this.tasks = response.data;
           this.getDateForm();
@@ -327,11 +375,7 @@ export default {
         const response = await axios.get("/calculate-total-time", {
           params: { idArray: this.idArray },
         });
-
-        const totalTime = response.data; // The backend sends the formatted total time
-
-        console.log("Total Time:", totalTime);
-        // You can display the total time or use it as needed
+        const totalTime = response.data;
       } catch (error) {
         console.error("Error calculating total time:", error);
       }
@@ -342,13 +386,60 @@ export default {
     isSelected(button) {
       return this.selectedButton === button;
     },
+    Filter(value) {
+      this.filterDatesBool = true;
+      this.filterDates = value;
+      this.filterDates[0] = this.convertDateAll(this.filterDates[0]);
+      this.filterDates[1] = this.convertDateAll(this.filterDates[1]);
+      console.log(this.filterDates);
+      this.fetchTasks();
+    },
+    UndoFilter() {
+      this.filterDatesBool = false;
+      this.filterDates = [
+        "Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)",
+        "Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)",
+      ];
+      this.fetchTasks();
+    },
+    convertDateAll(timeString) {
+      // Split the time string into year, month, and day
+      const [year, month, day] = timeString.split("-");
+
+      // Create a new Date object with the parsed year, month (0-indexed), and day
+      const currentDate = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day)
+      );
+      return currentDate;
+    },
+    fetchUserRole() {
+      axios
+        .get(`/users/current-user-get`)
+        .then((response) => {
+          this.currentUserRole = response.data.role;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   mounted() {
+    this.fetchUserRole();
+
     this.fetchUser();
     this.fetchTasks();
   },
   data() {
     return {
+      currentUserRole: "",
+      popupFilter: false,
+      filterDatesBool: false,
+      filterDates: [
+        "Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)",
+        "Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)",
+      ],
       popup: false,
       client: {},
       tasks: [],
@@ -357,6 +448,7 @@ export default {
       totalTime: "Vide",
       totalDistance: "Vide",
       selectedButton: "all",
+      ShowDel: false,
     };
   },
 };

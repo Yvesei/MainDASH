@@ -13,14 +13,22 @@
           <div
             class="py-3 px-4 flex items-center text-sm font-medium leading-none text-gray-600 bg-gray-200 hover:bg-gray-300 cursor-pointer rounded"
           >
-            <p>Sort By:</p>
+            <p>Show:</p>
             <select
+              v-model="selected"
+              @change="selectedFunc()"
               aria-label="select"
               class="focus:text-indigo-600 focus:outline-none bg-transparent ml-1"
             >
-              <option class="text-sm text-indigo-800">Latest</option>
-              <option class="text-sm text-indigo-800">Oldest</option>
-              <option class="text-sm text-indigo-800">Latest</option>
+              <option v-bind:value="1" class="text-sm text-indigo-800">
+                Undeleted tasks only
+              </option>
+              <option v-bind:value="2" class="text-sm text-indigo-800">
+                Deleted tasks only
+              </option>
+              <option v-bind:value="3" class="text-sm text-indigo-800">
+                All
+              </option>
             </select>
           </div>
         </div>
@@ -82,6 +90,27 @@
                 <p>Pending</p>
               </div>
             </a>
+            <a
+              v-if="this.filterDatesBool === false"
+              @click="popupFilter = true"
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Filter</p>
+              </div> </a
+            ><a
+              v-if="this.filterDatesBool === true"
+              @click="UndoFilter()"
+              class="hover:cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:bg-indigo-50 focus:ring-indigo-800 ml-4 sm:ml-8"
+            >
+              <div
+                class="py-2 px-8 text-gray-600 hover:text-indigo-700 hover:bg-indigo-100 rounded-full"
+              >
+                <p>Undo Filter</p>
+              </div>
+            </a>
           </div>
           <button
             @click="popup = true"
@@ -99,6 +128,12 @@
                   <thead>
                     <tr class="uppercase text-sm leading-normal">
                       <th class="py-3 px-6 text-left">Client</th>
+                      <th
+                        v-if="this.currentUserRole === 'ADMIN'"
+                        class="py-3 px-6 text-left"
+                      >
+                        User
+                      </th>
                       <th class="py-3 px-6 text-center">Date</th>
                       <th class="py-3 px-6 text-center">Heure</th>
                       <th class="py-3 px-6 text-center">Status</th>
@@ -125,6 +160,11 @@
       @close="popup = false"
       @task-added="fetchTasks"
     />
+    <Filter
+      :show-popup="popupFilter"
+      @close="popupFilter = false"
+      @task-filter="Filter"
+    />
   </div>
 </template>
 
@@ -133,27 +173,71 @@ import axios from "axios";
 import AddTaskPopup from "./AddTaskPopup.vue";
 import navbar from "./Navbar.vue";
 import TableTr from "./TableTr.vue";
+import Filter from "./Filter.vue";
 
 export default {
   setup() {
     name: "hero";
   },
   mounted() {
-    this.fetchTasks();
+    this.fetchUser();
+    if (this.selected == "1") {
+      this.fetchTasks();
+    }
+    if (this.selected == "2") {
+      this.fetchTasks();
+    }
+    if (this.selected == "3") {
+      this.fetchTasks();
+    }
   },
   components: {
     TableTr,
     AddTaskPopup,
+    Filter,
     navbar,
   },
   data() {
     return {
+      currentUserRole: "",
+      filterDates: [
+        "Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)",
+        "Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)",
+      ],
       popup: false,
+      popupFilter: false,
       tasks: [],
       selectedButton: "all",
+      selected: "1",
+      isdeleted: "undeleted",
+      filterDatesBool: false,
     };
   },
   methods: {
+    Filter(value) {
+      console.log(value);
+      if (value[1] == "") {
+        this.filterDates = ["2012-12-12", "2999-12-12"];
+        console.log("entered ");
+      } else this.filterDates = value;
+
+      this.filterDatesBool = true;
+
+      this.filterDates[0] = this.convertDateAll(this.filterDates[0]);
+      this.filterDates[1] = this.convertDateAll(this.filterDates[1]);
+      console.log(this.filterDates);
+
+      this.fetchTasks();
+    },
+    UndoFilter() {
+      this.filterDatesBool = false;
+      this.filterDates = [
+        "Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)",
+        "Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)",
+      ];
+      this.fetchTasks();
+    },
+    selectedFunc() {},
     selectButton(button) {
       this.selectedButton = button;
     },
@@ -161,14 +245,18 @@ export default {
       return this.selectedButton === button;
     },
     fetchTasks() {
+      if (this.selected == "1") this.isdeleted = "undeleted";
+      if (this.selected == "2") this.isdeleted = "deleted";
+      if (this.selected == "3") this.isdeleted = "none";
+
       axios
-        .get(`/tasks/latest`)
+        .get(
+          `/tasks/latest?deleted=${this.isdeleted}&filter=${this.filterDates}`
+        )
         .then((response) => {
           this.tasks = response.data.map((task) => {
             task.Date = this.extractDate(task.Date);
-
             task.dateStart = this.extractHours(task.dateStart);
-
             task.dateEnd = this.extractHours(task.dateEnd);
             return task;
           });
@@ -178,8 +266,13 @@ export default {
         });
     },
     fetchTasksDone() {
+      if (this.selected == "1") this.isdeleted = "undeleted";
+      if (this.selected == "2") this.isdeleted = "deleted";
+      if (this.selected == "3") this.isdeleted = "none";
       axios
-        .get(`/tasks/latest?type=done`)
+        .get(
+          `/tasks/latest?type=Done&deleted=${this.isdeleted}&filter=${this.filterDates}`
+        )
         .then((response) => {
           this.tasks = response.data.map((task) => {
             task.Date = this.extractDate(task.Date);
@@ -193,8 +286,13 @@ export default {
         });
     },
     fetchTasksPending() {
+      if (this.selected == "1") this.isdeleted = "undeleted";
+      if (this.selected == "2") this.isdeleted = "deleted";
+      if (this.selected == "3") this.isdeleted = "none";
       axios
-        .get(`/tasks/latest?type=pending`)
+        .get(
+          `/tasks/latest?type=Pending&deleted=${this.isdeleted}&filter=${this.filterDates}`
+        )
         .then((response) => {
           this.tasks = response.data.map((task) => {
             task.Date = this.extractDate(task.Date);
@@ -236,6 +334,29 @@ export default {
         .toString()
         .padStart(2, "0")}`;
       return `${formattedTime}`;
+    },
+    convertDateAll(timeString) {
+      // Split the time string into year, month, and day
+      const [year, month, day] = timeString.split("-");
+
+      // Create a new Date object with the parsed year, month (0-indexed), and day
+      const currentDate = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day)
+      );
+
+      return currentDate;
+    },
+    fetchUser() {
+      axios
+        .get(`/users/current-user-get`)
+        .then((response) => {
+          this.currentUserRole = response.data.role;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };

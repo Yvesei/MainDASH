@@ -1,23 +1,40 @@
 <template>
-  <tr class="border-b border-gray-200 hover:bg-gray-100">
+  <tr
+    v-if="
+      ShowDell() &&
+      (this.currentUserId === this.task.createdBy ||
+        this.currentUserRole === 'ADMIN')
+    "
+    :class="
+      task.deleted == true
+        ? 'bg-red-200 hover:bg-red-200'
+        : 'border-gray-200 hover:bg-gray-100'
+    "
+    class="border-b"
+  >
     <td>
       <div @click="addidtoarray()" class="ml-5">
         <div
           :class="this.clicked == true ? 'bg-blue-500' : 'bg-gray-200'"
           class="rounded-sm w-5 h-5 flex flex-shrink-0 justify-center items-center relative"
-        >
-          <!-- <input
-            placeholder="checkbox"
-            type="checkbox"
-            class="focus:opacity-100 checkbox opacity-0 absolute cursor-pointer w-full h-full"
-          /> -->
-        </div>
+        ></div>
       </div>
     </td>
 
     <td class="py-3 px-6 text-center whitespace-nowrap">
       <div class="">
         <span class="font-medium">{{ task.Date }}</span>
+      </div>
+    </td>
+    <td
+      v-if="this.currentUserRole === 'ADMIN'"
+      class="ml-6 py-3 px-6 text-center"
+    >
+      <div class="flex items-center">
+        <div class="mr-2">
+          <img class="w-6 h-6 rounded-full" :src="getimgUser()" alt="pic" />
+        </div>
+        <span>{{ user.name }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
@@ -124,7 +141,7 @@
                 <!-- File uplaod -->
                 <div class="bg-white p7 rounded mx-auto">
                   <div class="relative flex flex-col p-4 text-gray-400">
-                    <div class="m-auto flex">
+                    <div v-if="task.supplyFile != ''" class="m-auto flex">
                       <div
                         v-for="num of task.supplyFile.length"
                         v-bind:key="num"
@@ -314,6 +331,7 @@ export default {
       type: Object,
       required: true,
     },
+    ShowDel: Boolean,
   },
   emits: ["addId"],
   methods: {
@@ -348,7 +366,6 @@ export default {
       return `${formattedTime}`;
     },
     getFile(num) {
-      console.log(this.task.supplyFile);
       num--;
       return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile[num]}`;
     },
@@ -376,21 +393,58 @@ export default {
           console.error(error);
         });
     },
+    ShowDell() {
+      if (this.ShowDel == 1 && this.task.deleted == true) {
+        return 1;
+      }
+      if (this.ShowDel == 0 && this.task.deleted == false) {
+        return 1;
+      }
+    },
+    getimgUser() {
+      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
+    },
+    async fetchCreatedBy(id) {
+      const response = await axios
+        .get(`users/${id}`)
+        .then((response) => {
+          this.user = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    fetchUser() {
+      axios
+        .get(`/users/current-user-get`)
+        .then((response) => {
+          this.currentUserRole = response.data.role;
+          this.currentUserId = response.data.id;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   mounted() {
+    this.fetchUser();
     this.task.supplyFile = this.task.supplyFile.split(",");
     this.vide();
     this.totalTime();
+    this.fetchCreatedBy(this.task.createdBy);
   },
   components: {
     AddTaskPopup,
   },
   data() {
     return {
+      currentUserId: Number,
+      currentUserRole: "",
       popup: false,
       isOpen: false,
       clicked: false,
       totalHours: "",
+      user: {},
     };
   },
 };

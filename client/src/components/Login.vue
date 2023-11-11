@@ -59,17 +59,6 @@
             Log In
           </button>
         </form>
-
-        <div class="mb-4 text-sm flex justify-between items-center mt-3">
-          <p>If you don't have an account...</p>
-          <router-link to="/signup"
-            ><button
-              class="py-2 px-5 ml-3 bg-white border rounded-xl hover:scale-110 duration-300 border-blue-400"
-            >
-              Register
-            </button></router-link
-          >
-        </div>
       </div>
     </div>
   </section>
@@ -96,9 +85,9 @@ export default {
       });
 
       if (response.data.success) {
-        // Set the token as an HttpOnly cookie
         Cookies.set("token", response.data.token);
-        this.$router.push("/");
+        if (response.data.role === "ADMIN") this.$router.push("/");
+        else this.$router.push("/tasks");
       } else {
         this.WrongCred = true;
       }

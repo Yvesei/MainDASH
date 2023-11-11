@@ -143,7 +143,7 @@ export default {
           distance: this.distance,
           image: uploadedImageName,
         });
-        console.log(response);
+
         this.$emit("client-added");
         this.closePopup();
       } catch (error) {
@@ -165,7 +165,6 @@ export default {
         const response = await axios.post("tasks/upload", formData);
         return response.data.name; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },

@@ -226,7 +226,6 @@ export default {
         const response = await axios.post("users/upload", formData);
         return response.data.name; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },

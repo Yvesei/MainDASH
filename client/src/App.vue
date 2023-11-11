@@ -12,6 +12,14 @@ import Result from "./components/Result.vue";
 
 <script>
 export default {
+  watch: {
+    $route: {
+      immediate: true,
+      handler(to, from) {
+        document.title = to.meta.title || "MainDash";
+      },
+    },
+  },
   name: "app",
   components: {
     SignUp,

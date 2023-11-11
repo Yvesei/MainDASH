@@ -14,14 +14,16 @@ model User {
   email    String  @unique
   password String
   role     Role
+  Task     Task[]
 }
 
 model Client {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
   number   String?
   distance Int?
   image    String?
+  deleted  Boolean? @default(false)
   Task     Task[]
 }
 
@@ -41,6 +43,9 @@ model Task {
   status        Boolean?
   client        Client?   @relation(fields: [clientId], references: [id])
   clientId      Int?
+  user          User?     @relation(fields: [createdBy], references: [id])
+  createdBy     Int?
+  deleted       Boolean?  @default(false)
 }
 
 enum Role {

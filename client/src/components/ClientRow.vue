@@ -1,5 +1,13 @@
 <template>
-  <tr class="border-b border-gray-200 hover:bg-gray-100">
+  <tr
+    v-if="ShowDell()"
+    :class="
+      client.deleted == true
+        ? 'bg-red-200 hover:bg-red-200'
+        : 'border-gray-200 hover:bg-gray-100'
+    "
+    class="border-b"
+  >
     <td class="ml-6 py-3 px-6 text-center">
       <div @click="Result()" class="hover:cursor-pointer flex items-center">
         <div class="mr-2">
@@ -91,8 +99,17 @@ export default {
       type: Object,
       required: true,
     },
+    ShowDel: Boolean,
   },
   methods: {
+    ShowDell() {
+      if (this.ShowDel == 1 && this.client.deleted == true) {
+        return 1;
+      }
+      if (this.ShowDel == 0 && this.client.deleted == false) {
+        return 1;
+      }
+    },
     getTasksNumber() {
       axios
         .get(`/tasks/count?id=${this.client.id}`)
@@ -105,6 +122,7 @@ export default {
     },
     deleteClient() {
       const response = axios.delete(`clients/${this.client.id}`, {});
+      location.reload();
       this.$emit("client-deleted");
     },
     getimg() {

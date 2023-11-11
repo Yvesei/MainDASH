@@ -615,7 +615,6 @@ export default {
       return currentDate;
     },
     async onFileChange(e) {
-      console.log("onchange ");
       const selectedFile = e.target.files[0];
       this.selectedFile = selectedFile;
       if (selectedFile) {
@@ -630,24 +629,17 @@ export default {
         const response = await axios.post("tasks/upload", formData);
         return response.data.name; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },
     async onFileChangeFourniture(e) {
-      console.log("onchange fourniture");
-      console.log(e.target.files);
-
       for (const file of e.target.files) {
         this.selectedFileFourniture.push(file);
       }
-      console.log(this.selectedFileFourniture);
+
       if (this.selectedFileFourniture) {
-        console.log(this.selectedFileFourniture);
         this.selectedFileFournitureFront = [];
         for (const file of this.selectedFileFourniture) {
-          console.log("file : ");
-          console.log(file);
           this.selectedFileFournitureFront.push(URL.createObjectURL(file));
         }
 
@@ -656,10 +648,8 @@ export default {
     },
     getFile(num) {
       num--;
-      console.log(num);
-      console.log(this.selectedFileFourniture[num].name);
+
       if (this.selectedFileFourniture) {
-        console.log(this.selectedFileFourniture[num]);
         const blob = new Blob([this.selectedFileFourniture[num]], {
           type: this.selectedFileFourniture[num].type,
         });
@@ -671,16 +661,14 @@ export default {
       try {
         var responseName = [];
         for (const file of this.selectedFileFourniture) {
-          console.log(file);
           const formData = new FormData();
           formData.append("file", file);
           const response = await axios.post("tasks/uploadSupply", formData);
           responseName.push(response.data.name);
         }
-        console.log(responseName);
+
         return responseName; // Return the image name
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },
@@ -702,7 +690,6 @@ export default {
       return `http://192.168.1.146:3000/uploads/tasks/${clientImage}`;
     },
     filterClients() {
-      console.log("filtered clients");
       const searchQuery = this.name.toLowerCase();
       if (searchQuery === "") {
         // If the input is empty, show all clients

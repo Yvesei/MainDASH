@@ -47,7 +47,6 @@ router.post("/upload", (req, res) => {
     `${__dirname}/../public/uploads/users/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -69,7 +68,6 @@ router.post("/uploadEdit", (req, res) => {
     `${__dirname}/../public/uploads/users/${myFile.name}`,
     function (err) {
       if (err) {
-        console.log(err);
         return res.status(500).send({ msg: "Error occured" });
       }
       // returing the response with file path and name
@@ -99,7 +97,6 @@ router.get("/:id", function (req, res, next) {
 
 //post a new user
 router.post("/", function (req, res, next) {
-  console.log(req.body);
   prisma.user
     .create({ data: req.body })
     .then((user) => res.send(user))
@@ -135,11 +132,10 @@ router.patch("/current-user", verifyToken, function (req, res, next) {
 
   for (const propertyKey of propertyKeys) {
     if (userdata[propertyKey] === "") {
-      console.log(`Property name: ${propertyKey}`);
       delete userdata[propertyKey];
     }
   }
-  console.log(userdata);
+
   prisma.user
     .update({
       where: {

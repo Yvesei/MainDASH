@@ -7,6 +7,7 @@ const AdminUsers = prisma.user
       email: "admin",
       password: "admin",
       role: "ADMIN",
+      image: "avatar.png",
     },
   })
   .catch((error) => {

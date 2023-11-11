@@ -6,19 +6,37 @@ import axios from "axios";
 import Home from "./pages/Home.vue";
 import Login from "./pages/Login.vue";
 import Tasks from "./pages/Tasks.vue";
-import SignUp from "./pages/SignUp.vue";
 import Settings from "./pages/Settings.vue";
 import Clients from "./pages/Clients.vue";
 import Result from "./pages/Result.vue";
 
 const routes = [
-  { path: "/", component: Home, meta: { requiresAuth: true } },
-  { path: "/tasks", component: Tasks, meta: { requiresAuth: true } },
-  { path: "/clients", component: Clients, meta: { requiresAuth: true } },
-  { path: "/login", component: Login },
-  { path: "/result", component: Result, meta: { requiresAuth: true } },
-  { path: "/signup", component: SignUp, meta: { requiresAuth: true } },
-  { path: "/settings", component: Settings, meta: { requiresAuth: true } },
+  {
+    path: "/",
+    component: Home,
+    meta: { requiresAuth: true, title: "MainDash - Dashboard" },
+  },
+  {
+    path: "/tasks",
+    component: Tasks,
+    meta: { requiresAuth: true, title: "MainDash - Tasks" },
+  },
+  {
+    path: "/clients",
+    component: Clients,
+    meta: { requiresAuth: true, title: "MainDash - Clients" },
+  },
+  { path: "/login", component: Login, title: "MainDash - Login" },
+  {
+    path: "/result",
+    component: Result,
+    meta: { requiresAuth: true, title: "MainDash - Result" },
+  },
+  {
+    path: "/settings",
+    component: Settings,
+    meta: { requiresAuth: true, title: "MainDash - Settings" },
+  },
 ];
 
 const router = createRouter({

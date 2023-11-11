@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
       const token = jwt.sign(
         {
           id: user.id,
-          email: user.email,
+          role: user.role,
         },
         process.env.JWT_KEY,
         {
@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
       // Set the token as an HttpOnly cookie
       res.cookie("token", token, { sameSite: "None", secure: true });
 
-      res.json({ success: true, token });
+      res.json({ success: true, token, role: user.role });
     } else {
       res.json({ success: false });
     }

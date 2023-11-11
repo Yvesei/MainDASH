@@ -1,11 +1,33 @@
 <template>
-  <tr class="border-b border-gray-200 hover:bg-gray-100">
+  <tr
+    v-if="
+      this.currentUserId === this.task.createdBy ||
+      this.currentUserRole === 'ADMIN'
+    "
+    :class="
+      task.deleted == true
+        ? 'bg-red-200 hover:bg-red-200'
+        : 'border-gray-200 hover:bg-gray-100'
+    "
+    class="border-b"
+  >
     <td class="ml-6 py-3 px-6 text-center">
       <div class="flex items-center">
         <div class="mr-2">
           <img class="w-6 h-6 rounded-full" :src="getimg()" alt="pic" />
         </div>
         <span>{{ client.name }}</span>
+      </div>
+    </td>
+    <td
+      v-if="this.currentUserRole === 'ADMIN'"
+      class="ml-6 py-3 px-6 text-center"
+    >
+      <div class="flex items-center">
+        <div class="mr-2">
+          <img class="w-6 h-6 rounded-full" :src="getimgUser()" alt="pic" />
+        </div>
+        <span>{{ user.name }}</span>
       </div>
     </td>
     <td class="py-3 px-6 text-center whitespace-nowrap">
@@ -131,21 +153,24 @@ export default {
   },
   data() {
     return {
+      currentUserId: Number,
       popup: false,
       editpopup: false,
       client: {},
       currentUserRole: "",
+      user: {},
     };
   },
   props: {
     task: {
-      type: Object, // Specify the type of the prop
-      required: true, // Set to true if the prop is required
+      type: Object,
+      required: true,
     },
   },
   mounted() {
     this.fetchClient(this.task.clientId);
     this.fetchUser();
+    this.fetchCreatedBy(this.task.createdBy);
   },
   components: {
     AddTaskPopup,
@@ -157,6 +182,7 @@ export default {
         .get(`/users/current-user-get`)
         .then((response) => {
           this.currentUserRole = response.data.role;
+          this.currentUserId = response.data.id;
         })
         .catch((error) => {
           console.error(error);
@@ -176,6 +202,16 @@ export default {
       }
       this.$emit("task-deleted");
     },
+    async fetchCreatedBy(id) {
+      const response = await axios
+        .get(`users/${id}`)
+        .then((response) => {
+          this.user = response.data;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     async fetchClient(id) {
       const response = await axios
         .get(`clients/${id}`)
@@ -188,6 +224,9 @@ export default {
     },
     getimg() {
       return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
+    },
+    getimgUser() {
+      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
     },
   },
 };
