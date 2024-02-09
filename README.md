@@ -48,7 +48,7 @@ npm install
 In the server folder, create a .env file and provide the necessary environment variables. You can use this .env file as a reference.
 
 ```bash
-DATABASE_URL="mysql://root:@192.168.1.6:3306/blog"
+DATABASE_URL="mysql://root:@localhost:3306/blog"
 
 JWT_KEY=f2b11d8bbcfe4156be5faca2873b1cd7a20fedb5b0a40748b72a8f47451cfbd8
 ```

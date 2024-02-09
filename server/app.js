@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 // Define an array of allowed origins
 const allowedOrigins = [
   "https://1p5kdkfr-5173.uks1.devtunnels.ms",
-  "http://192.168.1.6:80",
+  "http://localhost:80",
   "http://127.0.0.1:80",
   "http://172.17.0.120:80/",
   "http://192.168.137.100:8080/",

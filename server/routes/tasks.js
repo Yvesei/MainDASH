@@ -3,6 +3,10 @@ var router = express.Router();
 const moment = require("moment");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+
+// Initialize ClamAV scanner
+// const clamscan = new ClamScan();
+const mime = require("mime-types");
 const { verifyToken } = require("../middleware/authMiddleware");
 // upload
 const fileUpload = require("express-fileupload");
@@ -167,8 +171,29 @@ router.post("/upload", (req, res) => {
   if (!req.files) {
     return res.send({ name: "avatar.png", path: "/avatar.png" });
   }
+  function isAllowedImageType(mimeType) {
+    const allowedImageTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/bmp",
+      "image/tiff",
+      "image/webp",
+      "image/svg+xml",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+    ];
 
+    return allowedImageTypes.includes(mimeType);
+  }
   const myFile = req.files.file;
+  const buffer = myFile.data;
+
+  const mimeType = mime.lookup(myFile.name);
+  if (!mimeType || !isAllowedImageType(mimeType)) {
+    return res.status(400).send({ msg: "Invalid file type." });
+  }
+
   const myFileSplit = myFile.name.split(".");
   const date = new Date();
   myFile.name = date.getTime() + "." + myFileSplit[1];
@@ -184,13 +209,49 @@ router.post("/upload", (req, res) => {
     }
   );
 });
-
-router.post("/uploadSupply", (req, res) => {
+const tmp = require("tmp-promise");
+const fs = require("fs").promises;
+const ClamScan = require("clamscan");
+// Initialize ClamAV scanner
+const clamscan = new ClamScan();
+router.post("/uploadSupply", async (req, res) => {
   if (!req.files) {
     return res.send({ name: "" });
   }
-
   const myFile = req.files.file;
+
+  function isAllowedImageType(mimeType) {
+    const allowedImageTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/bmp",
+      "image/tiff",
+      "image/webp",
+      "image/svg+xml",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+      "application/pdf",
+      "text/plain",
+      "text/markdown",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword",
+    ];
+
+    return allowedImageTypes.includes(mimeType);
+  }
+  const buffer = myFile.data;
+
+  const mimeType = mime.lookup(myFile.name);
+  if (!mimeType || !isAllowedImageType(mimeType)) {
+    return res.status(400).send({ msg: "Invalid file type." });
+  }
+
+  const maxFileSize = 5 * 1024 * 1024;
+  if (myFile.size > maxFileSize) {
+    return res.status(400).send({ msg: "File size exceeds the limit." });
+  }
+
   var lastIndex = myFile.name.lastIndexOf(".");
   const myFileSplit = [
     myFile.name.slice(0, lastIndex),

@@ -34,7 +34,7 @@
                 v-model="this.start"
                 type="text"
                 name="Company"
-                placeholder="eg. 11:23"
+                placeholder="2023-11-6"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
@@ -48,7 +48,7 @@
                 v-model="this.finish"
                 type="email"
                 name="Email Address"
-                placeholder="eg. 11:23"
+                placeholder="2023-11-31"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>

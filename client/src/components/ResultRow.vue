@@ -367,7 +367,7 @@ export default {
     },
     getFile(num) {
       num--;
-      return `http://192.168.1.146:3000/uploads/tasks/${this.task.supplyFile[num]}`;
+      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile[num]}`;
     },
     vide() {
       const propertyKeys = Object.keys(this.task);
@@ -402,7 +402,7 @@ export default {
       }
     },
     getimgUser() {
-      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
+      return `http://localhost:3000/uploads/users/${this.user.image}`;
     },
     async fetchCreatedBy(id) {
       const response = await axios

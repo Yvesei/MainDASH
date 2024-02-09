@@ -785,11 +785,11 @@ export default {
       }
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
+      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },
     getFile(num) {
       num--;
-      return `http://192.168.1.146:3000/uploads/tasks/${this.supplyFile[num]}`;
+      return `http://localhost:3000/uploads/tasks/${this.supplyFile[num]}`;
     },
     deleteFile(num) {
       num--;

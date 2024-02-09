@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     getimg() {
-      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
+      return `http://localhost:3000/uploads/users/${this.user.image}`;
     },
   },
   data() {

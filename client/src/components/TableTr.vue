@@ -119,7 +119,10 @@
           </svg>
         </div>
 
-        <div class="w-4 transform hover:text-purple-500 hover:scale-110">
+        <div
+          v-if="task.status == false"
+          class="w-4 transform hover:text-purple-500 hover:scale-110"
+        >
           <svg
             @click="makeDone()"
             xmlns="http://www.w3.org/2000/svg"
@@ -223,10 +226,10 @@ export default {
         });
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/tasks/${this.client.image}`;
+      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
     },
     getimgUser() {
-      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
+      return `http://localhost:3000/uploads/users/${this.user.image}`;
     },
   },
 };

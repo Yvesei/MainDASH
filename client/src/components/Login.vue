@@ -2,14 +2,14 @@
   <section class="border-red-500 min-h-screen flex items-center justify-center">
     <div
       style="border: 1px solid #f7f7f7"
-      class="p-5 flex rounded-2xl shadow-lg max-w-3xl"
+      class="w-[26rem] p-5 flex justify-center rounded-2xl shadow-lg"
     >
-      <div class="md:w-2/2 px-5">
+      <div class="px-5">
         <h2 class="mt-4 text-2xl font-bold text-[#002D74]">Login</h2>
         <p class="text-sm mt-4 text-[#002D74]">
           If you have an account, please login
         </p>
-        <form @submit.prevent class="mt-6" action="#" method="POST">
+        <form @submit.prevent class="w-[20rem] mt-6" action="#" method="POST">
           <div>
             <label class="block text-gray-700">Email Address</label>
             <input

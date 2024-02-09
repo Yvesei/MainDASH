@@ -10,7 +10,7 @@
         class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
         <div class="flex justify-between">
-          <h5 class="mb-0 font-bold dark:text-white">Client</h5>
+          <h5 class="mb-0 font-bold dark:text-white">Edit User</h5>
 
           <svg
             @click="closeUserPopup"
@@ -281,7 +281,7 @@ export default {
       }
     },
     getimg() {
-      return `http://192.168.1.146:3000/uploads/users/${this.user.image}`;
+      return `http://localhost:3000/uploads/users/${this.user.image}`;
     },
   },
   data() {
