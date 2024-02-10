@@ -1,20 +1,25 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Cookies from "vue-cookies";
 
 import axios from "axios";
 
-import Home from "./pages/Home.vue";
-import Login from "./pages/Login.vue";
-import Tasks from "./pages/Tasks.vue";
-import Settings from "./pages/Settings.vue";
-import Clients from "./pages/Clients.vue";
-import Result from "./pages/Result.vue";
+const Home = () => import("./pages/Home.vue");
+const Login = () => import("./pages/Login.vue");
+const Tasks = () => import("./pages/Tasks.vue");
+const Settings = () => import("./pages/Settings.vue");
+const Clients = () => import("./pages/Clients.vue");
+const Result = () => import("./pages/Result.vue");
+
+const NotFound = () => import("./pages/NotFound.vue");
 
 const routes = [
   {
     path: "/",
     component: Home,
-    meta: { requiresAuth: true, title: "MainDash - Dashboard" },
+    meta: {
+      requiresAuth: true,
+      adminOnly: true,
+      title: "MainDash - Dashboard",
+    },
   },
   {
     path: "/tasks",
@@ -26,7 +31,7 @@ const routes = [
     component: Clients,
     meta: { requiresAuth: true, title: "MainDash - Clients" },
   },
-  { path: "/login", component: Login, title: "MainDash - Login" },
+  { path: "/login", component: Login, meta: { title: "MainDash - Login" } },
   {
     path: "/result",
     component: Result,
@@ -36,6 +41,11 @@ const routes = [
     path: "/settings",
     component: Settings,
     meta: { requiresAuth: true, title: "MainDash - Settings" },
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: NotFound,
+    meta: { title: "MainDash - Page not found" },
   },
 ];
 
@@ -53,13 +63,15 @@ router.beforeEach(async (to, from, next) => {
       const response = await axios.get("users/verify-user", {
         withCredentials: true,
       });
-      if (response.data.success) {
-        next();
+      if (!response.data.success) {
+        next({ path: "/login", query: { redirect: to.fullPath } });
+      } else if (to.meta.adminOnly && response.data.role !== "ADMIN") {
+        next("/tasks");
       } else {
-        next("/login");
+        next();
       }
     } catch (error) {
-      next("/login");
+      next({ path: "/login", query: { redirect: to.fullPath } });
     }
   } else {
     next();

@@ -1,219 +1,404 @@
 <template>
-  <form class="relative w-2/3 flex mt-6">
-    <div
-      class="flex flex-row items-center justify-center bg-grey-lighter round"
-      style="flex-direction: column"
-    >
-      <label
-        class="flex flex-col items-center px-6 py-6 mb-4 mt-8 bg-white text-blue rounded-full shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white"
-      >
-        <svg
-          class="w-8 h-8"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"
-          />
-        </svg>
-
-        <input type="file" class="hidden" />
-      </label>
-      <label
-        class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-        for="First Name"
-        >Profile</label
-      >
+  <main id="main-content" tabindex="-1" class="settings-page">
+    <header>
+      <p class="eyebrow">WORKSPACE / SETTINGS</p>
+      <h1>Settings</h1>
+      <p>Manage your profile and sign-in details.</p>
+    </header>
+    <div v-if="loading" class="settings-card state" role="status">
+      Loading your profile…
     </div>
-    <div
-      active=""
-      form="user"
-      class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white opacity-100 dark:bg-slate-850 rounded-2xl bg-clip-border"
-    >
-      <div class="flex justify-between">
-        <h5
-          class="flex items-center text-2xl mb-0 font-bold dark:text-white flex"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-8 h-8 mr-2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          Settings
-        </h5>
+    <div v-else-if="loadError" class="settings-card state" role="alert">
+      Could not load your profile. <button @click="load">Try again</button>
+    </div>
+    <form v-else class="settings-card" @submit.prevent="save">
+      <div class="card-heading">
+        <div>
+          <h2>Your profile</h2>
+          <p>This information is visible to your team.</p>
+        </div>
       </div>
-      <div>
-        <!-- file upload -->
-        <div
-          class="flex flex-row items-center justify-center bg-grey-lighter round"
-          style="flex-direction: column"
-        >
-          <label
-            v-bind:class="selectedFileFront ? 'p-0' : 'p-5'"
-            class="mb-4 mt-8 rounded-full border cursor-pointer"
-          >
-            <img
-              v-if="selectedFileFront"
-              class="w-20 h-20 rounded-full"
-              :src="selectedFileFront ? selectedFileFront : getimg()"
-              alt=""
-            />
-            <svg
-              v-if="!selectedFileFront"
-              class="w-10 h-10 fill-black"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-            >
-              <path
-                d="M272 54.6V368c0 8.8-7.2 16-16 16s-16-7.2-16-16V54.6L139.3 155.3c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l128-128c6.2-6.2 16.4-6.2 22.6 0l128 128c6.2 6.2 6.2 16.4 0 22.6s-16.4 6.2-22.6 0L272 54.6zM208 352H64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H448c17.7 0 32-14.3 32-32V384c0-17.7-14.3-32-32-32H304V320H448c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V384c0-35.3 28.7-64 64-64H208v32zm176 64a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"
-              />
-            </svg>
-
-            <input type="file" class="hidden" @change="onFileChange" />
-          </label>
-          <label
-            class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-            for="First Name"
-            >Profile</label
-          >
-        </div>
-
-        <div class="flex flex-wrap mt-4 -mx-3">
-          <div class="w-full max-w-full px-3 flex-0">
-            <label
-              class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-              for="First Name"
-              >Nom</label
-            >
-            <input
-              v-model="name"
-              type="text"
-              name="First Name"
-              placeholder="eg. Michael"
-              class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+      <div class="avatar-row">
+        <img
+          :src="preview || avatarUrl"
+          alt="Your profile picture"
+          width="72"
+          height="72"
+        />
+        <div>
+          <div class="avatar-control">
+            <label for="avatar" class="upload-button">Choose photo</label
+            ><input
+              id="avatar"
+              ref="file"
+              class="sr-only"
+              type="file"
+              name="avatar"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              aria-describedby="avatar-help"
+              @change="onFileChange"
             />
           </div>
-        </div>
-        <div class="flex flex-wrap mt-4 -mx-3">
-          <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0">
-            <label
-              class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-              for="email"
-              >Email</label
-            >
-            <input
-              v-model="email"
-              type="text"
-              name="email"
-              placeholder="ex: user@tridentsystems.com"
-              class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-        </div>
-        <div class="flex flex-wrap mt-4 -mx-3">
-          <div class="w-full max-w-full px-3 flex-0">
-            <label
-              class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-              for="password"
-              >Password</label
-            >
-            <input
-              v-model="password"
-              type="password"
-              name="password"
-              class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div class="flex mt-6 justify-between">
+          <p id="avatar-help">PNG, JPEG, GIF or WebP. Up to 5 MB.</p>
           <button
-            @click="editUser()"
+            v-if="selectedFile"
             type="button"
-            aria-controls="address"
-            next-form-btn=""
-            href="javascript:;"
-            class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
+            class="text-button"
+            @click="clearFile"
           >
-            Modify
+            Remove selection
           </button>
         </div>
       </div>
-    </div>
-  </form>
+      <div class="fields">
+        <label for="profile-name"
+          >Name<input
+            id="profile-name"
+            v-model.trim="name"
+            name="name"
+            required
+            maxlength="191"
+            autocomplete="name" /></label
+        ><label for="profile-email"
+          >Email or login<input
+            id="profile-email"
+            v-model.trim="email"
+            name="username"
+            required
+            maxlength="191"
+            autocomplete="username"
+            spellcheck="false"
+        /></label>
+      </div>
+      <div class="password-section">
+        <h3>Sign-in details</h3>
+        <p>Leave the new password blank to keep your current password.</p>
+        <div class="fields">
+          <label for="profile-new-password"
+            >New password<input
+              id="profile-new-password"
+              v-model="password"
+              name="new-password"
+              type="password"
+              maxlength="1024"
+              autocomplete="new-password" /></label
+          ><label v-if="needsPassword" for="profile-current-password"
+            >Current password<input
+              id="profile-current-password"
+              ref="currentPasswordField"
+              v-model="currentPassword"
+              name="current-password"
+              type="password"
+              required
+              autocomplete="current-password"
+              aria-describedby="current-password-help"
+            /><span id="current-password-help"
+              >Required to change your login or password.</span
+            ></label
+          >
+        </div>
+      </div>
+      <p v-if="error" class="feedback error" role="alert">{{ error }}</p>
+      <p v-if="message" class="feedback" role="status">{{ message }}</p>
+      <div class="form-footer">
+        <button class="save-button" type="submit" :disabled="saving">
+          {{ saving ? "Saving…" : "Save changes" }}
+        </button>
+      </div>
+    </form>
+  </main>
 </template>
-
 <script>
 import axios from "axios";
-
 export default {
-  methods: {
-    // async editUser() {
-
-    // },
-    async editUser() {
-      try {
-        const uploadedImageName = await this.onUploadFile(); // uploaded
-        const response = axios.patch("users/current-user", {
-          name: this.name,
-          image: uploadedImageName,
-          email: this.email,
-          password: this.password,
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    async onFileChange(e) {
-      const selectedFile = e.target.files[0];
-      this.selectedFile = selectedFile;
-      if (selectedFile) {
-        this.selectedFileFront = URL.createObjectURL(selectedFile);
-        this.addedfile = true;
-      }
-    },
-    async onUploadFile() {
-      try {
-        const formData = new FormData();
-        formData.append("file", this.selectedFile);
-        const response = await axios.post("users/uploadEdit", formData);
-        return response.data.name; // Return the image name
-      } catch (error) {
-        throw error;
-      }
-    },
-    getimg() {
-      return `http://localhost:3000/uploads/users/${this.user.image}`;
-    },
-  },
+  name: "Settings",
   data() {
     return {
-      user: {
-        type: Object,
-      },
+      user: {},
       name: "",
-      image: "",
       email: "",
       password: "",
-      selectedFileFront: "",
-      selectedFile: "",
-      addedfile: "",
+      currentPassword: "",
+      selectedFile: null,
+      preview: "",
+      loading: true,
+      loadError: false,
+      saving: false,
+      error: "",
+      message: "",
     };
+  },
+  computed: {
+    avatarUrl() {
+      return `${axios.defaults.baseURL.replace(
+        /\/$/,
+        ""
+      )}/uploads/users/${encodeURIComponent(this.user.image || "avatar.png")}`;
+    },
+    needsPassword() {
+      return this.email !== this.user.email || !!this.password;
+    },
+  },
+  mounted() {
+    this.load();
+  },
+  beforeUnmount() {
+    if (this.preview) URL.revokeObjectURL(this.preview);
+  },
+  methods: {
+    async load() {
+      this.loading = true;
+      this.loadError = false;
+      try {
+        const { data } = await axios.get("/users/current-user-get");
+        this.user = data;
+        this.name = data.name;
+        this.email = data.email;
+      } catch (error) {
+        this.loadError = true;
+      } finally {
+        this.loading = false;
+      }
+    },
+    onFileChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (
+        !["image/png", "image/jpeg", "image/gif", "image/webp"].includes(
+          file.type
+        ) ||
+        file.size > 5 * 1024 * 1024
+      ) {
+        this.clearFile();
+        this.error = "Choose a PNG, JPEG, GIF or WebP image under 5 MB.";
+        return;
+      }
+      if (this.preview) URL.revokeObjectURL(this.preview);
+      this.preview = URL.createObjectURL(file);
+      this.selectedFile = file;
+      this.error = "";
+    },
+    clearFile() {
+      if (this.preview) URL.revokeObjectURL(this.preview);
+      this.preview = "";
+      this.selectedFile = null;
+      if (this.$refs.file) this.$refs.file.value = "";
+    },
+    async save() {
+      if (this.saving) return;
+      this.saving = true;
+      this.error = "";
+      this.message = "";
+      try {
+        let image = this.user.image;
+        if (this.selectedFile) {
+          const data = new FormData();
+          data.append("file", this.selectedFile);
+          image = (await axios.post("/users/uploadEdit", data)).data.name;
+        }
+        const passwordChanged = !!this.password;
+        const payload = { name: this.name, email: this.email, image };
+        if (this.password) payload.password = this.password;
+        if (this.needsPassword) payload.currentPassword = this.currentPassword;
+        const { data } = await axios.patch("/users/current-user", payload);
+        if (passwordChanged) {
+          this.$router.replace({
+            path: "/login",
+            query: { passwordChanged: "1" },
+          });
+          return;
+        }
+        this.user = data;
+        this.name = data.name;
+        this.email = data.email;
+        this.password = "";
+        this.currentPassword = "";
+        this.clearFile();
+        this.message = "Your profile has been updated.";
+        window.dispatchEvent(new Event("maindash-profile-updated"));
+      } catch (error) {
+        this.error =
+          error.response?.status === 403
+            ? "Your current password is incorrect."
+            : error.response?.data?.error ||
+              "Could not save your changes. Please try again.";
+        if (error.response?.status === 403 && this.needsPassword)
+          this.$nextTick(() => this.$refs.currentPasswordField?.focus());
+      } finally {
+        this.saving = false;
+      }
+    },
   },
 };
 </script>
+<style scoped>
+.settings-page {
+  flex: 1;
+  min-width: 0;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px clamp(24px, 4vw, 64px);
+  color: #1f2937;
+}
+.eyebrow {
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+.settings-page h1 {
+  margin: 8px 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+.settings-page header > p:last-child,
+.card-heading p,
+.avatar-row p,
+.password-section > p {
+  color: #6b7280;
+  font-size: 14px;
+}
+.settings-card {
+  margin-top: 32px;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.settings-card.state {
+  color: #6b7280;
+}
+.state button,
+.text-button {
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: underline;
+}
+.card-heading h2 {
+  font-size: 19px;
+  font-weight: 700;
+}
+.card-heading p {
+  margin-top: 5px;
+  font-size: 13px;
+}
+.avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 26px 0;
+}
+.avatar-row img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #f8fafc;
+}
+.avatar-row p {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.upload-button {
+  display: inline-flex;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #4338ca;
+  font-size: 13px;
+  font-weight: 650;
+}
+.text-button {
+  display: block;
+  margin-top: 5px;
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.fields label {
+  display: grid;
+  gap: 8px;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 650;
+}
+.fields input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #1f2937;
+  font-weight: 400;
+}
+.fields label span {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+.password-section {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #e5e7eb;
+}
+.password-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.password-section > p {
+  margin: 5px 0 20px;
+  font-size: 13px;
+}
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 25px;
+  margin-top: 25px;
+  border-top: 1px solid #e5e7eb;
+}
+.save-button {
+  padding: 11px 17px;
+  border-radius: 8px;
+  background: #4338ca;
+  color: white;
+  font-size: 13px;
+  font-weight: 650;
+}
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.feedback {
+  margin-top: 20px;
+  color: #4f46e5;
+  font-size: 13px;
+}
+.feedback.error {
+  color: #b91c1c;
+}
+@media (max-width: 650px) {
+  .settings-page {
+    padding: 28px 18px;
+  }
+  .settings-card {
+    padding: 20px;
+  }
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}
+.avatar-control:focus-within .upload-button {
+  outline: 2px solid #3b82f6;
+  outline-offset: 3px;
+}
+.upload-button:hover {
+  background: #f3f4f6;
+}
+.save-button:hover:not(:disabled) {
+  background: #4f46e5;
+}
+</style>

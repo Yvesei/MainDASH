@@ -29,6 +29,7 @@
       :show-user-popup="edituserpopup"
       :user="user"
       @close="edituserpopup = false"
+      @updated="$emit('updated')"
     />
   </div>
 </template>
@@ -37,7 +38,8 @@ import EditUser from "./EditUser.vue";
 import axios from "axios";
 
 export default {
-  name: "Navbar",
+  name: "AccountUser",
+  emits: ["updated"],
   components: {
     EditUser,
   },
@@ -49,7 +51,9 @@ export default {
   },
   methods: {
     getimg() {
-      return `http://localhost:3000/uploads/users/${this.user.image}`;
+      return `${axios.defaults.baseURL.replace(/\/$/, "")}/uploads/users/${
+        this.user.image
+      }`;
     },
   },
   data() {

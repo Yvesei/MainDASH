@@ -1,97 +1,164 @@
 <template>
-  <section class="border-red-500 min-h-screen flex items-center justify-center">
-    <div
-      style="border: 1px solid #f7f7f7"
-      class="w-[26rem] p-5 flex justify-center rounded-2xl shadow-lg"
-    >
-      <div class="px-5">
-        <h2 class="mt-4 text-2xl font-bold text-[#002D74]">Login</h2>
-        <p class="text-sm mt-4 text-[#002D74]">
-          If you have an account, please login
-        </p>
-        <form @submit.prevent class="w-[20rem] mt-6" action="#" method="POST">
-          <div>
-            <label class="block text-gray-700">Email Address</label>
-            <input
-              v-model="email"
-              type="email"
-              name=""
-              placeholder="Enter Email Address"
-              class="w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-              autofocus
-              autocomplete
-              required
-            />
-            <p v-if="WrongCred" class="text-red-500 mt-2">
-              Email or Password are incorrect
-            </p>
-          </div>
-
-          <div class="mt-4">
-            <label class="block text-gray-700">Password</label>
-            <input
-              v-model="password"
-              type="password"
-              name=""
-              placeholder="Enter Password"
-              minlength="6"
-              class="w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-              required
-            />
-            <p v-if="WrongCred" class="text-red-500 mt-2">
-              Email or Password are incorrect
-            </p>
-          </div>
-
-          <div class="text-right mt-2">
-            <a
-              href="#"
-              class="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700"
-              >Forgot Password?</a
-            >
-          </div>
-
-          <button
-            @click="handleSubmit()"
-            type="submit"
-            class="w-full block bg-blue-700 hover:bg-blue-800 focus:bg-blue-400 text-white font-semibold rounded-lg px-4 py-3 mt-6 mb-6"
-          >
-            Log In
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
+  <main id="main-content" tabindex="-1" class="login-page">
+    <section class="login-card">
+      <h1>Login</h1>
+      <p class="description">Sign in to your account.</p>
+      <p v-if="$route.query.passwordChanged" class="login-notice" role="status">
+        Your password was updated. Please sign in again.
+      </p>
+      <form @submit.prevent="handleSubmit">
+        <label for="email">Email or username</label>
+        <input
+          id="email"
+          v-model.trim="email"
+          name="email"
+          type="text"
+          autocomplete="username"
+          placeholder="Enter email or username"
+          required
+        />
+        <label for="password">Password</label>
+        <input
+          id="password"
+          v-model="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Enter password"
+          required
+        />
+        <p v-if="error" class="login-error" role="alert">{{ error }}</p>
+        <button type="submit" :disabled="loading">
+          {{ loading ? "Signing in…" : "Log in" }}
+        </button>
+      </form>
+      <p class="login-help">
+        Need access? Contact your workspace administrator.
+      </p>
+    </section>
+  </main>
 </template>
-
 <script>
 import axios from "axios";
-import Cookies from "vue-cookies";
-
 export default {
   name: "Login",
   data() {
-    return {
-      email: "",
-      password: "",
-      WrongCred: "",
-    };
+    return { email: "", password: "", error: "", loading: false };
   },
   methods: {
     async handleSubmit() {
-      const response = await axios.post("login", {
-        email: this.email,
-        password: this.password,
-      });
-
-      if (response.data.success) {
-        Cookies.set("token", response.data.token);
-        if (response.data.role === "ADMIN") this.$router.push("/");
-        else this.$router.push("/tasks");
-      } else {
-        this.WrongCred = true;
+      if (this.loading) return;
+      this.error = "";
+      this.loading = true;
+      try {
+        const { data } = await axios.post("login", {
+          email: this.email,
+          password: this.password,
+        });
+        if (data.success) {
+          const redirect = this.$route.query.redirect;
+          const destination =
+            typeof redirect === "string" &&
+            redirect.startsWith("/") &&
+            !redirect.startsWith("//")
+              ? redirect
+              : data.role === "ADMIN"
+              ? "/"
+              : "/tasks";
+          this.$router.push(destination);
+        } else this.error = "The email address or password is incorrect.";
+      } catch (error) {
+        this.error =
+          error.response?.status === 429
+            ? "Too many sign-in attempts. Please wait and try again."
+            : "Could not sign in. Please check your connection and try again.";
+      } finally {
+        this.loading = false;
       }
     },
   },
 };
 </script>
+<style scoped>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #fff;
+  color: #002d74;
+}
+.login-card {
+  width: min(100%, 416px);
+  padding: 36px 40px;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+.login-card h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+.description {
+  margin-top: 10px;
+  font-size: 14px;
+}
+.login-card form {
+  margin-top: 24px;
+}
+.login-card label {
+  display: block;
+  margin: 16px 0 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+}
+.login-card input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #111827;
+}
+.login-card input:focus {
+  border-color: #3b82f6;
+}
+.login-card form button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+}
+.login-card form button:hover {
+  background: #1e40af;
+}
+.login-card form button:disabled {
+  opacity: 0.65;
+}
+.login-notice {
+  margin-top: 16px;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+.login-error {
+  margin-top: 12px;
+  color: #dc2626;
+  font-size: 13px;
+}
+.login-help {
+  margin-top: 20px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 480px) {
+  .login-card {
+    padding: 28px 24px;
+  }
+}
+</style>

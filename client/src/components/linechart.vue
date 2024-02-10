@@ -1,49 +1,67 @@
 <template>
-  <div>
-    <div><canvas id="acquisitions"></canvas></div>
+  <div class="chart">
+    <canvas
+      v-if="!error"
+      ref="canvas"
+      aria-label="Tasks by month"
+      role="img"
+    ></canvas>
+    <p v-else>Could not load task activity.</p>
   </div>
 </template>
-
 <script>
 import Chart from "chart.js/auto";
 import axios from "axios";
 export default {
-  setup() {
-    name: "Home";
-  },
   data() {
-    return {
-      datah: [],
-    };
+    return { chart: null, error: false };
   },
-  mounted() {
-    (async function () {
-      let datah;
-
-      try {
-        const response = await axios.get(`/tasks/linechart`);
-        datah = response.data;
-      } catch (error) {
-        console.error(error);
-      }
-
-      const data = datah;
-
-      new Chart(document.getElementById("acquisitions"), {
+  async mounted() {
+    try {
+      const { data } = await axios.get("/tasks/linechart");
+      this.chart = new Chart(this.$refs.canvas, {
         type: "line",
         data: {
-          labels: data.map((row) => row.month),
+          labels: data.map((row) => row.month.slice(0, 3)),
           datasets: [
             {
-              label: "Tasks by month",
+              label: "Tasks",
               data: data.map((row) => row.count),
-              borderColor: "#027bff",
-              color: "#027bff",
+              borderColor: "#497e67",
+              backgroundColor: "#dcebdc",
+              fill: true,
+              tension: 0.35,
+              pointRadius: 3,
+              pointBackgroundColor: "#497e67",
             },
           ],
         },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 },
+              grid: { color: "#edf2ed" },
+            },
+            x: { grid: { display: false } },
+          },
+        },
       });
-    })();
+    } catch (error) {
+      this.error = true;
+    }
+  },
+  beforeUnmount() {
+    if (this.chart) this.chart.destroy();
   },
 };
 </script>
+<style scoped>
+.chart {
+  min-height: 160px;
+  color: #8b9991;
+  font-size: 13px;
+}
+</style>
