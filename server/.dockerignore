@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.env
+coverage
+tests
+public/uploads/tasks/*
+!public/uploads/tasks/avatar.png
+public/uploads/users/*
+!public/uploads/users/avatar.png

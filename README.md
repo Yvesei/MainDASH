@@ -1,107 +1,74 @@
-# Project Name
+# MainDash
 
-MainDASH - A web application for creating and managing tasks.
+Task and client management built with Vue, Express, Prisma and MySQL.
 
-## Project Structure
+## Docker
 
-The project is structured into two main folders:
+Run the full stack:
 
-client - Contains the Vue.js frontend code.
-server - Contains the Node.js and Express backend code.
-
-## Prerequisites
-
-Make sure you have the following software installed on your machine:
-
-Node.js\
-NPM\
-MySQL
-
-## Getting Started
-
-To run the project locally, follow these steps:
-
-#### 1. Clone the repository
-
-```bash
-git clone https://github.com/Yvesei/MainDASH.git
-
-cd MainDASH
+```sh
+docker compose up --build
 ```
 
-#### 2. Install Dependencies
+Open [http://localhost:8080](http://localhost:8080). The first run applies migrations and creates:
 
-Navigate to the client and server folders and install the required dependencies.
+| Login | Password |
+| --- | --- |
+| `admin` | `admin` |
 
-```bash
-cd client
-npm install
+For a shared deployment, copy `.env.example` to `.env` and set your own database passwords and `JWT_KEY`:
+
+```sh
+cp .env.example .env
+docker compose up --build -d
 ```
 
-```bash
-cd ../server
-npm install
-```
+`mysql_data` and `uploads_data` keep database records and uploads. Use `docker compose down` to stop the stack. `docker compose down -v` removes those volumes.
 
-#### 3. Configure the Environment Variables
+The Compose file is for local HTTP use and sets `COOKIE_SECURE=false`. Use HTTPS and set `COOKIE_SECURE=true` outside local development.
 
-In the server folder, create a .env file and provide the necessary environment variables. You can use this .env file as a reference.
+## Run locally
 
-```bash
-DATABASE_URL="mysql://root:@localhost:3306/blog"
+Requires Node.js, npm and MySQL.
 
-JWT_KEY=f2b11d8bbcfe4156be5faca2873b1cd7a20fedb5b0a40748b72a8f47451cfbd8
-```
+1. Install dependencies in both directories:
 
-- you can replace the database url with yours if you happened to have it running on another port number.
+   ```sh
+   cd server && npm install
+   cd ../client && npm install
+   ```
 
-#### 4. Set Up the Database
+2. Create `server/.env`:
 
-Before running the project, you need to set up the database and run migrations.
+   ```env
+   DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/maindash"
+   JWT_KEY="replace-with-a-long-random-secret"
+   ```
 
-Create the Database
-Create a new database in your chosen database management system.
+3. Apply migrations and seed the administrator:
 
-Run Migrations
-In the server folder, run the following command to apply migrations using Prisma:
+   ```sh
+   cd server
+   npx prisma migrate dev
+   node seeds/seed.js
+   ```
 
-```bash
-npx prisma migrate dev
-```
+4. Start the API and frontend in separate terminals:
 
-This command will create the necessary tables and schema in your database.
+   ```sh
+   cd server && npm start
+   ```
 
-#### Seed Data
+   ```sh
+   cd client && npm start
+   ```
 
-- you can head to the server folder and type in terminal
+   The frontend runs at `http://localhost:8080` and expects the API on port 3000. Set `VUE_APP_API_URL` in `client/.env.local` to change the API URL.
 
-```bash
-node seeds/seed.js
-```
+For a production client build, run `npm run build` in `client`. Production cookies require HTTPS.
 
-#### 5. Run the Development Servers
+## Production configuration
 
-In separate terminal windows, start the development servers for the client and server.
+Use HTTPS with `NODE_ENV=production`. If the frontend is on another origin, set `CORS_ORIGINS` and build the client with the right `VUE_APP_API_URL`.
 
-#### Start the client server
-
-```bash
-cd client
-npm start
-Start the server
-```
-
-```bash
-cd server
-npm start
-```
-
-### 5. Access the Application
-
-Open your web browser and visit http://localhost:8080/ to access the application or local_IP:8080.
-
-## LOGIN
-
-you can use the credentials below :
-_email_ : admin
-_password_ : admin
+Run API tests with `cd server && npm test`.
