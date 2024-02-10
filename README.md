@@ -2,6 +2,8 @@
 
 Task and client management built with Vue, Express, Prisma and MySQL.
 
+![MainDash dashboard](docs/maindash.png)
+
 ## Docker
 
 Run the full stack:
