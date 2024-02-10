@@ -1,236 +1,354 @@
 <template>
-  <tr
-    v-if="
-      this.currentUserId === this.task.createdBy ||
-      this.currentUserRole === 'ADMIN'
-    "
-    :class="
-      task.deleted == true
-        ? 'bg-red-200 hover:bg-red-200'
-        : 'border-gray-200 hover:bg-gray-100'
-    "
-    class="border-b"
-  >
-    <td class="ml-6 py-3 px-6 text-center">
-      <div class="flex items-center">
-        <div class="mr-2">
-          <img class="w-6 h-6 rounded-full" :src="getimg()" alt="pic" />
+  <tr :class="{ 'archived-row': task.deleted }">
+    <td class="select-cell">
+      <input
+        type="checkbox"
+        :checked="selected"
+        :disabled="!!task.status || !!task.deleted"
+        :aria-label="`Select task for ${client?.name || 'client'}`"
+        @change="$emit('select', task.id)"
+      />
+    </td>
+    <td>
+      <div class="client-cell">
+        <img :src="imageUrl('tasks', client && client.image)" alt="" />
+        <div>
+          <strong>{{ client?.name || "Unknown client" }}</strong
+          ><span>{{ task.type || "Maintenance" }}</span>
         </div>
-        <span>{{ client.name }}</span>
       </div>
     </td>
-    <td
-      v-if="this.currentUserRole === 'ADMIN'"
-      class="ml-6 py-3 px-6 text-center"
-    >
-      <div class="flex items-center">
-        <div class="mr-2">
-          <img class="w-6 h-6 rounded-full" :src="getimgUser()" alt="pic" />
-        </div>
-        <span>{{ user.name }}</span>
-      </div>
+    <td v-if="currentUserRole === 'ADMIN'">
+      <span>{{ owner.name || "Unknown user" }}</span>
     </td>
-    <td class="py-3 px-6 text-center whitespace-nowrap">
-      <div class="">
-        <span class="font-medium">{{ task.Date }}</span>
-      </div>
+    <td class="nowrap">{{ formatDate(task.Date) }}</td>
+    <td class="nowrap">
+      {{ task.dateStart || "—"
+      }}<span v-if="task.dateEnd"> – {{ task.dateEnd }}</span>
     </td>
-    <td class="py-3 px-6 text-center">
-      <div>
-        <span>{{ task.dateStart }}-{{ task.dateEnd }}</span>
-      </div>
+    <td>
+      <span class="status" :class="task.status ? 'done' : 'pending'">{{
+        task.status ? "Done" : "Pending"
+      }}</span
+      ><span v-if="task.deleted" class="archived-label">Archived</span>
     </td>
-
-    <td class="py-3 px-6 text-center">
-      <span
-        v-if="task.status === false"
-        class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs"
-        >Pending</span
-      ><span
-        v-if="task.status == true"
-        class="bg-blue-200 text-blue-600 py-1 px-3 rounded-full text-xs"
-        >Done</span
-      >
-    </td>
-    <td class="py-3 px-6 text-center">
-      <div class="flex item-center justify-center">
-        <div
-          v-if="this.currentUserRole === 'ADMIN' || task.status === false"
+    <td>
+      <div class="actions">
+        <button
+          type="button"
+          :aria-label="
+            task.deleted || (currentUserRole === 'USER' && task.status)
+              ? 'View task'
+              : 'Edit task'
+          "
+          :title="
+            task.deleted || (currentUserRole === 'USER' && task.status)
+              ? 'View task'
+              : 'Edit task'
+          "
           @click="editpopup = true"
-          class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
+            v-if="task.deleted || (currentUserRole === 'USER' && task.status)"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-            />
-          </svg>
-        </div>
-        <div
-          v-if="this.currentUserRole === 'USER'"
-          @click="editpopup = true"
-          class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
             fill="none"
-            viewBox="0 0 24 24"
             stroke="currentColor"
+            stroke-width="1.8"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
             />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-            />
-          </svg>
-        </div>
-
-        <div
-          v-if="this.currentUserRole === 'ADMIN'"
-          class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
-        >
-          <svg
-            @click="deleteTask()"
-            xmlns="http://www.w3.org/2000/svg"
+            <circle cx="12" cy="12" r="2.5" /></svg
+          ><svg
+            v-else
+            viewBox="0 0 24 24"
             fill="none"
-            viewBox="0 0 24 24"
             stroke="currentColor"
+            stroke-width="1.8"
           >
             <path
-              stroke-linecap="round"
+              d="m14.5 5.5 4 4M4 20l4.5-.8L20 7.7a2.8 2.8 0 0 0-4-4L4.8 15.5 4 20Z"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
           </svg>
-        </div>
-
-        <div
-          v-if="task.status == false"
-          class="w-4 transform hover:text-purple-500 hover:scale-110"
+        </button>
+        <button
+          v-if="!task.status && !task.deleted"
+          type="button"
+          :disabled="busy"
+          aria-label="Mark task done"
+          title="Mark done"
+          @click="makeDone"
         >
           <svg
-            @click="makeDone()"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 448 512"
+            viewBox="0 0 24 24"
+            fill="none"
             stroke="currentColor"
+            stroke-width="1.8"
           >
+            <rect x="3" y="3" width="18" height="18" rx="2" />
             <path
-              d="M64 64C46.3 64 32 78.3 32 96V416c0 17.7 14.3 32 32 32H384c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM331.3 203.3l-128 128c-6.2 6.2-16.4 6.2-22.6 0l-64-64c-6.2-6.2-6.2-16.4 0-22.6s16.4-6.2 22.6 0L192 297.4 308.7 180.7c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"
+              d="m7.5 12 3 3 6-6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
-        </div>
+        </button>
+        <button
+          v-if="currentUserRole === 'ADMIN'"
+          type="button"
+          :disabled="busy"
+          :aria-label="task.deleted ? 'Restore task' : 'Archive task'"
+          :title="task.deleted ? 'Restore task' : 'Archive task'"
+          @click="deleteTask"
+        >
+          <svg
+            v-if="task.deleted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path
+              d="M4 10a8 8 0 1 1 2 7M4 4v6h6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            /></svg
+          ><svg
+            v-else
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path
+              d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </div>
+      <p v-if="error" role="alert" class="action-error">{{ error }}</p>
     </td>
-    <add-task-popup :show-popup="popup" @close="popup = false" />
-    <edit-task-popup
+  </tr>
+  <Teleport to="body"
+    ><edit-task-popup
+      v-if="editpopup"
       :task="task"
       :show-popup="editpopup"
-      @close="editpopup = false"
-    />
-  </tr>
+      @close="closePopup"
+      @task-updated="$emit('task-deleted')"
+  /></Teleport>
 </template>
-
 <script>
 import axios from "axios";
-import AddTaskPopup from "./AddTaskPopup.vue";
 import editTaskPopup from "./editTaskPopup.vue";
-
 export default {
-  setup() {
-    name: "TableTr";
-  },
-  data() {
-    return {
-      currentUserId: Number,
-      popup: false,
-      editpopup: false,
-      client: {},
-      currentUserRole: "",
-      user: {},
-    };
-  },
+  name: "TableTr",
+  components: { editTaskPopup },
   props: {
-    task: {
-      type: Object,
-      required: true,
+    task: { type: Object, required: true },
+    currentUserRole: { type: String, default: "" },
+    currentUserId: { type: Number, default: null },
+    clients: { type: Array, default: () => [] },
+    users: { type: Array, default: () => [] },
+    selected: Boolean,
+    openRequest: Boolean,
+  },
+  emits: ["task-deleted", "task-closed", "select"],
+  data() {
+    return { editpopup: false, user: {}, busy: false, error: "" };
+  },
+  computed: {
+    client() {
+      return this.clients.find((client) => client.id === this.task.clientId);
+    },
+    owner() {
+      return (
+        this.users.find((user) => user.id === this.task.createdBy) || this.user
+      );
+    },
+  },
+  watch: {
+    openRequest(value) {
+      if (value) this.editpopup = true;
     },
   },
   mounted() {
-    this.fetchClient(this.task.clientId);
-    this.fetchUser();
-    this.fetchCreatedBy(this.task.createdBy);
-  },
-  components: {
-    AddTaskPopup,
-    editTaskPopup,
+    if (this.openRequest) this.editpopup = true;
+    if (
+      this.currentUserRole === "ADMIN" &&
+      this.task.createdBy &&
+      !this.users.some((user) => user.id === this.task.createdBy)
+    )
+      this.fetchCreatedBy();
   },
   methods: {
-    fetchUser() {
-      axios
-        .get(`/users/current-user-get`)
-        .then((response) => {
-          this.currentUserRole = response.data.role;
-          this.currentUserId = response.data.id;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    closePopup() {
+      this.editpopup = false;
+      this.$emit("task-closed");
     },
     async deleteTask() {
-      const response = await axios.delete(`tasks/${this.task.id}`, {});
-      this.$emit("task-deleted");
-    },
-    async makeDone() {
+      this.error = "";
+      this.busy = true;
       try {
-        const response = await axios.patch("/tasks/markDone", {
-          params: { idArray: this.task.id },
+        await axios.delete(`tasks/${this.task.id}`);
+        this.$emit("task-deleted", {
+          id: this.task.id,
+          archived: !this.task.deleted,
         });
       } catch (error) {
-        console.error("Error setting as done :", error);
+        this.error = error.response?.data?.error || "Could not update task.";
+      } finally {
+        this.busy = false;
       }
-      this.$emit("task-deleted");
     },
-    async fetchCreatedBy(id) {
-      const response = await axios
-        .get(`users/${id}`)
-        .then((response) => {
-          this.user = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    async makeDone() {
+      this.error = "";
+      this.busy = true;
+      try {
+        await axios.patch("/tasks/markDone", { idArray: this.task.id });
+        this.$emit("task-deleted");
+      } catch (error) {
+        this.error = error.response?.data?.error || "Could not complete task.";
+      } finally {
+        this.busy = false;
+      }
     },
-    async fetchClient(id) {
-      const response = await axios
-        .get(`clients/${id}`)
-        .then((response) => {
-          this.client = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    async fetchCreatedBy() {
+      try {
+        this.user =
+          (await axios.get(`users/${this.task.createdBy}`)).data || {};
+      } catch (error) {
+        console.error("Could not load task owner", error);
+      }
     },
-    getimg() {
-      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+    imageUrl(folder, name) {
+      return `${axios.defaults.baseURL.replace(
+        /\/$/,
+        ""
+      )}/uploads/${folder}/${encodeURIComponent(name || "avatar.png")}`;
     },
-    getimgUser() {
-      return `http://localhost:3000/uploads/users/${this.user.image}`;
+    formatDate(value) {
+      if (!value) return "—";
+      const [year, month, day] = value.split("-");
+      const date = new Date(Number(year), Number(month) - 1, Number(day));
+      return Number.isNaN(date.getTime())
+        ? value
+        : new Intl.DateTimeFormat(undefined, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }).format(date);
     },
   },
 };
 </script>
+<style scoped>
+tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s;
+}
+tr:hover {
+  background: #f9fafb;
+}
+td {
+  padding: 14px 16px;
+  color: #4b5563;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.select-cell {
+  padding-right: 0;
+}
+input[type="checkbox"] {
+  accent-color: #4f46e5;
+}
+input:disabled {
+  opacity: 0.35;
+}
+.client-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+}
+.client-cell img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #f3f4f6;
+}
+.client-cell strong,
+.client-cell span {
+  display: block;
+}
+.client-cell strong {
+  color: #374151;
+  font-weight: 600;
+}
+.client-cell span {
+  margin-top: 3px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.status {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #e9d5ff;
+  color: #9333ea;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status.done {
+  background: #bfdbfe;
+  color: #2563eb;
+}
+.archived-row {
+  background: #fee2e2;
+}
+.archived-label {
+  display: block;
+  color: #b91c1c;
+  margin-top: 4px;
+  font-size: 11px;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.actions button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: #6b7280;
+}
+.actions button:hover {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+.actions button:disabled {
+  opacity: 0.5;
+}
+.actions svg {
+  width: 17px;
+  height: 17px;
+}
+.action-error {
+  max-width: 180px;
+  margin: 6px auto 0;
+  color: #b91c1c;
+  text-align: center;
+  font-size: 11px;
+}
+</style>

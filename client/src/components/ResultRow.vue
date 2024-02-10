@@ -367,7 +367,9 @@ export default {
     },
     getFile(num) {
       num--;
-      return `http://localhost:3000/uploads/tasks/${this.task.supplyFile[num]}`;
+      return `${axios.defaults.baseURL.replace(/\/$/, "")}/uploads/tasks/${
+        this.task.supplyFile[num]
+      }`;
     },
     vide() {
       const propertyKeys = Object.keys(this.task);
@@ -402,7 +404,9 @@ export default {
       }
     },
     getimgUser() {
-      return `http://localhost:3000/uploads/users/${this.user.image}`;
+      return `${axios.defaults.baseURL.replace(/\/$/, "")}/uploads/users/${
+        this.user.image
+      }`;
     },
     async fetchCreatedBy(id) {
       const response = await axios

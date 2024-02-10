@@ -1,9 +1,16 @@
 <template>
   <div
     v-if="showPopup"
-    class="h-full overflow-auto w-full fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+    ref="dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Edit task"
+    @keydown.esc.stop.prevent="closePopup"
+    @keydown.tab="trapFocus"
+    class="task-dialog h-full overflow-auto w-full fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
   >
     <form
+      @submit.prevent="currentDivIndex = 1"
       v-if="currentDivIndex === 0"
       class="relative w-2/3"
       style="height: 406px"
@@ -14,17 +21,21 @@
         class="absolute top-0 left-0 flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
         <div class="flex justify-between">
-          <h5 class="mb-0 font-bold dark:text-white">Edit Timeline</h5>
-          <svg
-            @click="closePopup"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-            class="h-6"
-          >
-            <path
-              d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
-            />
-          </svg>
+          <div>
+            <h2 tabindex="-1" class="task-dialog-title">Timeline</h2>
+            <p class="task-step">Step 1 of 3</p>
+          </div>
+          <button type="button" aria-label="Close dialog" @click="closePopup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              class="h-6"
+            >
+              <path
+                d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
+              />
+            </svg>
+          </button>
         </div>
 
         <div>
@@ -32,7 +43,7 @@
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
+                for="edit-task-date"
                 >Date</label
               >
 
@@ -54,11 +65,12 @@
                 </div>
                 <input
                   :disabled="
-                    this.currentUserRole === 'USER' && this.status === true
+                    this.task.deleted ||
+                    (this.currentUserRole === 'USER' && this.status === true)
                   "
+                  id="edit-task-date"
                   v-model="providedDate"
-                  datepicker
-                  type="text"
+                  type="date"
                   class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 border border-gray-300 text-gray-900 text-sm leading-5.6 ease block w-full rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date, ex: 21-01-2023"
                 />
@@ -69,16 +81,18 @@
             <div class="w-full max-w-full px-3 flex-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Company"
-                >Heure debut</label
+                for="edit-task-start"
+                >Start time</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-start"
                 v-model="providedDateStart"
-                type="text"
-                name="Company"
+                type="time"
+                name="startTime"
                 placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
@@ -86,28 +100,29 @@
             <div class="w-full max-w-full px-3 mt-4 flex-0 sm:mt-0 sm:w-6/12">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Email Address"
-                >Heure fin</label
+                for="edit-task-end"
+                >End time</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-end"
                 v-model="this.dateEnd"
-                type="email"
-                name="Email Address"
+                type="time"
+                name="endTime"
                 placeholder="eg. 11:23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
+          <p v-if="error" role="alert" class="text-red-700 mt-4">{{ error }}</p>
           <div class="flex mt-6">
             <button
               @click="currentDivIndex = (currentDivIndex + 1) % 3"
               type="button"
-              aria-controls="address"
               next-form-btn=""
-              href="javascript:;"
               class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
             >
               Next
@@ -118,6 +133,7 @@
     </form>
 
     <form
+      @submit.prevent="currentDivIndex = 2"
       v-if="currentDivIndex === 1"
       class="relative w-2/3"
       style="height: 406px"
@@ -128,17 +144,21 @@
         class="absolute mt-[-5rem] flex flex-col visible w-full h-auto min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
         <div class="flex justify-between">
-          <h5 class="mb-0 font-bold dark:text-white">Client</h5>
-          <svg
-            @click="closePopup"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-            class="h-6"
-          >
-            <path
-              d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
-            />
-          </svg>
+          <div>
+            <h2 tabindex="-1" class="task-dialog-title">Client</h2>
+            <p class="task-step">Step 2 of 3</p>
+          </div>
+          <button type="button" aria-label="Close dialog" @click="closePopup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              class="h-6"
+            >
+              <path
+                d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
+              />
+            </svg>
+          </button>
         </div>
         <div>
           <div
@@ -152,6 +172,8 @@
               <img
                 v-if="client.image"
                 class="w-20 h-20 rounded-full"
+                width="80"
+                height="80"
                 :src="selectedFileFront ? selectedFileFront : getimg()"
                 alt=""
               />
@@ -168,30 +190,35 @@
 
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
                 type="file"
-                class="hidden"
+                class="sr-only"
+                aria-label="Choose client image"
+                accept="image/png,image/jpeg,image/gif,image/webp"
                 @change="onFileChange"
               />
             </label>
-            <label
+            <p
               class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-              for="First Name"
-              >Profile</label
             >
+              Profile
+            </p>
           </div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Nom</label
+                for="edit-task-client-name"
+                >Name</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-client-name"
                 v-model="client.name"
                 type="text"
                 name="First Name"
@@ -202,16 +229,19 @@
             <div class="w-full max-w-full px-3 mt-4 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Last Name"
-                >Num Tel</label
+                for="edit-task-phone"
+                >Phone</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-phone"
                 v-model="client.number"
-                type="text"
-                name="Last Name"
+                type="tel"
+                autocomplete="tel"
+                name="clientField"
                 placeholder="eg. 06xxxxxxxx"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
@@ -219,28 +249,32 @@
             <div class="w-full max-w-full px-3 mt-4 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="Last Name"
+                for="edit-task-distance"
                 >Distance</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-distance"
                 v-model="client.distance"
-                type="text"
-                name="Last Name"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                name="clientField"
                 placeholder="eg. 23"
                 class="focus:shadow-primary-outline dark:bg-slate-850 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
+          <p v-if="error" role="alert" class="text-red-700 mt-4">{{ error }}</p>
           <div class="flex mt-6">
             <button
               @click="currentDivIndex = (currentDivIndex - 1) % 3"
               type="button"
-              aria-controls="user"
               prev-form-btn=""
-              href="javascript:;"
               class="inline-block px-6 py-3 mb-0 text-xs font-bold text-right uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs bg-gradient-to-tl from-gray-400 to-gray-100 leading-pro tracking-tight-rem bg-150 bg-x-25 text-slate-800"
             >
               Prev
@@ -248,9 +282,7 @@
             <button
               @click="currentDivIndex = (currentDivIndex + 1) % 3"
               type="button"
-              aria-controls="address"
               next-form-btn=""
-              href="javascript:;"
               class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
             >
               Next
@@ -260,37 +292,47 @@
       </div>
     </form>
 
-    <form v-if="currentDivIndex === 2" class="absolute w-2/3 h-[160%]">
+    <form
+      @submit.prevent="AlterTask"
+      v-if="currentDivIndex === 2"
+      class="absolute w-2/3 h-[160%]"
+    >
       <div
         active=""
         form="user"
         class="absolute mt-[20rem] mb-4 flex flex-col visible w-full min-w-0 p-4 break-words bg-white border-0 shadow-xl opacity-100 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
       >
         <div class="flex justify-between">
-          <h5 class="mb-0 font-bold dark:text-white">Task</h5>
-          <svg
-            @click="closePopup"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-            class="h-6"
-          >
-            <path
-              d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
-            />
-          </svg>
+          <div>
+            <h2 tabindex="-1" class="task-dialog-title">Task</h2>
+            <p class="task-step">Step 3 of 3</p>
+          </div>
+          <button type="button" aria-label="Close dialog" @click="closePopup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              class="h-6"
+            >
+              <path
+                d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
+              />
+            </svg>
+          </button>
         </div>
         <div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Type de maintenance</label
+                for="edit-task-type"
+                >Maintenance type</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-type"
                 v-model="this.type"
                 type="text"
                 name="First Name"
@@ -303,14 +345,16 @@
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Fourniture</label
+                for="edit-task-supply"
+                >Supplies</label
               >
 
               <textarea
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-supply"
                 v-model="this.supply"
                 name="Bio"
                 rows="5"
@@ -326,10 +370,13 @@
                   >
                     <input
                       :disabled="
-                        this.currentUserRole === 'USER' && this.status === true
+                        this.task.deleted ||
+                        (this.currentUserRole === 'USER' &&
+                          this.status === true)
                       "
                       @change="onFileChangeFourniture"
-                      accept="*"
+                      aria-label="Choose attachments"
+                      accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md,.doc,.docx"
                       type="file"
                       multiple
                       class="absolute inset-0 z-50 w-full h-full p-0 m-0 outline-none opacity-0 cursor-pointer"
@@ -367,6 +414,7 @@
                         v-if="task.supplyFile != ''"
                         :href="getFile(num)"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="p-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
                       >
                         <p
@@ -376,24 +424,31 @@
                         </p>
                       </a>
 
-                      <svg
+                      <button
+                        type="button"
+                        :aria-label="`Remove attachment ${num}`"
                         v-if="
-                          this.currentUserRole === 'ADMIN' ||
-                          this.status === false
+                          !this.task.deleted &&
+                          (this.currentUserRole === 'ADMIN' ||
+                            this.status === false)
                         "
                         @click="deleteFile(num)"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        class="h-6"
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
+                        <svg
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          class="h-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
                     </div>
                     <div
                       v-for="num in selectedFileFournitureFront.length"
@@ -403,6 +458,7 @@
                         v-if="addedfilefourniture"
                         :href="getFileFront(num)"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="ml-5 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 mt-4 sm:mt-0 inline-flex items-start justify-start px-6 py-3 bg-indigo-700 hover:bg-indigo-600 focus:outline-none rounded"
                       >
                         <p class="text-sm font-medium leading-none text-white">
@@ -420,13 +476,15 @@
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Demande de devis</label
+                for="edit-task-devis"
+                >Quote request</label
               >
               <input
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-devis"
                 v-model="this.devis"
                 type="text"
                 name="First Name"
@@ -437,28 +495,30 @@
           </div>
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
-              <label
+              <p
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Fin de maintenance</label
               >
-              <div>
+                Maintenance outcome
+              </p>
+              <div role="group" aria-label="Maintenance outcome">
                 <div class="grid sm:grid-cols-2 gap-2">
                   <label
-                    :class="task.endTask == true ? 'border-blue-500' : ''"
-                    for="fav"
+                    :class="endTask === true ? 'border-blue-500' : ''"
+                    for="edit-task-favourable"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
                       :disabled="
-                        this.currentUserRole === 'USER' && this.status === true
+                        this.task.deleted ||
+                        (this.currentUserRole === 'USER' &&
+                          this.status === true)
                       "
                       v-model="endTask"
-                      value="true"
-                      :checked="this.endTask == true"
+                      name="edit-task-outcome"
+                      :value="true"
                       type="radio"
-                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="fav"
+                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                      id="edit-task-favourable"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
                       >Favourable</span
@@ -466,23 +526,25 @@
                   </label>
 
                   <label
-                    :class="task.endTask == false ? 'border-blue-500' : ''"
-                    for="defav"
+                    :class="endTask === false ? 'border-blue-500' : ''"
+                    for="edit-task-unfavourable"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
                       :disabled="
-                        this.currentUserRole === 'USER' && this.status === true
+                        this.task.deleted ||
+                        (this.currentUserRole === 'USER' &&
+                          this.status === true)
                       "
                       v-model="endTask"
-                      value="false"
+                      name="edit-task-outcome"
+                      :value="false"
                       type="radio"
-                      :checked="task.endTask == false"
                       class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="defav"
+                      id="edit-task-unfavourable"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
-                      >Defavourable</span
+                      >Unfavourable</span
                     >
                   </label>
                 </div>
@@ -493,13 +555,15 @@
             <div class="w-full max-w-full px-3 flex-0">
               <label
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Resultat</label
+                for="edit-task-result"
+                >Result</label
               >
               <textarea
                 :disabled="
-                  this.currentUserRole === 'USER' && this.status === true
+                  this.task.deleted ||
+                  (this.currentUserRole === 'USER' && this.status === true)
                 "
+                id="edit-task-result"
                 v-model="this.result"
                 name="Bio"
                 rows="5"
@@ -511,52 +575,56 @@
 
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
-              <label
+              <p
                 class="mb-2 ml-1 text-xs font-bold text-slate-700 dark:text-white/80"
-                for="First Name"
-                >Maintenance a suivre</label
               >
-              <div>
+                Follow-up
+              </p>
+              <div role="group" aria-label="Follow-up">
                 <div class="grid sm:grid-cols-2 gap-2">
                   <label
-                    :class="task.followupBool == true ? 'border-blue-500' : ''"
-                    for="a-suivre"
+                    :class="followupBool === true ? 'border-blue-500' : ''"
+                    for="edit-task-parts"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
                       :disabled="
-                        this.currentUserRole === 'USER' && this.status === true
+                        this.task.deleted ||
+                        (this.currentUserRole === 'USER' &&
+                          this.status === true)
                       "
                       v-model="followupBool"
-                      value="true"
-                      :checked="task.followupBool == true"
+                      :value="true"
+                      name="edit-task-followup"
                       type="radio"
-                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="a-suivre"
+                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                      id="edit-task-parts"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
-                      >Manque des pièces</span
+                      >Parts needed</span
                     >
                   </label>
 
                   <label
-                    :class="task.followupBool == false ? 'border-blue-500' : ''"
-                    for="Autre"
+                    :class="followupBool === false ? 'border-blue-500' : ''"
+                    for="edit-task-other"
                     class="flex p-3 block w-full bg-white border rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400"
                   >
                     <input
                       :disabled="
-                        this.currentUserRole === 'USER' && this.status === true
+                        this.task.deleted ||
+                        (this.currentUserRole === 'USER' &&
+                          this.status === true)
                       "
                       v-model="followupBool"
-                      value="false"
-                      :checked="task.followupBool == false"
+                      :value="false"
+                      name="edit-task-followup"
                       type="radio"
-                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 pointer-events-none focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="Autre"
+                      class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                      id="edit-task-other"
                     />
                     <span class="text-sm text-gray-500 ml-3 dark:text-gray-400"
-                      >Autre</span
+                      >Other</span
                     >
                   </label>
                 </div>
@@ -567,6 +635,12 @@
           <div class="flex flex-wrap mt-4 -mx-3">
             <div class="w-full max-w-full px-3 flex-0">
               <textarea
+                :disabled="
+                  task.deleted ||
+                  (currentUserRole === 'USER' && status === true)
+                "
+                aria-label="Other follow-up details"
+                id="edit-task-followup-other"
                 v-model="this.followupAutre"
                 name="Bio"
                 rows="5"
@@ -576,28 +650,29 @@
             </div>
           </div>
 
+          <p v-if="error" role="alert" class="text-red-700 mt-4">{{ error }}</p>
           <!--  Buttons  -->
           <div class="flex mt-6">
             <button
               @click="currentDivIndex = (currentDivIndex - 1) % 3"
               type="button"
-              aria-controls="user"
               prev-form-btn=""
-              href="javascript:;"
               class="inline-block px-6 py-3 mb-0 text-xs font-bold text-right uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs bg-gradient-to-tl from-gray-400 to-gray-100 leading-pro tracking-tight-rem bg-150 bg-x-25 text-slate-800"
             >
               Prev
             </button>
 
             <button
-              @click="AlterTask()"
-              type="button"
-              aria-controls="address"
+              :disabled="
+                saving ||
+                task.deleted ||
+                (currentUserRole === 'USER' && status === true)
+              "
+              type="submit"
               next-form-btn=""
-              href="javascript:;"
               class="inline-block px-6 py-3 mb-0 ml-auto text-xs font-bold text-right text-white uppercase align-middle transition-all ease-in border-0 rounded-lg shadow-md cursor-pointer hover:-translate-y-px active:opacity-85 hover:shadow-xs dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 bg-gradient-to-tl from-zinc-800 to-zinc-700 leading-pro tracking-tight-rem bg-150 bg-x-25"
             >
-              Edit
+              {{ saving ? "Saving…" : "Save changes" }}
             </button>
           </div>
         </div>
@@ -615,6 +690,20 @@ export default {
     task: {
       type: Object, // Specify the type of the prop
       required: true, // Set to true if the prop is required
+    },
+  },
+  watch: {
+    showPopup: {
+      immediate: true,
+      handler(open) {
+        if (open) {
+          this.returnFocus = document.activeElement;
+          this.$nextTick(this.focusHeading);
+        }
+      },
+    },
+    currentDivIndex() {
+      if (this.showPopup && !this.error) this.$nextTick(this.focusHeading);
     },
   },
   mounted() {
@@ -639,61 +728,51 @@ export default {
   },
   methods: {
     convertDate(timeString) {
-      const currentDate = new Date(); // Get the current date
-
-      // Split the time string into hours and minutes
-      const [hours, minutes] = timeString.split(":");
-
-      // Set the time on the current date
-      currentDate.setHours(Number(hours));
-      currentDate.setMinutes(Number(minutes));
+      if (!timeString) return null;
+      const currentDate = this.providedDate
+        ? new Date(`${this.providedDate}T00:00:00`)
+        : new Date();
+      const [hours, minutes] = timeString.split(":").map(Number);
+      currentDate.setHours(hours, minutes, 0, 0);
       return currentDate;
     },
-    extractDate(isoDateString) {
-      const isoDate = new Date(isoDateString);
-      // Extract date
-      const year = isoDate.getUTCFullYear();
-      const month = isoDate.getUTCMonth() + 1;
-      const day = isoDate.getUTCDate();
-
-      // Extract time
-      const hours = isoDate.getUTCHours();
-      const minutes = isoDate.getUTCMinutes();
-
-      // Format the time as HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-      return `${year}-${month}-${day}`;
+    convertDateAll(timeString) {
+      return timeString ? new Date(`${timeString}T00:00:00`) : null;
     },
-    async convertDateAll(timeString) {
-      // Split the time string into year, month, and day
-      const [year, month, day] = timeString.split("-");
-
-      // Create a new Date object with the parsed year, month (0-indexed), and day
-      const currentDate = new Date(
-        Number(year),
-        Number(month) - 1,
-        Number(day)
-      );
-      console.log(currentDate);
-      return currentDate;
+    focusHeading() {
+      this.$refs.dialog?.querySelector(".task-dialog-title")?.focus();
     },
-    extractHours(isoDateString) {
-      const isoDate = new Date(isoDateString);
-
-      // Extract time
-      const hours = isoDate.getUTCHours() + 1;
-      const minutes = isoDate.getUTCMinutes();
-
-      // Format the time as HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-      return `${formattedTime}`;
+    trapFocus(event) {
+      const focusable = [
+        ...this.$refs.dialog.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+        ),
+      ].filter((el) => el.getClientRects().length);
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0],
+        last = focusable[focusable.length - 1];
+      if (
+        event.shiftKey &&
+        (document.activeElement === first ||
+          document.activeElement ===
+            this.$refs.dialog.querySelector(".task-dialog-title"))
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     },
     closePopup() {
+      const target = this.returnFocus;
       this.$emit("close");
+      this.$nextTick(() => {
+        if (target?.isConnected) target.focus();
+      });
     },
     fetchClient(id) {
       axios
@@ -706,11 +785,38 @@ export default {
         });
     },
     async AlterTask() {
+      if (
+        this.saving ||
+        this.task.deleted ||
+        (this.currentUserRole === "USER" && this.status === true)
+      )
+        return;
+      this.error = "";
+      if (!this.client.name?.trim()) {
+        this.currentDivIndex = 1;
+        this.error = "Enter a client name.";
+        this.$nextTick(() =>
+          this.$refs.dialog?.querySelector("#edit-task-client-name")?.focus()
+        );
+        return;
+      }
+      if (
+        this.providedDateStart &&
+        this.dateEnd &&
+        this.dateEnd < this.providedDateStart
+      ) {
+        this.currentDivIndex = 0;
+        this.error = "End time must be after start time.";
+        this.$nextTick(() =>
+          this.$refs.dialog?.querySelector("#edit-task-end")?.focus()
+        );
+        return;
+      }
+      this.saving = true;
       try {
         const uploadedImageName = await this.onUploadFile();
         const uploadedFileNameFourniture = await this.onUploadFileFourniture();
         const providedDate = await this.convertDateAll(this.providedDate);
-        console.log(providedDate);
         const response = await axios.patch("tasks/", {
           taskId: this.taskId,
           id: this.client.id,
@@ -725,14 +831,26 @@ export default {
           supply: this.supply,
           supplyFile: uploadedFileNameFourniture,
           devis: this.devis,
-          endTask: JSON.parse(this.endTask),
+          endTask:
+            this.endTask == null
+              ? null
+              : this.endTask === true || this.endTask === "true",
           result: this.result,
-          followupBool: JSON.parse(this.followupBool),
+          followupBool:
+            this.followupBool == null
+              ? null
+              : this.followupBool === true || this.followupBool === "true",
           followupAutre: this.followupAutre,
         });
+        this.$emit("task-updated");
         this.closePopup();
       } catch (error) {
-        console.error(error);
+        this.error =
+          error.response?.data?.error ||
+          error.response?.data?.msg ||
+          "Could not save changes. Please try again.";
+      } finally {
+        this.saving = false;
       }
     },
     async onFileChange(e) {
@@ -744,6 +862,7 @@ export default {
       }
     },
     async onUploadFile() {
+      if (!this.selectedFile) return this.client.image;
       try {
         const formData = new FormData();
         formData.append("file", this.selectedFile);
@@ -785,11 +904,15 @@ export default {
       }
     },
     getimg() {
-      return `http://localhost:3000/uploads/tasks/${this.client.image}`;
+      return `${axios.defaults.baseURL.replace(/\/$/, "")}/uploads/tasks/${
+        this.client.image
+      }`;
     },
     getFile(num) {
       num--;
-      return `http://localhost:3000/uploads/tasks/${this.supplyFile[num]}`;
+      return `${axios.defaults.baseURL.replace(/\/$/, "")}/uploads/tasks/${
+        this.supplyFile[num]
+      }`;
     },
     deleteFile(num) {
       num--;
@@ -820,6 +943,8 @@ export default {
   data() {
     return {
       currentUserRole: "",
+      saving: false,
+      error: "",
       currentDivIndex: 0,
       maintenanceAutre: false,
       client: {
@@ -836,7 +961,7 @@ export default {
       dateEnd: "",
       type: "",
       supply: "",
-      supplyFile: "",
+      supplyFile: [],
       devis: "",
       endTask: Boolean,
       result: "",
@@ -854,3 +979,95 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.task-dialog {
+  overscroll-behavior: contain;
+  padding: 24px;
+  align-items: flex-start;
+  background: rgba(0, 0, 0, 0.5);
+}
+.task-dialog form {
+  position: relative;
+  width: min(100%, 720px);
+  height: auto !important;
+  margin: auto;
+}
+.task-dialog form > div[form="user"] {
+  position: relative;
+  top: auto;
+  left: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.16);
+  color: #374151;
+}
+.task-dialog button:focus-visible,
+.task-dialog a:focus-visible,
+.task-dialog label:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+.task-dialog button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.task-dialog-title {
+  margin: 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 700;
+}
+.task-step {
+  margin-top: 3px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+.task-dialog label {
+  color: #475569;
+}
+.task-dialog
+  input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+.task-dialog textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  box-shadow: none;
+}
+.task-dialog input:focus-visible,
+.task-dialog textarea:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+.task-dialog input[type="radio"],
+.task-dialog input[type="checkbox"] {
+  accent-color: #4f46e5;
+}
+.task-dialog button[class*="bg-gradient"] {
+  border-radius: 8px;
+  background: #27272a;
+  background-image: none;
+  box-shadow: none;
+  transform: none;
+}
+.task-dialog button[class*="bg-gradient"]:hover {
+  background: #3f3f46;
+}
+.task-dialog button[aria-label="Close dialog"] svg {
+  width: 20px;
+  height: 20px;
+  fill: #6b7280;
+}
+@media (max-width: 600px) {
+  .task-dialog {
+    padding: 12px;
+  }
+  .task-dialog form > div[form="user"] {
+    padding: 20px;
+  }
+}
+</style>
