@@ -1,150 +1,245 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { verifyToken } = require("../middleware/authMiddleware.js");
-
-router.get("/verify-user", verifyToken, (req, res) => {
-  // If the request reaches here, it means the user exists and the token is valid
-  res.json({ success: true });
-});
-router.get("/current-user-get", verifyToken, async (req, res, next) => {
-  const userid = req.user.id;
-  await prisma.user
-    .findUnique({ where: { id: userid } })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
-
-router.get("/countAll", async function (req, res, next) {
-  try {
-    const userCount = await prisma.user.count({});
-    res.status(200).json({ userCount });
-  } catch (error) {
-    console.error("Error fetching task count:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching task count." });
-  }
-});
-// upload
+const { verifyToken, requireAdmin } = require("../middleware/authMiddleware");
+const { hashPassword, verifyPassword } = require("../lib/password");
+const crypto = require("crypto");
+const path = require("path");
 const fileUpload = require("express-fileupload");
-// middle ware
-router.use(express.static("public")); //to access the files in public folder
-router.use(fileUpload());
 
-router.post("/upload", (req, res) => {
-  if (!req.files) {
-    return res.send({ name: "avatar.png", path: "/avatar.png" });
+const publicUser = {
+  id: true,
+  name: true,
+  email: true,
+  image: true,
+  role: true,
+};
+router.use(verifyToken);
+router.get("/verify-user", (req, res) =>
+  res.json({ success: true, role: req.user.role })
+);
+router.get("/current-user-get", async (req, res, next) => {
+  try {
+    res.json(
+      await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: publicUser,
+      })
+    );
+  } catch (error) {
+    next(error);
   }
+});
+router.get("/countAll", requireAdmin, async (req, res, next) => {
+  try {
+    res.json({ userCount: await prisma.user.count() });
+  } catch (error) {
+    next(error);
+  }
+});
 
-  const myFile = req.files.file;
-  const myFileSplit = myFile.name.split(".");
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
+router.use(
+  fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, abortOnLimit: true })
+);
+async function uploadImage(req, res, next) {
+  const file = req.files && req.files.file;
+  if (!file)
+    return res.json(
+      req.path === "/upload"
+        ? { name: "avatar.png", path: "/avatar.png" }
+        : { msg: "no-image" }
+    );
+  if (Array.isArray(file) || !file.data || !file.data.length)
+    return res.status(400).json({ error: "Choose a valid image." });
+  const bytes = file.data;
+  let extension;
+  if (
+    bytes.length >= 8 &&
+    bytes
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  )
+    extension = "png";
+  else if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff
+  )
+    extension = "jpg";
+  else if (
+    bytes.length >= 6 &&
+    ["GIF87a", "GIF89a"].includes(bytes.toString("ascii", 0, 6))
+  )
+    extension = "gif";
+  else if (
+    bytes.length >= 12 &&
+    bytes.toString("ascii", 0, 4) === "RIFF" &&
+    bytes.toString("ascii", 8, 12) === "WEBP"
+  )
+    extension = "webp";
+  else
+    return res
+      .status(400)
+      .json({ error: "Choose a PNG, JPEG, GIF or WebP image." });
+  const name = `${crypto.randomBytes(16).toString("hex")}.${extension}`;
+  try {
+    await file.mv(path.join(__dirname, "../public/uploads/users", name));
+    res.json({ name, path: `/${name}` });
+  } catch (error) {
+    next(error);
+  }
+}
+router.post("/upload", requireAdmin, uploadImage);
+router.post("/uploadEdit", uploadImage);
 
-  myFile.mv(
-    `${__dirname}/../public/uploads/users/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
-      }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
-    }
+router.get("/", requireAdmin, async (req, res, next) => {
+  try {
+    const take = Number(req.query.take);
+    const skip = Number(req.query.skip);
+    res.json(
+      await prisma.user.findMany({
+        ...(Number.isInteger(take) && take > 0 ? { take } : {}),
+        ...(Number.isInteger(skip) && skip >= 0 ? { skip } : {}),
+        select: publicUser,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+});
+router.get("/:id", async (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid user ID." });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select:
+        req.user.role === "ADMIN"
+          ? publicUser
+          : { id: true, name: true, image: true },
+    });
+    if (!user) return res.status(404).json({ error: "User not found." });
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
+function userFields(body, admin = false) {
+  const data = {};
+  for (const key of ["name", "email", "image"]) {
+    if (typeof body[key] === "string" && body[key].trim())
+      data[key] = body[key].trim();
+  }
+  if (admin && body.role !== undefined) {
+    if (!["ADMIN", "USER"].includes(body.role))
+      throw new Error("Invalid role.");
+    data.role = body.role;
+  }
+  return data;
+}
+function validPassword(password) {
+  return (
+    typeof password === "string" &&
+    password.length > 0 &&
+    password.length <= 1024
   );
-});
-router.post("/uploadEdit", (req, res) => {
-  if (!req.files) {
-    return res.status(200).send({ msg: "no-image" });
+}
+function handleUserError(error, res, next) {
+  if (error.code === "P2002")
+    return res
+      .status(409)
+      .json({ error: "An account with this email already exists." });
+  if (error.code === "P2025")
+    return res.status(404).json({ error: "User not found." });
+  next(error);
+}
+router.post("/", requireAdmin, async (req, res, next) => {
+  let data;
+  try {
+    data = userFields(req.body, true);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
-
-  const myFile = req.files.file;
-  const myFileSplit = myFile.name.split(".");
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
-
-  myFile.mv(
-    `${__dirname}/../public/uploads/users/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
+  if (
+    !data.name ||
+    !data.email ||
+    !data.role ||
+    !validPassword(req.body.password)
+  )
+    return res
+      .status(400)
+      .json({ error: "Name, email, role and password are required." });
+  try {
+    data.password = await hashPassword(req.body.password);
+    res
+      .status(201)
+      .json(await prisma.user.create({ data, select: publicUser }));
+  } catch (error) {
+    handleUserError(error, res, next);
+  }
+});
+router.delete("/:id", requireAdmin, async (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid user ID." });
+  if (id === req.user.id)
+    return res
+      .status(400)
+      .json({ error: "You cannot delete your own account." });
+  try {
+    res.json(await prisma.user.delete({ where: { id }, select: publicUser }));
+  } catch (error) {
+    handleUserError(error, res, next);
+  }
+});
+async function updateUser(req, res, next, admin) {
+  const id = admin ? Number(req.body.id) : req.user.id;
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid user ID." });
+  let data;
+  try {
+    data = userFields(req.body, admin);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+  if (
+    req.body.password !== undefined &&
+    req.body.password !== "" &&
+    !validPassword(req.body.password)
+  )
+    return res.status(400).json({ error: "Invalid password." });
+  try {
+    if (!admin && (data.email || req.body.password)) {
+      const current = await prisma.user.findUnique({
+        where: { id },
+        select: { email: true, password: true },
+      });
+      if (!current) return res.status(404).json({ error: "User not found." });
+      if ((data.email && data.email !== current.email) || req.body.password) {
+        if (!(await verifyPassword(req.body.currentPassword, current.password)))
+          return res
+            .status(403)
+            .json({ error: "Current password is incorrect." });
       }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
     }
-  );
-});
-/* GET users listing. */
-router.get("/", function (req, res, next) {
-  const { take, skip } = req.query; // Extract take and skip from query parameters
-  prisma.user
-    .findMany({
-      take: parseInt(take) || undefined,
-      skip: parseInt(skip) || undefined,
-    })
-    .then((users) => res.send(users))
-    .catch((err) => res.send(err));
-});
-
-// get a single user
-router.get("/:id", function (req, res, next) {
-  prisma.user
-    .findUnique({ where: { id: +req.params.id } })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
-
-//post a new user
-router.post("/", function (req, res, next) {
-  prisma.user
-    .create({ data: req.body })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
-
-// delete a user
-router.delete("/:id", function (req, res, next) {
-  prisma.user
-    .delete({ where: { id: +req.params.id } })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
-
-//modify a user
-router.patch("/", function (req, res, next) {
-  const { id, ...userData } = req.body;
-  prisma.user
-    .update({
-      where: {
-        id: +id,
-      },
-      data: userData,
-    })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
-
-router.patch("/current-user", verifyToken, function (req, res, next) {
-  const user = req.user; // id + email + iat + exp
-  const userdata = req.body;
-  const propertyKeys = Object.keys(userdata);
-
-  for (const propertyKey of propertyKeys) {
-    if (userdata[propertyKey] === "") {
-      delete userdata[propertyKey];
-    }
+    if (req.body.password)
+      data.password = await hashPassword(req.body.password);
+    res.json(
+      await prisma.user.update({ where: { id }, data, select: publicUser })
+    );
+  } catch (error) {
+    handleUserError(error, res, next);
   }
-
-  prisma.user
-    .update({
-      where: {
-        id: +user.id,
-      },
-      data: userdata,
-    })
-    .then((user) => res.send(user))
-    .catch((err) => res.send(err));
-});
+}
+router.patch("/current-user", (req, res, next) =>
+  updateUser(req, res, next, false)
+);
+router.patch("/", requireAdmin, (req, res, next) =>
+  updateUser(req, res, next, true)
+);
 
 module.exports = router;

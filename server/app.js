@@ -1,54 +1,70 @@
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+require("dotenv").config();
+
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
+const { verifyToken } = require("./middleware/authMiddleware");
 
-// Define an array of allowed origins
-const allowedOrigins = [
-  "https://1p5kdkfr-5173.uks1.devtunnels.ms",
-  "http://localhost:80",
-  "http://127.0.0.1:80",
-  "http://172.17.0.120:80/",
-  "http://192.168.137.100:8080/",
-  "http://localhost:80", // Replace with your actual IP address
-];
+const app = express();
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim().replace(/\/$/, ""))
+    .filter(Boolean)
+);
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, true);
-      // callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
+function originAllowed(req, origin) {
+  if (!origin) return true;
+  if (allowedOrigins.has(origin)) return true;
+  try {
+    const source = new URL(origin);
+    const host = req.get("host");
+    if (source.host === host && source.protocol === `${req.protocol}:`)
+      return true;
+    return (
+      process.env.NODE_ENV !== "production" &&
+      source.hostname === req.hostname &&
+      ["8080", "5173"].includes(source.port) &&
+      ["http:", "https:"].includes(source.protocol)
+    );
+  } catch (error) {
+    return false;
+  }
+}
 
-var app = express();
-
-// Enable CORS for all routes
-app.use(cors(corsOptions));
-
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var clientsRouter = require("./routes/client");
-var tasksRouter = require("./routes/tasks");
-var loginRouter = require("./routes/login");
-
+app.use((req, res, next) => {
+  if (!originAllowed(req, req.get("origin")))
+    return res.status(403).json({ error: "Origin not allowed." });
+  next();
+});
+app.use(cors({ origin: true, credentials: true }));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/tasks", tasksRouter);
-app.use("/login", loginRouter);
-app.use("/clients", clientsRouter);
-app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
+
+app.use("/login", require("./routes/login"));
+app.use("/users", require("./routes/users"));
+app.use("/tasks", verifyToken, require("./routes/tasks"));
+app.use("/clients", verifyToken, require("./routes/client"));
+app.use(
+  "/uploads",
+  verifyToken,
+  (req, res, next) => {
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Content-Security-Policy", "default-src 'none'; sandbox");
+    next();
+  },
+  express.static(path.join(__dirname, "public/uploads"))
+);
+
+app.use((error, req, res, next) => {
+  console.error(error);
+  res.status(500).json({ error: "An unexpected error occurred." });
+});
 
 module.exports = app;

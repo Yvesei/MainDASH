@@ -6,329 +6,223 @@ const prisma = new PrismaClient();
 
 // Initialize ClamAV scanner
 // const clamscan = new ClamScan();
-const mime = require("mime-types");
 const { verifyToken } = require("../middleware/authMiddleware");
+
+// All task queries are restricted to their owner unless the requester is an admin.
+const taskScope = (user) =>
+  user.role === "ADMIN" ? {} : { createdBy: user.id };
+const taskFields = [
+  "type",
+  "supply",
+  "devis",
+  "result",
+  "followupAutre",
+  "dateEnd",
+  "dateStart",
+  "Date",
+];
+const allowedTaskData = (data) =>
+  Object.fromEntries(
+    taskFields
+      .filter((key) => data[key] !== undefined)
+      .map((key) => [key, data[key]])
+  );
 // upload
 const fileUpload = require("express-fileupload");
 // middle ware
-router.use(express.static("public")); //to access the files in public folder
-router.use(fileUpload());
+router.use(
+  fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, abortOnLimit: true })
+);
 
-router.get("/linechart", async (req, res) => {
-  const tasks = await prisma.task.findMany({
-    orderBy: {
-      Date: "desc",
-    },
-  });
-
-  const currentMonth = moment().month(); // Get the current month (0-indexed)
-  const monthCounts = new Array(12).fill(0); // Initialize an array for counts, one slot per month
-
-  // Count tasks for each month
-  for (const task of tasks) {
-    const date = moment(task.Date);
-    const month = date.month();
-    monthCounts[month]++;
-  }
-
-  // Define month names
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  // Create data array
-  const data = [];
-
-  // Construct data array for the last 12 months
-  for (let i = 0; i < 12; i++) {
-    const monthIndex = (currentMonth - i + 12) % 12; // Calculate the correct index
-    const monthName = monthNames[monthIndex];
-    const count = monthCounts[monthIndex];
-    data.unshift({ month: monthName, count });
-  }
-
-  res.send(data);
-});
-
-router.get("/calculate-time-difference", async (req, res) => {
-  const id = +req.query.id;
-
+// Count each calendar month separately so older years do not inflate the chart.
+router.get("/linechart", async (req, res, next) => {
   try {
-    const task = await prisma.task.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!task) {
-      return res.status(404).json({ error: "Task not found." });
-    }
-
-    const startDateTime = moment(task.dateStart);
-    const endDateTime = moment(task.dateEnd);
-
-    const duration = moment.duration(endDateTime.diff(startDateTime));
-    const hours = duration.hours();
-    const minutes = duration.minutes();
-    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}`;
-
-    res.status(200).send(formattedTime);
-  } catch (error) {
-    console.error("Error fetching task count:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching task count." });
-  }
-});
-
-router.get("/calculate-total-time", async (req, res) => {
-  try {
-    const idArray = req.query.idArray.map(Number);
-
+    const firstMonth = moment().startOf("month").subtract(11, "months");
     const tasks = await prisma.task.findMany({
       where: {
-        id: {
-          in: idArray,
-        },
+        ...taskScope(req.user),
+        deleted: false,
+        Date: { gte: firstMonth.toDate() },
       },
+      select: { Date: true },
     });
-
-    let totalHours = 0;
-    let totalMinutes = 0;
-
+    const counts = new Map();
     for (const task of tasks) {
-      const startDateTime = moment(task.dateStart);
-      const endDateTime = moment(task.dateEnd);
-
-      const duration = moment.duration(endDateTime.diff(startDateTime));
-      totalHours += duration.hours();
-      totalMinutes += duration.minutes();
+      if (!task.Date) continue;
+      const month = moment(task.Date).format("YYYY-MM");
+      counts.set(month, (counts.get(month) || 0) + 1);
     }
-
-    const formattedTotalTime = `${totalHours
-      .toString()
-      .padStart(2, "0")}:${totalMinutes.toString().padStart(2, "0")}`;
-
-    res.status(200).send(formattedTotalTime);
+    res.send(
+      Array.from({ length: 12 }, (_, index) => {
+        const month = firstMonth.clone().add(index, "months");
+        return {
+          month: month.format("MMMM"),
+          count: counts.get(month.format("YYYY-MM")) || 0,
+        };
+      })
+    );
   } catch (error) {
-    console.error("Error calculating total time:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while calculating total time." });
+    next(error);
   }
 });
-router.patch("/markDone", async (req, res) => {
+
+function taskMinutes(task) {
+  if (!task.dateStart || !task.dateEnd) return 0;
+  return Math.max(
+    0,
+    Math.floor(
+      moment(task.dateEnd).diff(moment(task.dateStart), "minutes", true)
+    )
+  );
+}
+
+function formatMinutes(minutes) {
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(
+    minutes % 60
+  ).padStart(2, "0")}`;
+}
+
+router.get("/calculate-time-difference", async (req, res, next) => {
+  const id = Number(req.query.id);
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid task ID." });
   try {
-    const idArray = req.body.params.idArray;
-
-    const date = new Date();
-
-    if (idArray.length == undefined) {
-      await prisma.task.update({
-        where: {
-          id: idArray,
-        },
-        data: {
-          status: true,
-          dateEnd: date,
-        },
-      });
-    } else {
-      for (const id of idArray) {
-        await prisma.task.update({
-          where: {
-            id: id,
-          },
-          data: {
-            status: true,
-            dateEnd: date,
-          },
-        });
-      }
-    }
-    res.status(200).send("");
+    const task = await prisma.task.findUnique({ where: { id } });
+    if (!task || (req.user.role !== "ADMIN" && task.createdBy !== req.user.id))
+      return res.status(404).json({ error: "Task not found." });
+    res.send(formatMinutes(taskMinutes(task)));
   } catch (error) {
-    console.error("Error setting as marked:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while  setting as marked." });
+    next(error);
   }
 });
 
-router.post("/upload", (req, res) => {
-  if (!req.files) {
-    return res.send({ name: "avatar.png", path: "/avatar.png" });
+router.get("/calculate-total-time", async (req, res, next) => {
+  // Axios serializes arrays as idArray[], while other clients may use idArray.
+  const value = req.query.idArray || req.query["idArray[]"] || [];
+  const ids = (Array.isArray(value) ? value : [value]).map(Number);
+  if (ids.some((id) => !Number.isInteger(id) || id <= 0)) {
+    return res.status(400).json({ error: "Invalid task IDs." });
   }
-  function isAllowedImageType(mimeType) {
-    const allowedImageTypes = [
-      "image/png",
-      "image/jpeg",
-      "image/gif",
-      "image/bmp",
-      "image/tiff",
-      "image/webp",
-      "image/svg+xml",
-      "image/x-icon",
-      "image/vnd.microsoft.icon",
-    ];
-
-    return allowedImageTypes.includes(mimeType);
+  try {
+    const tasks = await prisma.task.findMany({
+      where: { ...taskScope(req.user), id: { in: ids } },
+    });
+    res.send(
+      formatMinutes(tasks.reduce((total, task) => total + taskMinutes(task), 0))
+    );
+  } catch (error) {
+    next(error);
   }
-  const myFile = req.files.file;
-  const buffer = myFile.data;
+});
 
-  const mimeType = mime.lookup(myFile.name);
-  if (!mimeType || !isAllowedImageType(mimeType)) {
-    return res.status(400).send({ msg: "Invalid file type." });
+router.patch("/markDone", async (req, res, next) => {
+  const value = req.body.params?.idArray ?? req.body.idArray;
+  const ids = (Array.isArray(value) ? value : [value]).map(Number);
+  if (ids.some((id) => !Number.isInteger(id) || id <= 0)) {
+    return res.status(400).json({ error: "Invalid task IDs." });
   }
+  try {
+    // Preserve the completion time when an already completed task is selected again.
+    await prisma.task.updateMany({
+      where: {
+        ...taskScope(req.user),
+        deleted: false,
+        id: { in: ids },
+        OR: [{ status: false }, { status: null }],
+      },
+      data: { status: true, dateEnd: new Date() },
+    });
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+});
 
-  const myFileSplit = myFile.name.split(".");
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
-
-  myFile.mv(
-    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
-      }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
+// Uploads are served by the app, so accept only known file types and inspect
+// their signatures. Random names avoid collisions and ignore user-supplied paths.
+const crypto = require("crypto");
+const path = require("path");
+const imageExtensions = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+const attachmentExtensions = new Set([
+  ...imageExtensions,
+  ".pdf",
+  ".txt",
+  ".md",
+  ".doc",
+  ".docx",
+]);
+function validSignature(extension, data) {
+  if (extension === ".jpg" || extension === ".jpeg")
+    return (
+      data.length >= 3 &&
+      data[0] === 0xff &&
+      data[1] === 0xd8 &&
+      data[2] === 0xff
+    );
+  if (extension === ".png")
+    return data
+      .subarray(0, 8)
+      .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  if (extension === ".gif")
+    return ["GIF87a", "GIF89a"].includes(data.subarray(0, 6).toString("ascii"));
+  if (extension === ".webp")
+    return (
+      data.subarray(0, 4).toString("ascii") === "RIFF" &&
+      data.subarray(8, 12).toString("ascii") === "WEBP"
+    );
+  if (extension === ".pdf")
+    return data.subarray(0, 5).toString("ascii") === "%PDF-";
+  if (extension === ".docx")
+    return data.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
+  if (extension === ".doc")
+    return data
+      .subarray(0, 8)
+      .equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]));
+  return (extension === ".txt" || extension === ".md") && !data.includes(0);
+}
+function uploadFile(allowed, fallback) {
+  return async (req, res) => {
+    const file = req.files && req.files.file;
+    if (!file) return res.send(fallback);
+    if (Array.isArray(file) || !file.data || file.size > 5 * 1024 * 1024)
+      return res.status(400).json({ msg: "Select one file under 5 MB." });
+    const extension = path.extname(file.name).toLowerCase();
+    if (!allowed.has(extension) || !validSignature(extension, file.data))
+      return res.status(400).json({ msg: "Unsupported or invalid file type." });
+    const name = `${crypto.randomBytes(16).toString("hex")}${extension}`;
+    try {
+      await file.mv(path.join(__dirname, "../public/uploads/tasks", name));
+      res.send({ name, path: `/${name}` });
+    } catch (error) {
+      res.status(500).json({ msg: "Could not save the file." });
     }
-  );
-});
-const tmp = require("tmp-promise");
-const fs = require("fs").promises;
-const ClamScan = require("clamscan");
-// Initialize ClamAV scanner
-const clamscan = new ClamScan();
-router.post("/uploadSupply", async (req, res) => {
-  if (!req.files) {
-    return res.send({ name: "" });
-  }
-  const myFile = req.files.file;
-
-  function isAllowedImageType(mimeType) {
-    const allowedImageTypes = [
-      "image/png",
-      "image/jpeg",
-      "image/gif",
-      "image/bmp",
-      "image/tiff",
-      "image/webp",
-      "image/svg+xml",
-      "image/x-icon",
-      "image/vnd.microsoft.icon",
-      "application/pdf",
-      "text/plain",
-      "text/markdown",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword",
-    ];
-
-    return allowedImageTypes.includes(mimeType);
-  }
-  const buffer = myFile.data;
-
-  const mimeType = mime.lookup(myFile.name);
-  if (!mimeType || !isAllowedImageType(mimeType)) {
-    return res.status(400).send({ msg: "Invalid file type." });
-  }
-
-  const maxFileSize = 5 * 1024 * 1024;
-  if (myFile.size > maxFileSize) {
-    return res.status(400).send({ msg: "File size exceeds the limit." });
-  }
-
-  var lastIndex = myFile.name.lastIndexOf(".");
-  const myFileSplit = [
-    myFile.name.slice(0, lastIndex),
-    myFile.name.slice(lastIndex + 1),
-  ];
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
-
-  myFile.mv(
-    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
-      }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
-    }
-  );
-});
-
-router.post("/uploadEdit", (req, res) => {
-  if (!req.files) {
-    return res.send();
-  }
-
-  const myFile = req.files.file;
-  const myFileSplit = myFile.name.split(".");
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
-
-  myFile.mv(
-    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
-      }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
-    }
-  );
-});
-
-router.post("/uploadFileEdit", (req, res) => {
-  if (!req.files) {
-    return res.send({ name: "" });
-  }
-
-  const myFile = req.files.file;
-  const myFileSplit = myFile.name.split(".");
-  const date = new Date();
-  myFile.name = date.getTime() + "." + myFileSplit[1];
-
-  myFile.mv(
-    `${__dirname}/../public/uploads/tasks/${myFile.name}`,
-    function (err) {
-      if (err) {
-        return res.status(500).send({ msg: "Error occured" });
-      }
-      // returing the response with file path and name
-      return res.send({ name: myFile.name, path: `/${myFile.name}` });
-    }
-  );
-});
+  };
+}
+router.post(
+  "/upload",
+  uploadFile(imageExtensions, { name: "avatar.png", path: "/avatar.png" })
+);
+router.post("/uploadEdit", uploadFile(imageExtensions, {}));
+router.post("/uploadSupply", uploadFile(attachmentExtensions, { name: "" }));
+router.post("/uploadFileEdit", uploadFile(attachmentExtensions, { name: "" }));
 router.get("/countAll", async function (req, res, next) {
   try {
     const taskCount = await prisma.task.count({
       where: {
+        ...taskScope(req.user),
         deleted: false,
       },
     });
     const DoneCount = await prisma.task.count({
       where: {
+        ...taskScope(req.user),
         status: true,
         deleted: false,
       },
     });
-    const percent = ((DoneCount * 100) / taskCount).toFixed(2);
+    const percent = taskCount
+      ? ((DoneCount * 100) / taskCount).toFixed(2)
+      : "0.00";
 
     res.status(200).json({ taskCount, percent, DoneCount });
   } catch (error) {
@@ -345,6 +239,7 @@ router.get("/count", async function (req, res, next) {
   try {
     const taskCount = await prisma.task.count({
       where: {
+        ...taskScope(req.user),
         clientId: clientId,
         deleted: false,
       },
@@ -373,18 +268,29 @@ router.post("/", verifyToken, async (req, res) => {
     supplyFile,
     ...taskData
   } = req.body;
-  supplyFile = supplyFile.toString();
+  if (typeof name !== "string" || !name.trim())
+    return res.status(400).json({ error: "A client name is required." });
+  name = name.trim();
+  if (
+    distance !== "" &&
+    distance != null &&
+    (!Number.isInteger(Number(distance)) || Number(distance) < 0)
+  )
+    return res
+      .status(400)
+      .json({ error: "Distance must be a non-negative whole number." });
+  supplyFile = supplyFile == null ? "" : supplyFile.toString();
   // endTask = +endTask;
   // followupBool = +followupBool;
-  if (endTask === undefined) {
+  if (endTask == null) {
     endTask = null;
   } else {
-    endTask == "true" ? (endTask = true) : (endTask = false);
+    endTask = endTask === true || endTask === "true";
   }
-  if (followupBool === undefined) {
+  if (followupBool == null) {
     followupBool = null;
   } else {
-    followupBool == "true" ? (followupBool = true) : (followupBool = false);
+    followupBool = followupBool === true || followupBool === "true";
   }
   try {
     let client = await prisma.client.findUnique({
@@ -398,7 +304,8 @@ router.post("/", verifyToken, async (req, res) => {
         data: {
           name: name,
           number: number,
-          distance: parseInt(distance),
+          distance:
+            distance === "" || distance == null ? null : Number(distance),
           image: image,
         },
       });
@@ -415,7 +322,8 @@ router.post("/", verifyToken, async (req, res) => {
         endTask,
         followupBool,
         supplyFile,
-        ...taskData,
+        ...allowedTaskData(taskData),
+        status: false,
         client: {
           connect: {
             id: client.id,
@@ -438,276 +346,126 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/", function (req, res, next) {
-  const { clientId, type } = req.query;
-  var filter = [];
+function taskFilter(query) {
+  const where = {};
+  if (query.type === "Done") where.status = true;
+  else if (query.type === "Pending")
+    where.OR = [{ status: false }, { status: null }];
+  else if (query.type) throw new Error("Invalid task status.");
 
-  if (req.query.filter) {
-    filter = req.query.filter;
+  if (query.filterStart || query.filterEndExclusive) {
+    if (
+      (query.filterStart && typeof query.filterStart !== "string") ||
+      (query.filterEndExclusive && typeof query.filterEndExclusive !== "string")
+    )
+      throw new Error("Invalid date range.");
+    const start = query.filterStart ? new Date(query.filterStart) : null;
+    const end = query.filterEndExclusive
+      ? new Date(query.filterEndExclusive)
+      : null;
+    if (
+      (start && Number.isNaN(start.getTime())) ||
+      (end && Number.isNaN(end.getTime())) ||
+      (start && end && start >= end)
+    ) {
+      throw new Error("Invalid date range.");
+    }
+    where.Date = {
+      ...(start ? { gte: start } : {}),
+      ...(end ? { lt: end } : {}),
+    };
+  } else if (query.filter) {
+    if (typeof query.filter !== "string")
+      throw new Error("Invalid date range.");
+    const parts = query.filter.split(",");
+    if (parts.length !== 2) throw new Error("Invalid date range.");
+    const start = new Date(parts[0]);
+    const end = new Date(parts[1]);
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      start > end
+    ) {
+      throw new Error("Invalid date range.");
+    }
+    end.setDate(end.getDate() + 1);
+    where.Date = { gte: start, lt: end };
+  }
+  return where;
+}
 
-    filter = filter.split(",");
-
-    filter[0] = new Date(filter[0]);
-    filter[1] = new Date(filter[1]);
-    filter[1].setDate(filter[1].getDate() + 1);
-  } else {
-    filter[0] = new Date("Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)");
-    filter[1] = new Date("Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)");
+router.get("/", async (req, res, next) => {
+  const clientId = Number(req.query.clientId);
+  if (!Number.isInteger(clientId) || clientId <= 0) {
+    return res.status(400).json({ error: "Invalid client ID." });
   }
-  console.log(filter);
-  if (!type) {
-    const clientid = parseInt(clientId);
-    prisma.task
-      .findMany({
-        where: {
-          clientId: clientid,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks))
-      .catch((error) => next(error));
+  let where;
+  try {
+    where = { ...taskScope(req.user), ...taskFilter(req.query), clientId };
+    if (req.user.role !== "ADMIN" || req.query.includeHidden !== "true")
+      where.deleted = false;
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
-  if (type == "Pending") {
-    const clientid = parseInt(clientId);
-    prisma.task
-      .findMany({
-        where: {
-          status: false,
-          clientId: clientid,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks))
-      .catch((error) => next(error));
-  }
-  if (type == "Done") {
-    const clientid = parseInt(clientId);
-    prisma.task
-      .findMany({
-        where: {
-          status: true,
-          clientId: clientid,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks))
-      .catch((error) => next(error));
+  try {
+    res.send(await prisma.task.findMany({ where, orderBy: { Date: "desc" } }));
+  } catch (error) {
+    next(error);
   }
 });
-router.get("/latest", verifyToken, function (req, res, next) {
-  const { type } = req.query;
-  const { deleted } = req.query;
-  var filter = [];
 
-  if (req.query.filter) {
-    filter = req.query.filter;
-
-    filter = filter.split(",");
-
-    filter[0] = new Date(filter[0]);
-    filter[1] = new Date(filter[1]);
-    filter[1].setDate(filter[1].getDate() + 1);
-  } else {
-    filter[0] = new Date("Wed Dec 12 2012 00:00:00 GMT 0000 (GMT)");
-    filter[1] = new Date("Thu Dec 12 2999 00:00:00 GMT 0000 (GMT)");
+router.get("/latest", verifyToken, async (req, res, next) => {
+  let where;
+  try {
+    where = { ...taskScope(req.user), ...taskFilter(req.query) };
+    const deleted = req.query.deleted || "undeleted";
+    if (deleted === "undeleted") where.deleted = false;
+    else if (deleted === "deleted") where.deleted = true;
+    else if (deleted !== "none") throw new Error("Invalid deletion filter.");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
-  console.log(filter);
-
-  if (!type && deleted == "undeleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: false,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-          // dateEnd: {
-          //   lte: filter[1],
-          // },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  // done + !deleted
-  if (type == "Done" && deleted == "undeleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: false,
-          status: true,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  // pending + !deleted
-  else if (type == "Pending" && deleted == "undeleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: false,
-          status: false,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  // deleted
-  if (!type && deleted == "deleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: true,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  } else if (type == "Pending" && deleted == "deleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: true,
-          status: false,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  } else if (type == "Done" && deleted == "deleted") {
-    prisma.task
-      .findMany({
-        where: {
-          deleted: true,
-          status: true,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  // show all
-
-  if (!type && deleted == "none") {
-    prisma.task
-      .findMany({
-        where: {
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  if (type == "Done" && deleted == "none") {
-    prisma.task
-      .findMany({
-        where: {
-          status: true,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
-  }
-  if (type == "Pending" && deleted == "none") {
-    prisma.task
-      .findMany({
-        where: {
-          status: false,
-          Date: {
-            gte: filter[0],
-            lte: filter[1],
-          },
-        },
-        orderBy: {
-          Date: "desc",
-        },
-      })
-      .then((tasks) => res.send(tasks));
+  try {
+    res.send(await prisma.task.findMany({ where, orderBy: { Date: "desc" } }));
+  } catch (error) {
+    next(error);
   }
 });
 // get a single tasks
-router.get("/:id", function (req, res, next) {
-  prisma.task
-    .findUnique({ where: { id: +req.params.id } })
-    .then((task) => res.send(task));
+router.get("/:id", async function (req, res, next) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid task ID." });
+  try {
+    const task = await prisma.task.findFirst({
+      where: { id, ...taskScope(req.user) },
+    });
+    if (!task) return res.status(404).json({ error: "Task not found." });
+    res.send(task);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // delete a tasks 000000
 router.delete("/:id", async function (req, res, next) {
-  const task = await prisma.task.findUnique({
-    where: { id: +req.params.id },
-  });
-  console.log(task);
-  var value = false;
-  if (task.deleted == false) value = true;
-  prisma.task
-    .update({
-      where: { id: +req.params.id },
-      data: {
-        deleted: value,
-      },
-    })
-    .then((task) => res.send(task));
+  if (req.user.role !== "ADMIN")
+    return res.status(403).json({ error: "Administrator access required." });
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0)
+    return res.status(400).json({ error: "Invalid task ID." });
+  try {
+    const task = await prisma.task.findUnique({ where: { id } });
+    if (!task) return res.status(404).json({ error: "Task not found." });
+    res.send(
+      await prisma.task.update({
+        where: { id },
+        data: { deleted: !task.deleted },
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.patch("/", async (req, res) => {
@@ -725,7 +483,21 @@ router.patch("/", async (req, res) => {
     supplyFile,
     ...taskData
   } = req.body;
-  supplyFile = supplyFile.toString();
+  if (!Number.isInteger(Number(taskId)) || Number(taskId) <= 0)
+    return res.status(400).json({ error: "Invalid task ID." });
+  if (typeof name !== "string" || !name.trim())
+    return res.status(400).json({ error: "A client name is required." });
+  name = name.trim();
+  if (
+    distance !== "" &&
+    distance != null &&
+    (!Number.isInteger(Number(distance)) || Number(distance) < 0)
+  )
+    return res
+      .status(400)
+      .json({ error: "Distance must be a non-negative whole number." });
+  distance = distance === "" || distance == null ? null : Number(distance);
+  supplyFile = supplyFile == null ? "" : supplyFile.toString();
   if (endTask === undefined) {
     endTask = null;
   } else {
@@ -738,6 +510,17 @@ router.patch("/", async (req, res) => {
   }
 
   try {
+    const existingTask = await prisma.task.findFirst({
+      where: { id: Number(taskId), ...taskScope(req.user) },
+    });
+    if (!existingTask)
+      return res.status(404).json({ error: "Task not found." });
+    if (
+      existingTask.deleted ||
+      (req.user.role !== "ADMIN" && existingTask.status)
+    ) {
+      return res.status(403).json({ error: "This task cannot be edited." });
+    }
     let client = {};
     let client2 = {};
     if (id != undefined) {
@@ -762,7 +545,7 @@ router.patch("/", async (req, res) => {
             name: name,
           },
         });
-        if (client2.id == client.id) {
+        if (!client2 || client2.id == client.id) {
           client = await prisma.client.update({
             where: {
               id: client.id,
@@ -793,22 +576,26 @@ router.patch("/", async (req, res) => {
     }
 
     if (providedDate !== "" && providedDate !== null) {
-      // Assuming providedDate is a string in the format "2023-11-06T23:00:00.000Z1"
-      const adjustedDate = moment(providedDate).add(1, "hours");
-
-      // Set the taskData.Date with the adjusted date
-      taskData.Date = adjustedDate.toISOString();
-
-      console.log("providedDate");
-      console.log(adjustedDate);
+      taskData.Date = providedDate;
     }
     taskData.supplyFile = supplyFile;
     const updatedTask = await prisma.task.update({
       where: {
-        id: taskId,
+        id: Number(taskId),
       },
       data: {
-        ...taskData,
+        ...allowedTaskData(taskData),
+        ...(taskData.dateStart !== undefined
+          ? { dateStart: taskData.dateStart }
+          : {}),
+        ...(taskData.Date !== undefined ? { Date: taskData.Date } : {}),
+        ...(taskData.endTask !== undefined
+          ? { endTask: taskData.endTask }
+          : {}),
+        ...(taskData.followupBool !== undefined
+          ? { followupBool: taskData.followupBool }
+          : {}),
+        supplyFile,
         client: {
           connect: {
             id: ID,
